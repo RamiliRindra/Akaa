@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, UserRound } from "lucide-react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { FormEvent, useState, useTransition } from "react";
 
 import { registerWithCredentials } from "@/actions/auth";
@@ -42,19 +41,10 @@ export function RegisterForm() {
         return;
       }
 
-      setSuccess("Compte créé avec succès. Connexion en cours...");
-
-      try {
-        await signIn("credentials", {
-          email: parsed.data.email,
-          password: parsed.data.password,
-          redirectTo: "/dashboard",
-          redirect: true,
-        });
-      } catch {
-        setSuccess("Compte créé. Connectez-vous maintenant.");
-        setForm(INITIAL_FORM);
-      }
+      // Connexion automatique + redirect : géré côté serveur dans registerWithCredentials.
+      // Si la navigation n’a pas lieu, on affiche un message de secours.
+      setSuccess("Compte créé. Si la page ne change pas, connectez-vous manuellement.");
+      setForm(INITIAL_FORM);
     });
   }
 

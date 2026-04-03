@@ -4,15 +4,101 @@ import { inspect } from "node:util";
 
 import { hash } from "bcryptjs";
 import { Prisma, UserRole } from "@prisma/client";
+import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
+import { auth, signIn } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { loginSchema } from "@/lib/validations/auth";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 
 type RegisterResult = {
   success: boolean;
   error?: string;
 };
+
+export type LoginFormState = { error: string } | null;
+
+function isNextRedirectError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: unknown }).digest === "string" &&
+    String((error as { digest: string }).digest).startsWith("NEXT_REDIRECT")
+  );
+}
+
+function sanitizeCallbackUrl(raw: unknown): string {
+  if (typeof raw !== "string" || !raw.startsWith("/") || raw.startsWith("//")) {
+    return "/dashboard";
+  }
+  return raw;
+}
+
+function authRedirectHasError(target: string): boolean {
+  try {
+    return new URL(target, "https://internal.invalid").searchParams.has("error");
+  } catch {
+    return false;
+  }
+}
+
+function messageForAuthRedirect(target: string): string {
+  const err = new URL(target, "https://internal.invalid").searchParams.get("error");
+  if (err === "CredentialsSignin") {
+    return "Email ou mot de passe incorrect.";
+  }
+  return "La connexion a échoué. Réessayez.";
+}
+
+/**
+ * Connexion credentials via signIn serveur (cookies().set + redirect) :
+ * évite les écarts fetch client / Set-Cookie observés sur Railway.
+ */
+export async function loginWithCredentialsForm(
+  _prev: LoginFormState,
+  formData: FormData,
+): Promise<LoginFormState> {
+  const existing = await auth();
+  if (existing?.user) {
+    return { error: "Vous êtes déjà connecté." };
+  }
+
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+
+  const callbackUrl = sanitizeCallbackUrl(formData.get("callbackUrl"));
+
+  try {
+    const target = await signIn("credentials", {
+      email: parsed.data.email,
+      password: parsed.data.password,
+      redirectTo: callbackUrl,
+      redirect: false,
+    });
+
+    if (typeof target !== "string") {
+      return { error: "Réponse de connexion inattendue. Réessayez." };
+    }
+
+    if (authRedirectHasError(target)) {
+      return { error: messageForAuthRedirect(target) };
+    }
+
+    redirect(target);
+  } catch (error) {
+    if (isNextRedirectError(error)) {
+      throw error;
+    }
+    console.error("[auth][login][error]", error);
+    return { error: "Connexion impossible. Réessayez ou vérifiez votre connexion." };
+  }
+}
 
 export async function registerWithCredentials(input: RegisterInput): Promise<RegisterResult> {
   try {
@@ -56,8 +142,30 @@ export async function registerWithCredentials(input: RegisterInput): Promise<Reg
       },
     });
 
+    try {
+      const target = await signIn("credentials", {
+        email: normalizedEmail,
+        password: parsed.data.password,
+        redirectTo: "/dashboard",
+        redirect: false,
+      });
+
+      if (typeof target === "string" && !authRedirectHasError(target)) {
+        redirect(target);
+      }
+    } catch (error) {
+      if (isNextRedirectError(error)) {
+        throw error;
+      }
+      console.error("[auth][register][signIn-after-create]", error);
+    }
+
     return { success: true };
   } catch (error) {
+    if (isNextRedirectError(error)) {
+      throw error;
+    }
+
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2021") {
         return {
