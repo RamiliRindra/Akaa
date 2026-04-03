@@ -7,17 +7,13 @@ import type { Adapter } from "next-auth/adapters";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
+import {
+  getGoogleOAuthConfig,
+  hasGoogleOAuth,
+  isBootstrapAdminEmail,
+} from "@/lib/auth-config";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
-
-const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
-const googleOAuthDisabled = process.env.GOOGLE_OAUTH_DISABLED === "true";
-const hasGoogleOAuth =
-  Boolean(googleClientId && googleClientSecret) &&
-  !googleOAuthDisabled &&
-  !googleClientId?.includes("replace-with") &&
-  !googleClientSecret?.includes("replace-with");
 
 function logPrismaAuthError(context: string, error: unknown) {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -40,6 +36,34 @@ function logPrismaAuthError(context: string, error: unknown) {
   }
 
   console.error("[auth][error]", { context, error });
+}
+
+async function ensureBootstrapAdminRole(user: {
+  id?: string | null;
+  email?: string | null;
+  role?: UserRole | null;
+}) {
+  if (!isBootstrapAdminEmail(user.email)) {
+    return user.role ?? null;
+  }
+
+  if (user.id) {
+    try {
+      await db.user.updateMany({
+        where: {
+          id: user.id,
+          role: { not: UserRole.ADMIN },
+        },
+        data: {
+          role: UserRole.ADMIN,
+        },
+      });
+    } catch (error) {
+      logPrismaAuthError("bootstrap-admin.updateRole", error);
+    }
+  }
+
+  return UserRole.ADMIN;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -84,8 +108,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ...(hasGoogleOAuth
         ? [
           Google({
-            clientId: googleClientId as string,
-            clientSecret: googleClientSecret as string,
+            clientId: getGoogleOAuthConfig().clientId as string,
+            clientSecret: getGoogleOAuthConfig().clientSecret as string,
             profile(profile) {
               const fallbackName =
                 profile.name ??
@@ -151,8 +175,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        const role = await ensureBootstrapAdminRole({
+          id: user.id,
+          email: user.email,
+          role: (user.role as UserRole | undefined) ?? null,
+        });
         token.sub = user.id;
-        token.role = user.role;
+        token.role = role ?? user.role;
+        return token;
+      }
+
+      if (isBootstrapAdminEmail(token.email)) {
+        token.role =
+          (await ensureBootstrapAdminRole({
+            id: token.sub,
+            email: token.email,
+            role: (token.role as UserRole | undefined) ?? null,
+          })) ?? undefined;
         return token;
       }
 

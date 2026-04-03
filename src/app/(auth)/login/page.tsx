@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { GoogleButton } from "@/components/auth/google-button";
+import { hasGoogleOAuth } from "@/lib/auth-config";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata = {
@@ -8,8 +9,6 @@ export const metadata = {
 };
 
 export default function LoginPage() {
-  const isGoogleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
-
   return (
     <div className="space-y-5">
       <div className="space-y-1 text-center">
@@ -31,7 +30,7 @@ export default function LoginPage() {
         <span className="text-xs text-[#0c0910]/50">ou</span>
         <span className="h-px flex-1 bg-[#0c0910]/10" />
       </div>
-      <GoogleButton enabled={isGoogleEnabled} />
+      <GoogleButton enabled={hasGoogleOAuth} />
     </div>
   );
 }

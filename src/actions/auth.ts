@@ -7,6 +7,7 @@ import { Prisma, UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import { auth, signIn } from "@/lib/auth";
+import { isBootstrapAdminEmail } from "@/lib/auth-config";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
@@ -157,7 +158,7 @@ export async function registerWithCredentials(input: RegisterInput): Promise<Reg
         email: normalizedEmail,
         name: parsed.data.name,
         passwordHash,
-        role: UserRole.LEARNER,
+        role: isBootstrapAdminEmail(normalizedEmail) ? UserRole.ADMIN : UserRole.LEARNER,
       },
     });
 
