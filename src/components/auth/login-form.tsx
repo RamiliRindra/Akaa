@@ -5,14 +5,15 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { FormEvent, useState, useTransition } from "react";
+import { FormEvent, useState } from "react";
 
 import { type LoginInput, loginSchema } from "@/lib/validations/auth";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
-  const [isPending, startTransition] = useTransition();
+  const urlAuthError = searchParams.get("error");
+  const [isPending, setIsPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<LoginInput>({
@@ -20,7 +21,15 @@ export function LoginForm() {
     password: "",
   });
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const displayError =
+    error ??
+    (urlAuthError === "CredentialsSignin"
+      ? "Email ou mot de passe incorrect."
+      : urlAuthError
+        ? "La connexion a échoué. Réessayez."
+        : null);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
@@ -30,24 +39,20 @@ export function LoginForm() {
       return;
     }
 
-    startTransition(async () => {
-      const result = await signIn("credentials", {
+    setIsPending(true);
+    try {
+      // redirect: true évite le chemin redirect:false de next-auth/react qui fait
+      // new URL(data.url) et lève si data.url est une URL relative (ex. /dashboard).
+      await signIn("credentials", {
         email: parsed.data.email,
         password: parsed.data.password,
-        callbackUrl,
-        redirect: false,
+        redirectTo: callbackUrl,
+        redirect: true,
       });
-
-      if (!result || result.error) {
-        setError("Email ou mot de passe incorrect.");
-        return;
-      }
-
-      // Navigation document complète : le cookie de session est alors garanti
-      // avant le prochain rendu serveur (évite de rester bloqué sur /login après signIn).
-      const next = result.url ?? callbackUrl;
-      window.location.assign(next.startsWith("/") ? next : new URL(next, window.location.origin).href);
-    });
+    } catch {
+      setIsPending(false);
+      setError("Connexion impossible. Réessayez ou vérifiez votre connexion.");
+    }
   }
 
   return (
@@ -101,7 +106,7 @@ export function LoginForm() {
         </div>
       </div>
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {displayError ? <p className="text-sm text-red-600">{displayError}</p> : null}
 
       <motion.button
         type="submit"

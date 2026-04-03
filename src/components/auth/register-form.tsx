@@ -44,21 +44,17 @@ export function RegisterForm() {
 
       setSuccess("Compte créé avec succès. Connexion en cours...");
 
-      const loginResult = await signIn("credentials", {
-        email: parsed.data.email,
-        password: parsed.data.password,
-        callbackUrl: "/dashboard",
-        redirect: false,
-      });
-
-      if (!loginResult || loginResult.error) {
+      try {
+        await signIn("credentials", {
+          email: parsed.data.email,
+          password: parsed.data.password,
+          redirectTo: "/dashboard",
+          redirect: true,
+        });
+      } catch {
         setSuccess("Compte créé. Connectez-vous maintenant.");
         setForm(INITIAL_FORM);
-        return;
       }
-
-      const next = loginResult.url ?? "/dashboard";
-      window.location.assign(next.startsWith("/") ? next : new URL(next, window.location.origin).href);
     });
   }
 
