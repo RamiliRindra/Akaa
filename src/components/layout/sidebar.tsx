@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { AppLogo } from "@/components/layout/app-logo";
+import { getNavIcon } from "@/components/layout/nav-icons";
 import type { NavItem } from "@/components/layout/nav-config";
 
 type SidebarProps = {
@@ -23,6 +24,7 @@ export function Sidebar({ title, items }: SidebarProps) {
         <nav className="mt-4 space-y-1">
           {items.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const Icon = getNavIcon(item.icon);
             return (
               <Link
                 key={item.href}
@@ -39,7 +41,7 @@ export function Sidebar({ title, items }: SidebarProps) {
                     className="absolute inset-0 rounded-xl border border-[#0F63FF]/20"
                   />
                 ) : null}
-                <item.icon className="relative z-10 h-4 w-4" />
+                <Icon className="relative z-10 h-4 w-4" />
                 <span className="relative z-10">{item.label}</span>
               </Link>
             );

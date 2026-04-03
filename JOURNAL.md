@@ -358,6 +358,46 @@ Ces commandes nécessitent aussi une connexion TCP → les éviter depuis le ré
 
 ---
 
+## Incident H — Railway : `/dashboard` 500 après login à cause d’icônes Lucide dans `navItems`
+
+**Date :** 03 Avril 2026
+
+### Symptôme
+- `POST /login` retourne **303 See Other**.
+- La navigation suivante vers `/dashboard` échoue avec **500**.
+- Log Railway:
+  `Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server".`
+  avec une valeur du type `{ $$typeof: ..., render: function, displayName: ... }`.
+
+### Cause racine
+- `ProtectedShell` est un **Server Component**.
+- Il passait `navItems` à `Sidebar` et `MobileNav`, qui sont des **Client Components**.
+- Or `navItems` contenait des références de composants Lucide (`Gauge`, `Shield`, etc.) via la clé `icon`.
+- Ces icônes sont des fonctions/composants React non sérialisables à travers la frontière Server -> Client.
+
+### Correctif appliqué
+- `src/components/layout/nav-config.ts`
+  - remplacement de `icon: LucideIcon` par `icon: NavIconName` (chaîne sérialisable).
+- `src/components/layout/nav-icons.tsx`
+  - ajout d’une table de mapping locale `NavIconName -> LucideIcon`.
+- `src/components/layout/sidebar.tsx`
+  - résolution de l’icône côté client via `getNavIcon(item.icon)`.
+- `src/components/layout/mobile-nav.tsx`
+  - même correction côté navigation mobile.
+
+### Impact
+- La config de navigation devient entièrement sérialisable.
+- Le shell dashboard ne transmet plus de fonctions React depuis le serveur.
+- Ce correctif cible directement l’erreur `digest: '1109689143'` vue dans les logs Railway.
+
+### Statut
+- ✅ Cause racine identifiée.
+- ✅ Correctif appliqué dans le dépôt local.
+- ✅ Validations locales exécutées : `npm run lint`, `npx tsc --noEmit`, `npm run build`.
+- ⏭️ Étape suivante : redéploiement Railway pour confirmer la disparition du `500` sur `/dashboard`.
+
+---
+
 ## Décisions techniques retenues
 
 1. **Conserver Prisma + schéma actuel** (structure SQL validée pour `account`).

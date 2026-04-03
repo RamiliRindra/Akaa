@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { getNavIcon } from "@/components/layout/nav-icons";
 import type { NavItem } from "@/components/layout/nav-config";
 
 type MobileNavProps = {
@@ -37,6 +38,7 @@ export function MobileNav({ items }: MobileNavProps) {
             <nav className="space-y-1">
               {items.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const Icon = getNavIcon(item.icon);
                 return (
                   <Link
                     key={item.href}
@@ -48,7 +50,7 @@ export function MobileNav({ items }: MobileNavProps) {
                         : "text-[#0c0910]/80 hover:bg-[#0F63FF]/5 hover:text-[#0F63FF]"
                     }`}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <Icon className="h-4 w-4" />
                     {item.label}
                   </Link>
                 );

@@ -1,41 +1,39 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Award,
-  BookOpen,
-  ChartNoAxesColumn,
-  Compass,
-  Gauge,
-  GraduationCap,
-  ListChecks,
-  Shield,
-  Trophy,
-  UserRound,
-  UsersRound,
-} from "lucide-react";
+export type NavIconName =
+  | "award"
+  | "book-open"
+  | "chart-no-axes-column"
+  | "compass"
+  | "gauge"
+  | "graduation-cap"
+  | "list-checks"
+  | "shield"
+  | "trophy"
+  | "user-round"
+  | "users-round";
 
 export type NavItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: NavIconName;
 };
 
 export const platformNav: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: Gauge },
-  { href: "/courses", label: "Cours", icon: BookOpen },
-  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
-  { href: "/profile", label: "Profil", icon: UserRound },
+  { href: "/dashboard", label: "Dashboard", icon: "gauge" },
+  { href: "/courses", label: "Cours", icon: "book-open" },
+  { href: "/leaderboard", label: "Leaderboard", icon: "trophy" },
+  { href: "/profile", label: "Profil", icon: "user-round" },
 ];
 
 export const trainerNav: NavItem[] = [
-  { href: "/trainer/dashboard", label: "Dashboard", icon: ChartNoAxesColumn },
-  { href: "/trainer/courses", label: "Mes cours", icon: GraduationCap },
+  { href: "/trainer/dashboard", label: "Dashboard", icon: "chart-no-axes-column" },
+  { href: "/trainer/courses", label: "Mes cours", icon: "graduation-cap" },
 ];
 
 export const adminNav: NavItem[] = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: Shield },
-  { href: "/admin/users", label: "Utilisateurs", icon: UsersRound },
-  { href: "/admin/courses", label: "Cours", icon: Compass },
-  { href: "/admin/categories", label: "Catégories", icon: ListChecks },
-  { href: "/admin/badges", label: "Badges", icon: Award },
-  { href: "/admin/xp", label: "Ajustement XP", icon: Trophy },
+  { href: "/admin/dashboard", label: "Dashboard", icon: "shield" },
+  { href: "/admin/users", label: "Utilisateurs", icon: "users-round" },
+  { href: "/admin/courses", label: "Cours", icon: "compass" },
+  { href: "/admin/categories", label: "Catégories", icon: "list-checks" },
+  { href: "/admin/badges", label: "Badges", icon: "award" },
+  { href: "/admin/xp", label: "Ajustement XP", icon: "trophy" },
 ];
