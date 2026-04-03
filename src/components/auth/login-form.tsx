@@ -3,14 +3,13 @@
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FormEvent, useState, useTransition } from "react";
 
 import { type LoginInput, loginSchema } from "@/lib/validations/auth";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const [isPending, startTransition] = useTransition();
@@ -44,8 +43,10 @@ export function LoginForm() {
         return;
       }
 
-      router.push(result.url ?? callbackUrl);
-      router.refresh();
+      // Navigation document complète : le cookie de session est alors garanti
+      // avant le prochain rendu serveur (évite de rester bloqué sur /login après signIn).
+      const next = result.url ?? callbackUrl;
+      window.location.assign(next.startsWith("/") ? next : new URL(next, window.location.origin).href);
     });
   }
 

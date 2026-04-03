@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, UserRound } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FormEvent, useState, useTransition } from "react";
 
@@ -18,7 +17,6 @@ const INITIAL_FORM: RegisterInput = {
 };
 
 export function RegisterForm() {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -59,8 +57,8 @@ export function RegisterForm() {
         return;
       }
 
-      router.push(loginResult.url ?? "/dashboard");
-      router.refresh();
+      const next = loginResult.url ?? "/dashboard";
+      window.location.assign(next.startsWith("/") ? next : new URL(next, window.location.origin).href);
     });
   }
 
