@@ -1,0 +1,287 @@
+---
+description: Règles UX, gamification et design engageant pour la plateforme Akaa
+globs: **/*.{tsx,css}
+alwaysApply: true
+---
+
+# UX & Gamification - Règles Akaa
+
+## Principes fondamentaux
+
+1. **Feedback immédiat** : chaque action de l'utilisateur produit un retour visuel en < 200ms.
+2. **Progression visible** : l'utilisateur voit toujours où il en est (XP, niveau, % cours).
+3. **Récompense fréquente** : des micro-récompenses régulières maintiennent l'engagement.
+4. **Mobile-first** : chaque composant est conçu pour mobile d'abord, puis élargi pour desktop.
+5. **Accessibilité** : contraste AA minimum, navigation clavier, labels ARIA en français.
+6. **Light mode uniquement** pour le MVP. Pas de `dark:` variants. Le dark mode sera ajouté en fin de projet.
+
+## Logo
+
+- Fichier : `src/img/logo_akaa.png`
+- Le logo est en bleu Akaa (#0F63FF) sur fond noir/transparent.
+- Utiliser `next/image` pour l'affichage (optimisation automatique).
+- Emplacements : sidebar (en haut), landing page, page de login.
+
+---
+
+## Palette de couleurs
+
+### Tokens sémantiques (définis dans globals.css)
+
+**Light mode uniquement** pour le MVP. Le dark mode sera envisagé en fin de projet.
+
+```css
+:root {
+  /* Primaire - Bleu Akaa : couleur du logo, confiance, action */
+  --color-primary: #0F63FF;
+  --color-primary-hover: #0B52D6;
+  --color-primary-light: #E8F0FF;
+
+  /* Accent - Or chaud : récompense, accomplissement, gamification */
+  --color-accent: #ffc857;
+  --color-accent-hover: #f0b429;
+  --color-accent-light: #fff8e7;
+
+  /* Succès - Teal : validation, progression, complétion */
+  --color-success: #119da4;
+  --color-success-light: #e0f5f6;
+
+  /* Erreur - Rouge vif : alerte, erreur quiz */
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+
+  /* XP - Violet sombre : expérience, mystère, progression */
+  --color-xp: #453750;
+  --color-xp-light: #ece7ef;
+
+  /* Streak - reprend accent doré pour la flamme */
+  --color-streak: #ffc857;
+  --color-streak-light: #fff8e7;
+
+  /* Surfaces — fond clair uniquement */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f8fafc;
+  --color-surface-muted: #f1f5f9;
+  --color-border: #e2e8f0;
+
+  /* Texte */
+  --color-text: #0c0910;
+  --color-text-muted: #64748b;
+}
+```
+
+### Palette de référence
+
+| Rôle | Hex | Usage |
+|------|-----|-------|
+| **Primary** | `#0F63FF` | Boutons CTA, liens, sidebar active, logo |
+| **Accent** | `#ffc857` | Récompenses, badges, streak flamme, highlights |
+| **XP** | `#453750` | XP pill, level badge, éléments gamification |
+| **Success** | `#119da4` | Progression, complétion, validation quiz |
+| **Text** | `#0c0910` | Texte principal, titres |
+| **Error** | `#ef4444` | Erreurs, mauvaise réponse quiz |
+
+### Règles de couleurs
+- Les couleurs de gamification (`xp`, `streak`, `accent`) sont réservées aux éléments de progression.
+- Utiliser `primary` (#0F63FF) pour les actions principales (boutons CTA, liens actifs, sidebar).
+- Les gradients sont subtils et réservés aux éléments hero (cards XP, badges, level up).
+- Pattern gradient gamifié : `bg-gradient-to-r from-primary to-xp` pour les éléments spéciaux.
+- **Pas de dark mode** dans les composants pour le MVP. Ne pas ajouter de `dark:` variants Tailwind.
+
+---
+
+## Typographie
+
+- **Titres** : Geist Sans, bold/semibold, tracking tight.
+- **Corps** : Geist Sans, regular, leading relaxed pour la lisibilité du contenu de cours.
+- **Mono** : Geist Mono pour les éléments numériques (XP, scores, niveaux).
+- Les compteurs XP et scores utilisent `font-mono tabular-nums` pour un alignement stable.
+
+---
+
+## Composants de gamification
+
+### XP Pill (header)
+- Toujours visible dans le header de la plateforme.
+- Format : icône zap + nombre XP + indicateur de niveau.
+- Couleur `xp` (#453750) avec fond `xp-light`.
+- Animation de pulse subtil quand l'XP augmente.
+
+### Streak Counter
+- Icône flamme + nombre de jours.
+- Couleur `accent` (#ffc857) sur fond sombre.
+- La flamme s'anime (scale bounce) quand le streak est actif.
+- Affichage grisé si le streak est cassé (0 jours).
+
+### Badge Card
+- Card avec icône/image du badge, nom, description.
+- Badges non débloqués : grayscale + opacité 40%, avec silhouette.
+- Badges débloqués : couleur pleine + shimmer subtil.
+- Animation de "reveal" quand un badge est débloqué (scale + glow).
+
+### Level Badge
+- Cercle avec le numéro de niveau.
+- Gradient `primary` -> `xp` pour le fond.
+- Barre de progression circulaire (SVG) montrant l'avancement vers le niveau suivant.
+
+### Progress Bar
+- Barre arrondie avec remplissage animé (transition width 500ms ease-out).
+- Couleur `success` pour la progression des cours.
+- Couleur `xp` pour la barre d'XP vers le prochain niveau.
+- Texte pourcentage à droite.
+
+### Leaderboard
+- Liste classée avec rang, avatar, nom, XP total.
+- Top 3 avec mise en avant (or/argent/bronze via `accent`).
+- Position de l'utilisateur actuel toujours visible (sticky si hors viewport).
+- Animation de montée/descente quand le classement change.
+
+---
+
+## Animations (Framer Motion)
+
+### Principes
+- Durée standard : 200-300ms pour les micro-interactions, 400-600ms pour les transitions de page.
+- Easing : `easeOut` pour les entrées, `easeIn` pour les sorties, `spring` pour les éléments ludiques.
+- Pas d'animation sur `prefers-reduced-motion: reduce`.
+
+### Catalogue d'animations obligatoires
+
+**XP Gained Toast**
+- Apparaît en bas à droite quand l'utilisateur gagne de l'XP.
+- Animation : slide up + fade in, avec le nombre XP qui "compte" progressivement.
+- Disparaît après 3 secondes (slide down + fade out).
+
+```tsx
+// Pattern d'animation XP toast
+<motion.div
+  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+  animate={{ opacity: 1, y: 0, scale: 1 }}
+  exit={{ opacity: 0, y: -10 }}
+  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+>
+  +{xpAmount} XP
+</motion.div>
+```
+
+**Badge Unlock**
+- Overlay centré semi-transparent.
+- Le badge arrive avec un scale de 0 -> 1.2 -> 1 (bounce).
+- Particules/confetti autour du badge.
+- Son optionnel (désactivable).
+
+**Chapter Complete**
+- Checkmark animé (stroke-dasharray animation).
+- La barre de progression du cours se met à jour en smooth.
+- Confetti léger si c'est le dernier chapitre (cours terminé).
+
+**Quiz Feedback**
+- Bonne réponse : flash vert + scale bounce sur l'option.
+- Mauvaise réponse : shake horizontal (3 oscillations, 300ms) + flash rouge.
+- Score final : compteur animé de 0 au score obtenu.
+
+**Page Transitions**
+- Les cards entrent en stagger (décalage de 50ms entre chaque).
+- Fade in + slight slide up pour les contenus de page.
+
+```tsx
+// Pattern stagger pour les listes
+<motion.div
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: index * 0.05 }}
+>
+```
+
+**Hover / Interactions**
+- Les cards de cours ont un léger lift au hover (translateY -2px + shadow increase).
+- Les boutons ont un scale 0.98 au clic (active state).
+- Les éléments interactifs ont une transition de couleur de 150ms.
+
+---
+
+## Layout et navigation
+
+### Dashboard (hub central)
+- Section hero en haut : XP total, niveau, streak, rang leaderboard.
+- Cards stats avec icônes et chiffres en `font-mono`.
+- Section "Continuer" : derniers cours en cours avec barre de progression.
+- Section "Cours recommandés" : cards horizontales scrollables.
+- Calendrier d'activité (style GitHub contribution graph) en bas.
+
+### Sidebar
+- Largeur fixe 256px sur desktop, drawer sur mobile.
+- Logo Akaa en haut : `src/img/logo_akaa.png` (bleu #0F63FF sur fond sombre, ou utiliser sur fond blanc).
+- Navigation avec icônes Lucide + labels.
+- Section gamification en bas : mini XP bar + niveau + streak.
+- Élément actif : fond `primary-light` (#E8F0FF) + texte `primary` (#0F63FF) + barre gauche de 3px.
+
+### Header
+- Hauteur 64px.
+- Breadcrumb à gauche.
+- XP pill + streak counter + avatar dropdown à droite.
+- Sur mobile : hamburger menu à gauche, XP pill au centre, avatar à droite.
+
+### Catalogue de cours
+- Grid responsive : 1 col mobile, 2 cols tablette, 3 cols desktop.
+- Filtres par catégorie en haut (pills/tags colorés avec la couleur de la catégorie).
+- Chaque card : thumbnail, titre, catégorie badge, progression (si inscrit), durée estimée.
+- Animation hover : shadow lift + scale léger.
+
+### Lecteur de chapitre
+- Layout deux colonnes sur desktop : sidebar sommaire (modules/chapitres) + contenu principal.
+- Sur mobile : sommaire en drawer.
+- Le chapitre actif est surligné dans le sommaire.
+- Boutons "Précédent" / "Suivant" en bas du contenu.
+- Barre de progression du cours en haut (sticky).
+
+---
+
+## Formulaires
+
+- Labels au-dessus des inputs (pas de placeholder comme label).
+- Messages d'erreur en rouge sous le champ, avec icône AlertCircle.
+- Validation en temps réel (après le premier blur).
+- Bouton de soumission avec état loading (spinner + texte "En cours...").
+- Les formulaires longs utilisent des étapes (stepper) pour réduire la charge cognitive.
+
+---
+
+## États vides et loading
+
+### Empty States
+- Illustration simple + texte explicatif + CTA.
+- Exemples : "Aucun cours trouvé" avec bouton "Explorer le catalogue".
+- Ton amical et encourageant en français.
+
+### Loading
+- Skeletons pour les listes et cards (pas de spinner pleine page).
+- Les skeletons reprennent la forme exacte du contenu attendu.
+- Animation pulse sur les skeletons.
+- Pour les actions : spinner dans le bouton (pas de spinner externe).
+
+### Toasts / Notifications
+- Position : bas droite sur desktop, bas centre sur mobile.
+- Types : success (teal #119da4), error (rouge #ef4444), info (bleu #0F63FF), xp (violet #453750).
+- Auto-dismiss après 4s (sauf erreur : persist jusqu'à fermeture manuelle).
+- Stack max 3 toasts simultanés.
+
+---
+
+## Responsive breakpoints
+
+- **Mobile** : < 640px (1 colonne, drawer navigation, bottom actions)
+- **Tablette** : 640px - 1024px (2 colonnes, sidebar collapsible)
+- **Desktop** : > 1024px (3+ colonnes, sidebar fixe)
+
+Chaque composant doit être testé et fonctionnel sur les 3 breakpoints. Le design mobile n'est pas une version dégradée : c'est la version de référence.
+
+---
+
+## Langue
+
+- Interface entièrement en français.
+- Messages d'erreur, labels, placeholders, toasts : tout en français.
+- Les dates utilisent le format français : `dd/MM/yyyy`, "il y a 3 jours", etc.
+- Utiliser `date-fns/locale/fr` pour le formatage des dates.
+- Préparer l'architecture pour i18n futur (pas de strings hardcodées dans les composants, les centraliser dans des constantes ou fichiers de traduction).

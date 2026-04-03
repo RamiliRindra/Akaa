@@ -1,0 +1,85 @@
+import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+type UserRole = "LEARNER" | "TRAINER" | "ADMIN";
+
+const AUTH_PAGES = ["/login", "/register"];
+const PLATFORM_PREFIXES = ["/dashboard", "/courses", "/leaderboard", "/profile"];
+
+function matchesPrefix(pathname: string, prefix: string) {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+function isPlatformRoute(pathname: string) {
+  return PLATFORM_PREFIXES.some((prefix) => matchesPrefix(pathname, prefix));
+}
+
+function isAuthPage(pathname: string) {
+  return AUTH_PAGES.some((page) => matchesPrefix(pathname, page));
+}
+
+function buildLoginRedirect(request: NextRequest) {
+  const loginUrl = new URL("/login", request.url);
+  const callbackUrl = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+  loginUrl.searchParams.set("callbackUrl", callbackUrl);
+
+  return NextResponse.redirect(loginUrl);
+}
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isTrainerRoute = matchesPrefix(pathname, "/trainer");
+  const isAdminRoute = matchesPrefix(pathname, "/admin");
+  const needsAuth = isPlatformRoute(pathname) || isTrainerRoute || isAdminRoute || isAuthPage(pathname);
+
+  if (!needsAuth) {
+    return NextResponse.next();
+  }
+
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  if (!token) {
+    if (isAuthPage(pathname)) {
+      return NextResponse.next();
+    }
+    return buildLoginRedirect(request);
+  }
+
+  if (isAuthPage(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  const role = token.role as UserRole | undefined;
+  if (!role) {
+    return buildLoginRedirect(request);
+  }
+
+  if (isAdminRoute && role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (isTrainerRoute && role !== "TRAINER" && role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/dashboard/:path*",
+    "/courses/:path*",
+    "/leaderboard/:path*",
+    "/profile/:path*",
+    "/trainer",
+    "/trainer/:path*",
+    "/admin",
+    "/admin/:path*",
+    "/login",
+    "/register",
+  ],
+};

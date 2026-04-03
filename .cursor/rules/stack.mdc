@@ -1,0 +1,214 @@
+---
+description: Conventions techniques strictes pour le projet Akaa (Next.js 16, Tailwind v4, Prisma 7, PostgreSQL)
+globs: **/*.{ts,tsx,css,prisma}
+alwaysApply: true
+---
+
+# Stack Technique - Conventions Akaa
+
+## Next.js 16 (App Router)
+
+### Server Components par défaut
+- Tout composant dans `src/app/` est un **Server Component** sauf indication contraire.
+- N'ajouter `"use client"` que si le composant utilise : `useState`, `useEffect`, `useRef`, event handlers (`onClick`, `onChange`), browser APIs, ou des hooks custom client.
+- Préférer passer des données via props depuis un Server Component parent plutôt que fetch côté client.
+
+### Server Actions pour les mutations
+- Toutes les mutations (create, update, delete) passent par des **Server Actions** dans `src/actions/`.
+- Chaque action commence par la vérification de session et de rôle.
+- Pattern obligatoire :
+
+```typescript
+"use server"
+
+import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { revalidatePath } from "next/cache"
+
+export async function createCourse(data: CreateCourseInput) {
+  const session = await auth()
+  if (!session?.user || !["TRAINER", "ADMIN"].includes(session.user.role)) {
+    throw new Error("Non autorisé")
+  }
+  // ... logique métier
+  revalidatePath("/trainer/courses")
+}
+```
+
+### Routing
+- Utiliser les **Route Groups** `(auth)`, `(platform)`, `(trainer)`, `(admin)` pour séparer les layouts.
+- Les segments dynamiques utilisent la convention `[param]` : `[slug]`, `[courseId]`, `[chapterId]`.
+- Chaque route group a son propre `layout.tsx`.
+
+### Data Fetching
+- Fetch dans les Server Components directement avec Prisma (pas de route API intermédiaire).
+- Utiliser React Query (`@tanstack/react-query`) uniquement pour les données client nécessitant du cache, polling, ou optimistic updates.
+- Les listes paginées utilisent des searchParams pour la page et les filtres.
+
+### Middleware
+- `src/middleware.ts` protège les routes par rôle en vérifiant le token de session.
+- Les routes `/trainer/*` nécessitent le rôle TRAINER ou ADMIN.
+- Les routes `/admin/*` nécessitent le rôle ADMIN.
+- Les routes `/dashboard/*`, `/courses/*`, `/leaderboard/*`, `/profile/*` nécessitent une authentification.
+
+### Error Handling
+- Chaque route group a un `error.tsx` pour les erreurs runtime.
+- Utiliser `notFound()` de `next/navigation` pour les 404.
+- Les Server Actions retournent `{ success: boolean, error?: string, data?: T }` plutôt que de throw.
+
+---
+
+## Tailwind CSS v4
+
+### Configuration CSS-first
+- **PAS de fichier `tailwind.config.js`**. Tailwind v4 est configuré via CSS uniquement.
+- Les design tokens sont dans `src/app/globals.css` via `@theme inline { }`.
+- Les couleurs custom, fonts, spacing se déclarent comme CSS variables dans `:root` et `@theme`.
+
+### Design Tokens Akaa
+- Couleur primaire : `#0F63FF` (bleu Akaa). Secondaires : `#453750`, `#0c0910`, `#ffc857`, `#119da4`.
+- Utiliser des variables CSS sémantiques : `--color-primary`, `--color-accent`, `--color-success`, etc.
+- Référencer dans Tailwind via `@theme inline` pour les mapper aux classes utilitaires.
+- **Light mode uniquement** pour le MVP. Pas de `@media (prefers-color-scheme: dark)` ni de `dark:` variants.
+- Logo : `src/img/logo_akaa.png`, affiché via `next/image`.
+
+### Classes utilitaires
+- Préférer les classes Tailwind aux styles inline ou CSS modules.
+- Utiliser la fonction `cn()` (clsx + tailwind-merge) de `src/lib/utils.ts` pour les classes conditionnelles.
+- Grouper les classes par catégorie : layout > sizing > spacing > typography > colors > effects.
+
+```tsx
+<div className={cn(
+  "flex items-center gap-3",
+  "w-full max-w-md",
+  "px-4 py-2",
+  "text-sm font-medium",
+  "bg-primary text-white",
+  "rounded-lg shadow-sm",
+  isActive && "ring-2 ring-accent"
+)}>
+```
+
+### Composants UI
+- Utiliser **shadcn/ui** comme base pour les composants dans `src/components/ui/`.
+- Ne pas modifier les composants shadcn directement ; les wrapper si besoin.
+- Les composants custom héritent du système de design tokens.
+
+---
+
+## Prisma 7 + PostgreSQL (Neon)
+
+### Schema
+- Un seul fichier `prisma/schema.prisma`.
+- Utiliser `@id @default(uuid())` pour les clés primaires (UUID v4).
+- Toutes les FK ont un `@relation` explicite avec `onDelete` défini.
+- Les index sont explicites sur toutes les FK et les colonnes de requêtes fréquentes.
+
+### Conventions de nommage Prisma
+- Modèles : **PascalCase** (`User`, `QuizAttempt`, `XpTransaction`)
+- Champs : **camelCase** (`userId`, `createdAt`, `totalXp`)
+- Enums : **SCREAMING_SNAKE_CASE** pour les valeurs (`LEARNER`, `DRAFT`, `NOT_STARTED`)
+- Utiliser `@@map("snake_case")` sur les modèles si le nom de table SQL doit différer.
+
+### PrismaClient Singleton
+- `src/lib/db.ts` exporte une instance unique pour éviter les connexions multiples en dev :
+
+```typescript
+import { PrismaClient } from "@prisma/client"
+
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+
+export const db = globalForPrisma.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db
+```
+
+### Requêtes
+- Toujours `select` ou `include` les champs nécessaires (pas de `findMany()` nu).
+- Utiliser `where` avec les index disponibles.
+- Les agrégations (count, sum) sont préférées aux requêtes N+1.
+- Pour le leaderboard : `orderBy: { totalXp: "desc" }` avec `take` pour la pagination.
+
+### Migrations
+- `npx prisma migrate dev --name description_courte` pour créer une migration.
+- `npx prisma db seed` pour les données initiales.
+- Ne jamais modifier une migration existante après qu'elle a été appliquée.
+
+### Neon Free Tier
+- Utiliser l'URL **pooled** pour `DATABASE_URL` (connexion via PgBouncer de Neon).
+- Utiliser l'URL **directe** pour `DIRECT_URL` (nécessaire pour les migrations Prisma).
+- Le cold start après auto-suspend (~5 min) ajoute ~500ms. Acceptable pour 300 utilisateurs.
+
+---
+
+## Zod 4
+
+### Validation
+- Chaque Server Action valide ses inputs avec un schéma Zod avant toute opération.
+- Les schémas vivent dans `src/lib/validations/` par domaine.
+- Réutiliser les schémas côté client pour la validation des formulaires.
+
+### Conventions
+- Nommer les schémas : `createCourseSchema`, `updateUserSchema`, `loginSchema`.
+- Les types inférés : `type CreateCourseInput = z.infer<typeof createCourseSchema>`.
+- Les messages d'erreur sont en français.
+
+```typescript
+import { z } from "zod"
+
+export const createCourseSchema = z.object({
+  title: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
+  description: z.string().optional(),
+  categoryId: z.string().uuid("Catégorie invalide").optional(),
+  status: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
+})
+
+export type CreateCourseInput = z.infer<typeof createCourseSchema>
+```
+
+---
+
+## TypeScript
+
+### Strict mode activé
+- `strict: true` dans `tsconfig.json` (déjà configuré).
+- Pas de `any`. Utiliser `unknown` si le type est inconnu, puis narrower.
+- Les types partagés vivent dans `src/types/index.ts`.
+
+### Conventions de nommage
+- Fichiers : **kebab-case** (`course-card.tsx`, `use-current-user.ts`)
+- Composants : **PascalCase** (`CourseCard`, `QuizPlayer`)
+- Fonctions / variables : **camelCase** (`createCourse`, `totalXp`)
+- Types / Interfaces : **PascalCase** (`CourseWithModules`, `UserRole`)
+- Constantes : **SCREAMING_SNAKE_CASE** (`XP_PER_CHAPTER`, `MAX_QUIZ_ATTEMPTS`)
+
+---
+
+## Structure des fichiers
+
+### Imports
+- Utiliser l'alias `@/` pour tous les imports depuis `src/` (configuré dans `tsconfig.json`).
+- Ordre des imports : 1) React/Next 2) Librairies externes 3) Composants `@/` 4) Lib/utils `@/` 5) Types
+
+### Composants
+- Un composant par fichier.
+- Les composants `"use client"` sont dans `src/components/`, pas dans `src/app/`.
+- Les pages (`page.tsx`) sont des Server Components qui orchestrent les données et passent aux composants client.
+- Les layouts (`layout.tsx`) sont des Server Components.
+
+### Server Actions
+- Regroupées par domaine dans `src/actions/`.
+- Chaque fichier exporte des fonctions nommées (pas de default export).
+- Toujours commencer par `"use server"` en haut du fichier.
+
+---
+
+## Git et qualité
+
+### Commits
+- Messages en anglais, format conventionnel : `feat:`, `fix:`, `refactor:`, `chore:`.
+- Un commit par fonctionnalité logique.
+
+### Fichiers ignorés
+- `.env.local` et tout `.env*` (sauf `.env.example`) dans `.gitignore`.
+- `node_modules/`, `.next/` ignorés. `prisma/migrations/` est versionné.
