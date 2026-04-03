@@ -166,7 +166,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         } catch (error) {
           logPrismaAuthError("callbacks.jwt.findRole", error);
         }
-        token.role = dbUser?.role;
+        if (dbUser) {
+          token.role = dbUser.role;
+        }
       }
 
       return token;

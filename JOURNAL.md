@@ -52,6 +52,8 @@ traceroute -p 5432 ep-crimson-violet-ag7bzsbj.c-2.eu-central-1.aws.neon.tech
 - Connexion via SQL Editor Neon (HTTPS port 443) = ✅ fonctionne
 - Connexion TCP directe port 5432/6543 = ❌ bloqué par TGN
 
+**Note (runtime application) :** L’app utilise l’adaptateur Neon serverless (`src/lib/db.ts`) avec une **WebSocket** vers `wss://…neon.tech/v2` (port 443). Des timeouts (`ETIMEDOUT`) sur ce chemin empêchent login/register en local même sans tester le port 5432 — voir **Incident F** ci-dessous.
+
 ---
 
 ## ✅ Solution appliquée — Workflow migration manuel via SQL Editor Neon
@@ -149,11 +151,11 @@ mkdir + cp migration.sql dans prisma/migrations/
 Insérer dans _prisma_migrations via SQL Editor
 
 ### Production (Railway)
-Ajouter dans le start command Railway :
+Ajouter dans le **Start Command** Railway (app Next.js, pas un binaire Node custom) :
 ```bash
-npx prisma migrate deploy && node dist/index.js
+npx prisma migrate deploy && npm run start
 ```
-Railway n'est pas bloqué par TGN → les migrations se déploient automatiquement.
+Railway n'est pas bloqué par TGN → les migrations et la connexion Prisma/Neon fonctionnent depuis le cloud.
 
 ### Prisma Studio / introspection
 Ces commandes nécessitent aussi une connexion TCP → les éviter depuis le réseau TGN local. Utiliser Railway ou un environnement cloud.
@@ -255,9 +257,63 @@ Ces commandes nécessitent aussi une connexion TCP → les éviter depuis le ré
 
 ---
 
+## Incident E — Déploiement Railway (Railpack) : échecs de build
+
+**Période :** 03 Avril 2026  
+**Contexte :** Déploiement de l’app Next.js 16 sur Railway (Railpack) pour contourner les limitations réseau TGN (Neon WSS, Google OAuth).
+
+### Symptôme 1 — TypeScript : `Prisma` absent de `@prisma/client`
+
+**Log Railway :** `Type error: Module '"@prisma/client"' has no exported member 'Prisma'.` dans `src/actions/auth.ts` (idem usage dans `src/lib/auth.ts`).
+
+**Diagnostic :** Le plan de build exécute `npm ci` puis `npm run build` **sans** passer par `prisma generate`. Sans client généré, les types et le namespace `Prisma` ne sont pas disponibles pour `tsc` pendant `next build`.
+
+**Contournement :**
+- `package.json` : script `postinstall` → `prisma generate`.
+- `package.json` : script `build` → `prisma generate && next build` (garantie avant chaque build manuel).
+
+### Symptôme 2 — `prisma.config.ts` et environnement CI
+
+**Risque :** Sur Railway il n’y a pas de `.env.local` ; si seule `DIRECT_URL` était lue depuis le fichier local, la config Prisma pouvait échouer au chargement pendant `prisma generate`.
+
+**Contournement :** Chaîne de résolution `DIRECT_URL` → `DATABASE_URL` (variables Railway) → URL PostgreSQL factice en dernier recours **uniquement** pour le chargement de config au `generate` (pas de connexion DB au moment du generate). Les migrations en prod continuent d’exiger une vraie `DIRECT_URL` Neon côté déploiement.
+
+### Symptôme 3 — Prérendu `/login` et `useSearchParams`
+
+**Log :** `useSearchParams() should be wrapped in a suspense boundary at page "/login"`.
+
+**Diagnostic :** Next.js 16 impose un boundary `<Suspense>` pour les composants client qui appellent `useSearchParams()` lors de la génération statique / prérendu.
+
+**Contournement :** Dans `src/app/(auth)/login/page.tsx`, envelopper `<LoginForm />` dans `<Suspense>` avec un fallback de chargement (skeleton).
+
+### Statut
+- ✅ Build production (`npm run build`) vert en local et sur Railway après ces changements.
+- ✅ Déploiement Railway validé par l’équipe.
+
+---
+
+## Incident F — Inscription locale : timeout WebSocket Neon (`wss://…/v2`)
+
+**Contexte :** Même lorsque le TCP 5432/6543 est documenté comme bloqué par TGN, le runtime Prisma + `@neondatabase/serverless` utilise une **WebSocket** vers `wss://ep-….neon.tech/v2`.
+
+**Symptôme :** `AggregateError` / `ETIMEDOUT` sur la WebSocket lors de `registerWithCredentials` (logs serveur avec `ErrorEvent` sur `_url: 'wss://…'`).
+
+**Diagnostic :** Problème de **joignabilité** entre la machine locale et l’endpoint Neon (WSS), pas un bug métier du formulaire d’inscription.
+
+**Contournements :**
+- Tester l’inscription et l’auth contre **l’URL Railway** (hors TGN côté serveur).
+- Option future : PostgreSQL local en dev si besoin de coder sans cloud.
+
+**Code :** Messages d’erreur utilisateur dans `src/actions/auth.ts` enrichis pour détecter timeout / WebSocket / Neon dans les erreurs (y compris quand `error.message` est vide), via `util.inspect`.
+
+### Statut
+- ✅ Comportement documenté ; validation fonctionnelle sur Railway recommandée depuis TGN.
+
+---
+
 ## Décisions techniques retenues
 
 1. **Conserver Prisma + schéma actuel** (structure SQL validée pour `account`).
 2. **Renforcer l’observabilité Auth** pour isoler rapidement les causes réelles.
-3. **Continuer credentials localement** en cas d’instabilité Google OAuth.
-4. **Cibler un runtime cloud (Railway) pour OAuth stable** si le réseau local continue à timeout.
+3. **Continuer credentials localement** en cas d’instabilité Google OAuth ; sinon utiliser l’instance déployée.
+4. **Railway déployé et validé** : build avec `prisma generate`, variables Neon/NextAuth/Google configurées sur le service ; tests auth/OAuth contre l’URL publique du service.

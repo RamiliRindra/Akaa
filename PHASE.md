@@ -181,6 +181,21 @@ Points livrés:
 - Script dev avec préférence IPv4:
   - `NODE_OPTIONS=--dns-result-order=ipv4first next dev`
 
+#### 6) Déploiement Railway (complément, 2026-04-03)
+Contexte: réseau local TGN incompatible avec Neon (WSS) / Google ; l’app est déployée sur **Railway** (aligné avec `ARCHITECTURE.md`: Next.js + Neon + variables d’environnement).
+
+Fichiers / scripts touchés:
+- `package.json`: `postinstall` → `prisma generate` ; `build` → `prisma generate && next build` (le build CI n’exécutait pas la génération du client Prisma, d’où l’échec TypeScript sur `Prisma` importé depuis `@prisma/client`).
+- `prisma.config.ts`: résolution de `DIRECT_URL` avec repli sur `DATABASE_URL` (variables Railway) et URL factice de dernier recours pour `prisma generate` sans `.env.local` (aucune connexion réelle au moment du generate).
+- `src/app/(auth)/login/page.tsx`: enveloppe `<Suspense>` autour de `LoginForm` (exigence Next.js 16 / `useSearchParams()` lors du prérendu).
+- `src/actions/auth.ts` (déjà en place): messages d’erreur réseau / timeout DB plus explicites pour l’inscription.
+
+Variables Railway à prévoir (identiques en intention à `.env.local` / `ARCHITECTURE.md`):
+- `DATABASE_URL`, `DIRECT_URL`, `NEXTAUTH_URL` (URL publique HTTPS du service), `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+
+Commande de démarrage recommandée côté prod (migrations hors réseau TGN):
+- `npx prisma migrate deploy && npm run start`
+
 ### Validation technique exécutée (Phase 2)
 - `npm run lint`
 - `npx tsc --noEmit`
@@ -191,10 +206,12 @@ Résultat:
 - ✅ Lint OK
 
 ### Tests manuels et statut
-- Credentials: flux fonctionnel côté UI/action, dépendant de la connectivité DB locale.
-- Google OAuth: diagnostic final local `CallbackRouteError` avec cause `fetch failed` / `ETIMEDOUT` (réseau sortant Google).
+- Credentials: flux fonctionnel côté UI/action ; en local Madagascar/TGN, dépend de la connectivité Neon (WSS) — souvent bloquée ; **validation réelle sur Railway** une fois déployé.
+- Google OAuth: en local, `CallbackRouteError` / `ETIMEDOUT` vers Google (réseau sortant) ; **OAuth testable sur l’URL Railway** avec redirect URI Google mis à jour.
 - Schéma SQL `account` vérifié conforme côté Neon.
+- **Déploiement Railway:** build `npm run build` vert après correctifs Prisma + Suspense ; service déployé opérationnel.
 
 Statut global Phase 2:
 - ✅ Implémentation code terminée.
-- ⚠️ Validation E2E Google locale bloquée par réseau sortant; à valider sur runtime cloud (Railway).
+- ✅ Déploiement Railway validé (build + mise en ligne).
+- ⚠️ Tests E2E auth/Google **en local** toujours limités par TGN ; scénario nominal = tests contre l’instance Railway + variables Neon/Google.

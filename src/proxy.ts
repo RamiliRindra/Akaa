@@ -49,13 +49,21 @@ export async function proxy(request: NextRequest) {
     return buildLoginRedirect(request);
   }
 
-  if (isAuthPage(pathname)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  const role = token.role as UserRole | undefined;
+  const hasValidRole =
+    role === "LEARNER" || role === "TRAINER" || role === "ADMIN";
+
+  // JWT présent mais sans rôle (ancien cookie, token incomplet) : ne pas
+  // rediriger /login → /dashboard, sinon boucle avec ProtectedShell qui renvoie vers /login.
+  if (!hasValidRole) {
+    if (isAuthPage(pathname)) {
+      return NextResponse.next();
+    }
+    return buildLoginRedirect(request);
   }
 
-  const role = token.role as UserRole | undefined;
-  if (!role) {
-    return buildLoginRedirect(request);
+  if (isAuthPage(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   if (isAdminRoute && role !== "ADMIN") {
