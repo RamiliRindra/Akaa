@@ -39,18 +39,24 @@ src/
 │   │   ├── dashboard/           # Hub central : XP, streaks, cours en cours
 │   │   ├── courses/             # Catalogue filtrable par catégorie
 │   │   │   └── [slug]/          # Détail cours + learn/[chapterId]
+│   │   ├── calendar/            # Mon calendrier + sessions/[sessionId]
+│   │   ├── programs/            # Parcours disponibles + [programId]
 │   │   ├── leaderboard/
 │   │   └── profile/
-│   ├── (trainer)/trainer/       # Espace formateur. CRUD cours/modules/chapitres/quiz.
+│   ├── (trainer)/trainer/       # Espace formateur. CRUD cours/modules/chapitres/quiz/sessions/parcours.
 │   │   ├── dashboard/
-│   │   └── courses/             # Liste, new, [courseId]/edit
+│   │   ├── courses/             # Liste, new, [courseId]/edit
+│   │   ├── calendar/            # Sessions + enrollments + attendance
+│   │   └── programs/            # Parcours de formation
 │   ├── (admin)/admin/           # Espace admin. Accès total.
 │   │   ├── dashboard/           # Stats globales
 │   │   ├── users/               # Gestion utilisateurs + rôles
 │   │   ├── courses/             # Gestion tous les cours
 │   │   ├── categories/          # CRUD catégories de formation
 │   │   ├── badges/              # CRUD badges
-│   │   └── xp/                  # Ajustement XP manuel
+│   │   ├── xp/                  # Ajustement XP manuel
+│   │   ├── calendar/            # Vue globale toutes sessions
+│   │   └── programs/            # Vue globale tous parcours
 │   ├── api/auth/[...nextauth]/  # Route NextAuth
 │   ├── layout.tsx               # Root layout (fonts, metadata, providers)
 │   ├── page.tsx                 # Landing page publique
@@ -62,6 +68,10 @@ src/
 │   ├── quiz/                    # QuizPlayer, QuestionCard, ResultScreen
 │   ├── dashboard/               # StatsCards, ProgressChart, Calendar
 │   ├── gamification/            # XPBar, BadgeCard, StreakCounter, LevelBadge, Leaderboard
+│   ├── calendar/                # CalendarView, SessionCard, SessionDetail, SessionForm
+│   ├── program/                 # ProgramCard, ProgramDetail, ProgramForm
+│   ├── attendance/              # AttendanceSheet, AttendanceRow
+│   ├── notifications/           # NotificationBell, NotificationList, NotificationItem
 │   ├── editor/                  # RichTextEditor (Tiptap), CourseBuilder
 │   └── layout/                  # Sidebar, Header, MobileNav
 ├── img/
@@ -71,15 +81,15 @@ src/
 │   ├── db.ts                    # Singleton PrismaClient
 │   ├── gamification.ts          # Logique XP, badges auto, streaks, niveaux
 │   ├── utils.ts                 # cn(), formatDate(), slugify()
-│   └── validations/             # Schemas Zod (auth, course, category, quiz)
-├── hooks/                       # useCurrentUser, useXP, useCourseProgress
-├── actions/                     # Server Actions (auth, courses, quiz, gamification, admin)
+│   └── validations/             # Schemas Zod (auth, course, category, quiz, session, program)
+├── hooks/                       # useCurrentUser, useXP, useCourseProgress, useCalendar, useNotifications
+├── actions/                     # Server Actions (auth, courses, quiz, gamification, sessions, programs, notifications, admin)
 ├── middleware.ts                # Protection routes par rôle
 └── types/index.ts               # Types TypeScript partagés
 
 prisma/
-├── schema.prisma                # 15 modèles, 5 domaines
-├── seed.ts                      # Admin, badges, catégories, cours démo
+├── schema.prisma                # ~23 modèles, 7 domaines (Auth, Contenu, Évaluation, Progression, Gamification, Planification, Notifications)
+├── seed.ts                      # Admin, badges, catégories, cours démo, parcours démo
 └── migrations/
 ```
 
@@ -136,6 +146,13 @@ npx prisma migrate reset
 - **Enrollment** : UNIQUE sur `(user_id, course_id)`. Un utilisateur ne s'inscrit qu'une fois par cours.
 - **ChapterProgress** : UNIQUE sur `(user_id, chapter_id)`.
 - **Quiz.chapter_id** : UNIQUE. Un seul quiz par chapitre.
+- **SessionEnrollment** : UNIQUE sur `(user_id, session_id)`. Une seule demande par session.
+- **SessionAttendance** : UNIQUE sur `(user_id, session_id)`. Une seule entrée de présence par participant.
+- **TrainingSession.course_id -> Course.id** : FK nullable avec ON DELETE SET NULL. Lien optionnel.
+- **TrainingSession.program_id -> TrainingProgram.id** : FK nullable avec ON DELETE SET NULL.
+- **TrainingSession.trainer_id -> User.id** : FK avec ON DELETE CASCADE. Index obligatoire.
+- **TrainingProgram.trainer_id -> User.id** : FK avec ON DELETE CASCADE. Index obligatoire.
+- **Notification.user_id -> User.id** : FK avec ON DELETE CASCADE. Index obligatoire.
 - Toutes les FK doivent avoir un index explicite dans le schema Prisma.
 - Toutes les PK sont des UUID v4 (`@default(uuid())`).
 

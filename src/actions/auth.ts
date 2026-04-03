@@ -52,6 +52,24 @@ function messageForAuthRedirect(target: string): string {
 }
 
 /**
+ * Auth.js met souvent une URL absolue dans Location (origine = host interne du conteneur
+ * ou localhost). `redirect()` avec cette URL envoie le navigateur vers 127.0.0.1 / mauvais host
+ * → on reste visuellement bloqué sur le formulaire malgré un 303.
+ * On ne garde que pathname + search (chemin relatif au domaine public).
+ */
+function normalizeAuthRedirectTarget(target: string): string {
+  if (target.startsWith("/") && !target.startsWith("//")) {
+    return target;
+  }
+  try {
+    const u = new URL(target);
+    return `${u.pathname}${u.search}`;
+  } catch {
+    return "/dashboard";
+  }
+}
+
+/**
  * Connexion credentials via signIn serveur (cookies().set + redirect) :
  * évite les écarts fetch client / Set-Cookie observés sur Railway.
  */
@@ -90,7 +108,9 @@ export async function loginWithCredentialsForm(
       return { error: messageForAuthRedirect(target) };
     }
 
-    redirect(target);
+    const nextPath = normalizeAuthRedirectTarget(target);
+    console.error("[auth][login] redirect", { raw: target, nextPath });
+    redirect(nextPath);
   } catch (error) {
     if (isNextRedirectError(error)) {
       throw error;
@@ -151,7 +171,9 @@ export async function registerWithCredentials(input: RegisterInput): Promise<Reg
       });
 
       if (typeof target === "string" && !authRedirectHasError(target)) {
-        redirect(target);
+        const nextPath = normalizeAuthRedirectTarget(target);
+        console.error("[auth][register] redirect", { raw: target, nextPath });
+        redirect(nextPath);
       }
     } catch (error) {
       if (isNextRedirectError(error)) {

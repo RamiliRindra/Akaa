@@ -97,13 +97,15 @@ GOOGLE_CLIENT_SECRET="xxx"
 
 ### 3.1 Vue d'ensemble
 
-Le schéma est organisé en **5 domaines** :
+Le schéma est organisé en **7 domaines** :
 
 1. **Authentification** : User, Account, Session, VerificationToken (tables NextAuth)
 2. **Contenu pédagogique** : Category, Course, Module, Chapter
 3. **Évaluation** : Quiz, QuizQuestion, QuizOption, QuizAttempt
 4. **Progression** : Enrollment, ChapterProgress
 5. **Gamification** : XpTransaction, Badge, UserBadge, Streak
+6. **Planification** : TrainingProgram, TrainingSession, SessionEnrollment, SessionAttendance
+7. **Notifications** : Notification
 
 ### 3.2 Schéma détaillé
 
@@ -355,6 +357,134 @@ Le schéma est organisé en **5 domaines** :
 > - Sinon : `current_streak = 1` (streak cassé)
 > - Toujours : `last_activity_date = today()`
 
+---
+
+#### DOMAINE : Planification (Calendrier de formation)
+
+> Ce domaine gère les sessions de formation planifiées (présentiel et/ou distanciel),
+> les parcours de formation (programmes regroupant plusieurs sessions), l'inscription
+> avec workflow d'approbation par le formateur, et l'émargement (feuille de présence).
+> L'UX s'inspire de Google Calendar / Apple Calendar pour la vue agenda.
+
+**TrainingProgram** - Parcours de formation (série de sessions planifiées)
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| title | VARCHAR(255) | NOT NULL | |
+| slug | VARCHAR(255) | UNIQUE, NOT NULL | Généré depuis title |
+| description | TEXT | nullable | |
+| trainer_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Formateur créateur |
+| status | ENUM('DRAFT','PUBLISHED','ARCHIVED') | NOT NULL, default 'DRAFT' | |
+| created_at | TIMESTAMP | NOT NULL, default now() | |
+| updated_at | TIMESTAMP | NOT NULL, default now() | |
+
+> Un parcours regroupe plusieurs TrainingSessions dans un ordre logique.
+> Similaire aux "Learning Paths" de LinkedIn Learning.
+
+**TrainingSession** - Session de formation (événement calendrier)
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| title | VARCHAR(255) | NOT NULL | |
+| description | TEXT | nullable | |
+| start_at | TIMESTAMP | NOT NULL | Début de la session |
+| end_at | TIMESTAMP | NOT NULL | Fin de la session |
+| is_all_day | BOOLEAN | NOT NULL, default false | Événement "toute la journée" |
+| location | TEXT | nullable | Adresse physique ou lien de visio |
+| max_participants | INTEGER | nullable | null = illimité |
+| xp_reward | INTEGER | NOT NULL, default 0 | XP attribués sur présence confirmée (configurable par formateur) |
+| trainer_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Formateur organisateur |
+| course_id | UUID | FK -> Course(id) ON DELETE SET NULL, nullable | **INDEX** - Lien optionnel vers un cours en ligne |
+| program_id | UUID | FK -> TrainingProgram(id) ON DELETE SET NULL, nullable | **INDEX** - Rattachement optionnel à un parcours |
+| program_order | INTEGER | nullable | Ordre dans le parcours (si rattaché) |
+| status | ENUM('SCHEDULED','CANCELLED','COMPLETED') | NOT NULL, default 'SCHEDULED' | |
+| recurrence_rule | VARCHAR(255) | nullable | Format RRULE (RFC 5545) pour les sessions récurrentes |
+| recurrence_parent_id | UUID | FK -> TrainingSession(id) ON DELETE SET NULL, nullable | Réf. vers la session parente récurrente |
+| reminder_minutes | JSONB | NOT NULL, default '[1440, 60]' | Minutes avant la session pour rappels (ex: [1440, 60] = 24h et 1h avant) |
+| created_at | TIMESTAMP | NOT NULL, default now() | |
+| updated_at | TIMESTAMP | NOT NULL, default now() | |
+
+> **Récurrence** : le formateur définit une règle RRULE (ex: "tous les mardis pendant 4 semaines").
+> À la création, le système génère les instances individuelles. Chaque instance référence
+> la session parente via `recurrence_parent_id`. Modifier la parente peut propager aux enfants.
+>
+> **Lien cours** : `course_id` est optionnel. Le formateur peut créer une session standalone
+> ou la rattacher à un cours en ligne existant. L'inscription à la session (`SessionEnrollment`)
+> est indépendante de l'inscription au cours (`Enrollment`).
+
+**SessionEnrollment** - Inscription à une session avec workflow d'approbation
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| user_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Apprenant demandeur |
+| session_id | UUID | FK -> TrainingSession(id) ON DELETE CASCADE | **INDEX** - Session ciblée |
+| status | ENUM('PENDING','APPROVED','REJECTED','CANCELLED') | NOT NULL, default 'PENDING' | |
+| requested_at | TIMESTAMP | NOT NULL, default now() | Date de la demande |
+| responded_at | TIMESTAMP | nullable | Date de réponse du formateur |
+| responded_by | UUID | FK -> User(id) ON DELETE SET NULL, nullable | Formateur/admin ayant répondu |
+
+> **UNIQUE(user_id, session_id)** - Un apprenant ne peut faire qu'une demande par session.
+> INDEX composite sur (user_id, session_id).
+>
+> **Workflow** :
+> 1. L'apprenant clique "S'inscrire" → status = PENDING
+> 2. Le formateur reçoit une notification → approuve (APPROVED) ou refuse (REJECTED)
+> 3. L'apprenant reçoit une notification du résultat
+> 4. L'apprenant peut annuler (CANCELLED) tant que la session n'a pas eu lieu
+>
+> **Capacité** : avant de créer un SessionEnrollment, vérifier que le nombre d'inscrits APPROVED
+> n'a pas atteint `session.max_participants` (si non null).
+
+**SessionAttendance** - Feuille de présence / Émargement
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| user_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Participant |
+| session_id | UUID | FK -> TrainingSession(id) ON DELETE CASCADE | **INDEX** - Session |
+| status | ENUM('PRESENT','ABSENT','LATE','EXCUSED') | NOT NULL, default 'ABSENT' | |
+| marked_at | TIMESTAMP | nullable | Horodatage du pointage |
+| marked_by | UUID | FK -> User(id) ON DELETE SET NULL, nullable | Formateur/admin ayant pointé |
+| notes | TEXT | nullable | Commentaire optionnel |
+
+> **UNIQUE(user_id, session_id)** - Une seule entrée de présence par participant par session.
+> Seuls les participants APPROVED dans SessionEnrollment peuvent avoir une entrée ici.
+> Le formateur (ou admin) pointe la présence pendant ou après la session.
+> La présence confirmée (PRESENT ou LATE) déclenche l'attribution des XP de la session.
+
+---
+
+#### DOMAINE : Notifications
+
+> Système de notifications in-app pour informer les utilisateurs des événements liés
+> au calendrier de formation (approbation/rejet inscription, rappels de session,
+> annulation, etc.). Extensible à d'autres domaines dans le futur.
+
+**Notification** - Notifications utilisateur
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| user_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Destinataire |
+| type | ENUM('ENROLLMENT_APPROVED','ENROLLMENT_REJECTED','SESSION_REMINDER','SESSION_CANCELLED','SESSION_UPDATED','XP_EARNED','BADGE_UNLOCKED') | NOT NULL | |
+| title | VARCHAR(255) | NOT NULL | Titre court (ex: "Inscription acceptée") |
+| message | TEXT | NOT NULL | Corps du message |
+| is_read | BOOLEAN | NOT NULL, default false | |
+| link | TEXT | nullable | URL de navigation (ex: /calendar/sessions/[id]) |
+| related_session_id | UUID | FK -> TrainingSession(id) ON DELETE SET NULL, nullable | Session liée (si applicable) |
+| created_at | TIMESTAMP | NOT NULL, default now() | |
+
+> **INDEX** sur (user_id, is_read) pour les requêtes "notifications non lues".
+> Les notifications sont affichées via une cloche dans le header (badge compteur non lues).
+> Auto-nettoyage possible : supprimer les notifications lues de plus de 30 jours.
+>
+> **Rappels de session** : un job planifié (cron Railway ou vérification côté client au chargement)
+> crée des notifications de type SESSION_REMINDER selon `session.reminder_minutes`.
+> Pour ~300 utilisateurs, une vérification au chargement de page est acceptable en MVP.
+
 ### 3.3 Index recommandés
 
 ```sql
@@ -377,6 +507,25 @@ CREATE INDEX idx_quiz_attempt_user ON quiz_attempt(user_id);
 
 -- Leaderboard (requête fréquente)
 CREATE INDEX idx_user_total_xp ON "user"(total_xp DESC);
+
+-- Planification (calendrier de formation)
+CREATE INDEX idx_training_program_trainer ON training_program(trainer_id);
+CREATE INDEX idx_training_session_trainer ON training_session(trainer_id);
+CREATE INDEX idx_training_session_course ON training_session(course_id);
+CREATE INDEX idx_training_session_program ON training_session(program_id);
+CREATE INDEX idx_training_session_start ON training_session(start_at);
+CREATE INDEX idx_training_session_status ON training_session(status);
+CREATE INDEX idx_training_session_recurrence ON training_session(recurrence_parent_id);
+CREATE INDEX idx_session_enrollment_user ON session_enrollment(user_id);
+CREATE INDEX idx_session_enrollment_session ON session_enrollment(session_id);
+CREATE INDEX idx_session_enrollment_status ON session_enrollment(status);
+CREATE INDEX idx_session_attendance_user ON session_attendance(user_id);
+CREATE INDEX idx_session_attendance_session ON session_attendance(session_id);
+
+-- Notifications
+CREATE INDEX idx_notification_user ON notification(user_id);
+CREATE INDEX idx_notification_user_unread ON notification(user_id, is_read) WHERE is_read = false;
+CREATE INDEX idx_notification_session ON notification(related_session_id);
 ```
 
 ### 3.4 Règles de gamification
@@ -388,7 +537,10 @@ CREATE INDEX idx_user_total_xp ON "user"(total_xp DESC);
 | Quiz score parfait (100%) | +25 XP bonus | QUIZ |
 | Maintenir un streak de 7 jours | +30 XP | STREAK |
 | Débloquer un badge avec xp_bonus | +xp_bonus du badge | BADGE |
+| Présence confirmée à une session | +xp_reward de la session (configurable par formateur) | SESSION |
 | Ajustement admin | +/- variable | ADMIN |
+
+> **Source enum** (XpTransaction.source) : `QUIZ | CHAPTER | STREAK | ADMIN | BADGE | SESSION`
 
 **Niveaux** : `level = floor(total_xp / 100) + 1`
 - Niveau 1 : 0-99 XP
@@ -406,6 +558,13 @@ CREATE INDEX idx_user_total_xp ON "user"(total_xp DESC);
 | Quiz Master | 10 quiz parfaits | QUIZ_PERFECT = 10 | 50 |
 | Érudit | 500 XP accumulés | XP_THRESHOLD = 500 | 25 |
 | Expert | 2000 XP accumulés | XP_THRESHOLD = 2000 | 50 |
+| Présent | 1 session suivie | SESSIONS_ATTENDED = 1 | 15 |
+| Régulier | 10 sessions suivies | SESSIONS_ATTENDED = 10 | 40 |
+
+> **Condition type enum** (Badge.condition_type) : `XP_THRESHOLD | COURSES_COMPLETED | STREAK | QUIZ_PERFECT | SESSIONS_ATTENDED | MANUAL`
+>
+> Les XP des sessions sont configurables par le formateur (champ `training_session.xp_reward`).
+> L'admin peut aussi modifier les XP d'une session via l'espace admin.
 
 ---
 
@@ -414,7 +573,7 @@ CREATE INDEX idx_user_total_xp ON "user"(total_xp DESC);
 ```
 akaa/
 ├── prisma/
-│   ├── schema.prisma              # Schéma complet Prisma (15 modèles)
+│   ├── schema.prisma              # Schéma complet Prisma (~23 modèles, 7 domaines)
 │   ├── seed.ts                    # Données de seed (admin, badges, catégories, cours démo)
 │   └── migrations/                # Généré par prisma migrate
 │
@@ -433,9 +592,16 @@ akaa/
 │   │   │   │       ├── page.tsx            # Détail cours + inscription
 │   │   │   │       └── learn/
 │   │   │   │           └── [chapterId]/page.tsx  # Lecteur chapitre + quiz
+│   │   │   ├── calendar/
+│   │   │   │   ├── page.tsx                # Mon calendrier (sessions inscrites, vue agenda)
+│   │   │   │   └── sessions/
+│   │   │   │       └── [sessionId]/page.tsx  # Détail session + inscription
+│   │   │   ├── programs/
+│   │   │   │   ├── page.tsx                # Parcours de formation disponibles
+│   │   │   │   └── [programId]/page.tsx    # Détail parcours (liste sessions)
 │   │   │   ├── leaderboard/page.tsx
 │   │   │   ├── profile/page.tsx
-│   │   │   └── layout.tsx         # Sidebar + header gamifié (XP pill, avatar, streak)
+│   │   │   └── layout.tsx         # Sidebar + header gamifié (XP pill, avatar, streak, notif bell)
 │   │   │
 │   │   ├── (trainer)/             # Route group : espace formateur
 │   │   │   ├── trainer/
@@ -445,6 +611,19 @@ akaa/
 │   │   │   │   │   ├── new/page.tsx        # Création de cours
 │   │   │   │   │   └── [courseId]/
 │   │   │   │   │       └── edit/page.tsx   # Éditeur complet (modules, chapitres, quiz)
+│   │   │   │   ├── calendar/
+│   │   │   │   │   ├── page.tsx            # Vue calendrier formateur (ses sessions + autres formateurs en lecture)
+│   │   │   │   │   └── sessions/
+│   │   │   │   │       ├── new/page.tsx    # Création de session
+│   │   │   │   │       └── [sessionId]/
+│   │   │   │   │           ├── edit/page.tsx      # Édition session
+│   │   │   │   │           ├── enrollments/page.tsx  # Gérer demandes d'inscription (approuver/refuser)
+│   │   │   │   │           └── attendance/page.tsx   # Feuille de présence / émargement
+│   │   │   │   ├── programs/
+│   │   │   │   │   ├── page.tsx            # Liste de ses parcours
+│   │   │   │   │   ├── new/page.tsx        # Création de parcours
+│   │   │   │   │   └── [programId]/
+│   │   │   │   │       └── edit/page.tsx   # Édition parcours (ajout/réordonnancement sessions)
 │   │   │   │   └── layout.tsx
 │   │   │
 │   │   ├── (admin)/               # Route group : espace admin
@@ -455,6 +634,11 @@ akaa/
 │   │   │   │   ├── categories/page.tsx     # CRUD catégories de formation
 │   │   │   │   ├── badges/page.tsx         # CRUD badges
 │   │   │   │   ├── xp/page.tsx             # Ajustement XP manuel
+│   │   │   │   ├── calendar/
+│   │   │   │   │   ├── page.tsx            # Vue globale toutes les sessions (tous formateurs)
+│   │   │   │   │   └── sessions/
+│   │   │   │   │       └── [sessionId]/page.tsx  # Détail + édition session (accès total)
+│   │   │   │   ├── programs/page.tsx       # Vue globale tous les parcours
 │   │   │   │   └── layout.tsx
 │   │   │
 │   │   ├── api/
@@ -470,6 +654,10 @@ akaa/
 │   │   ├── quiz/                  # QuizPlayer, QuestionCard, ResultScreen
 │   │   ├── dashboard/             # StatsCards, ProgressChart, Calendar
 │   │   ├── gamification/          # XPBar, BadgeCard, StreakCounter, LevelBadge, Leaderboard
+│   │   ├── calendar/              # CalendarView, SessionCard, SessionDetail, SessionForm
+│   │   ├── program/               # ProgramCard, ProgramDetail, ProgramForm
+│   │   ├── attendance/            # AttendanceSheet, AttendanceRow, AttendanceStatus
+│   │   ├── notifications/         # NotificationBell, NotificationList, NotificationItem
 │   │   ├── editor/                # RichTextEditor (Tiptap), CourseBuilder
 │   │   └── layout/                # Sidebar, Header, MobileNav
 │   │
@@ -482,18 +670,25 @@ akaa/
 │   │       ├── auth.ts
 │   │       ├── course.ts
 │   │       ├── category.ts
-│   │       └── quiz.ts
+│   │       ├── quiz.ts
+│   │       ├── session.ts          # createSessionSchema, updateSessionSchema
+│   │       └── program.ts          # createProgramSchema, updateProgramSchema
 │   │
 │   ├── hooks/                     # Hooks React personnalisés
 │   │   ├── use-current-user.ts
 │   │   ├── use-xp.ts
-│   │   └── use-course-progress.ts
+│   │   ├── use-course-progress.ts
+│   │   ├── use-calendar.ts         # Sessions à venir, filtrage par date
+│   │   └── use-notifications.ts    # Notifications non lues, polling
 │   │
 │   ├── actions/                   # Server Actions Next.js
 │   │   ├── auth.ts
 │   │   ├── courses.ts
 │   │   ├── quiz.ts
 │   │   ├── gamification.ts
+│   │   ├── sessions.ts             # CRUD sessions, inscription, émargement
+│   │   ├── programs.ts             # CRUD parcours de formation
+│   │   ├── notifications.ts        # Fetch, mark read, delete notifications
 │   │   └── admin.ts
 │   │
 │   ├── middleware.ts              # Protection des routes par rôle
@@ -542,13 +737,27 @@ akaa/
 | CRUD catégories | Non | Non | Oui |
 | CRUD badges | Non | Non | Oui |
 | Ajuster XP manuellement | Non | Non | Oui |
+| **— Calendrier de formation —** | | | |
+| Voir son calendrier (sessions inscrites) | Oui | Oui | Oui |
+| Voir les sessions/parcours disponibles | Oui | Oui | Oui |
+| Demander inscription à une session | Oui | Oui | Oui |
+| Annuler sa propre inscription | Oui | Oui | Oui |
+| Créer/éditer **ses** sessions | Non | Oui | Oui |
+| Créer/éditer **ses** parcours | Non | Oui | Oui |
+| Approuver/refuser les inscriptions à **ses** sessions | Non | Oui | Oui |
+| Pointer la présence (émargement) sur **ses** sessions | Non | Oui | Oui |
+| Voir les sessions des autres formateurs (lecture) | Non | Oui | Oui |
+| Configurer XP des **ses** sessions | Non | Oui | Oui |
+| Gérer **toutes** les sessions/parcours | Non | Non | Oui |
+| Modifier XP des sessions de tout formateur | Non | Non | Oui |
+| Vue globale calendrier (tous formateurs) | Non | Non | Oui |
 
 ### Implémentation technique
 
 - **middleware.ts** : vérifie le rôle via la session NextAuth et redirige si non autorisé
-- Routes `(platform)/*` : accessible à tous les rôles authentifiés
-- Routes `(trainer)/*` : TRAINER et ADMIN uniquement
-- Routes `(admin)/*` : ADMIN uniquement
+- Routes `(platform)/*` : accessible à tous les rôles authentifiés (dont `/calendar`, `/programs`)
+- Routes `(trainer)/*` : TRAINER et ADMIN uniquement (dont `/trainer/calendar`, `/trainer/programs`)
+- Routes `(admin)/*` : ADMIN uniquement (dont `/admin/calendar`, `/admin/programs`)
 - Server Actions : double vérification du rôle côté serveur avant toute mutation
 
 ---
@@ -621,3 +830,63 @@ akaa/
 - Tests de performance avec Neon (cold start, requêtes)
 - Dark mode (optionnel, si temps disponible)
 - Déploiement Railway
+
+### Phase 8 - Calendrier de formation (post-MVP)
+
+> Cette phase ajoute la dimension **formation planifiée** (présentiel/distanciel) à la plateforme,
+> avec un système de calendrier inspiré de Google Calendar et des parcours de formation
+> inspirés de LinkedIn Learning.
+
+#### 8.1 — Modèles et migrations
+
+- Ajouter les modèles Prisma : `TrainingProgram`, `TrainingSession`, `SessionEnrollment`, `SessionAttendance`, `Notification`
+- Étendre les enums : `XpSource` += `SESSION`, `BadgeConditionType` += `SESSIONS_ATTENDED`, `NotificationType`
+- Créer la migration Prisma et l'appliquer
+- Seed : parcours de démonstration, sessions exemple, badges "Présent" et "Régulier"
+
+#### 8.2 — Sessions de formation (formateur)
+
+- **CRUD sessions** : création avec date/heure/durée, événement toute la journée, lieu/lien, description
+- **Lien cours optionnel** : le formateur peut rattacher une session à un cours en ligne existant ou créer une session standalone
+- **Récurrence** : création de sessions récurrentes (RRULE RFC 5545), génération des instances individuelles
+- **Gestion des inscriptions** : vue des demandes PENDING, boutons approuver/refuser, notification automatique à l'apprenant
+- **Feuille de présence** : interface d'émargement (liste des participants APPROVED, pointage PRESENT/ABSENT/LATE/EXCUSED)
+- **Configuration XP** : champ `xp_reward` configurable par le formateur sur chaque session
+- **Vue calendrier** : le formateur voit ses sessions + celles des autres formateurs (lecture seule)
+
+#### 8.3 — Parcours de formation (formateur)
+
+- **CRUD parcours** : titre, description, statut (DRAFT/PUBLISHED/ARCHIVED)
+- **Gestion des sessions** : ajout/retrait de sessions dans un parcours, réordonnancement
+- **Vue parcours** : liste ordonnée des sessions avec statuts et dates
+
+#### 8.4 — Calendrier apprenant
+
+- **Mon calendrier** : vue agenda/liste chronologique des sessions auxquelles l'apprenant est inscrit (APPROVED)
+- **Affichage** : cases de calendrier style agenda (pas de vue mensuelle complète, liste chronologique avec regroupement par jour/semaine)
+- **Parcourir les sessions** : catalogue des sessions disponibles (SCHEDULED) avec inscription
+- **Demande d'inscription** : bouton "S'inscrire" → status PENDING → notification au formateur
+- **Annulation** : possibilité de se désinscrire tant que la session n'a pas eu lieu
+- **Parcours** : consultation des parcours publiés, vue du programme complet
+
+#### 8.5 — Notifications in-app
+
+- **Notification bell** : icône cloche dans le header avec badge compteur (notifications non lues)
+- **Types** : inscription approuvée/refusée, rappel de session, session annulée/modifiée, XP gagnés, badge débloqué
+- **Rappels** : notifications automatiques avant chaque session (configurable via `reminder_minutes` : 24h et 1h avant par défaut)
+- **Stratégie de rappels** : vérification côté serveur au chargement de page (acceptable pour ~300 utilisateurs) ou cron Railway
+- **Liste** : page/panel de notifications avec marquage lu/non lu, lien direct vers la session concernée
+
+#### 8.6 — Gamification sessions
+
+- **XP sur présence** : attribution automatique de `session.xp_reward` XP quand le formateur marque PRESENT ou LATE
+- **Création XpTransaction** avec source = `SESSION` et `source_id` = `session.id`
+- **Badges** : vérification automatique des badges `SESSIONS_ATTENDED` après chaque pointage de présence
+- **Toast XP** : réutilisation de l'animation XP existante quand l'apprenant consulte son calendrier/notifications
+
+#### 8.7 — Administration calendrier
+
+- **Vue globale** : l'admin voit toutes les sessions de tous les formateurs
+- **Édition** : l'admin peut créer/modifier/supprimer n'importe quelle session ou parcours
+- **XP** : l'admin peut modifier le `xp_reward` de n'importe quelle session
+- **Statistiques** : nombre de sessions, taux de participation, présences par formateur
