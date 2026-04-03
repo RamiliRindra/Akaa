@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { GoogleButton } from "@/components/auth/google-button";
 import { LoginForm } from "@/components/auth/login-form";
 
@@ -14,7 +16,16 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-[#0c0910]">Bon retour sur Akaa</h1>
         <p className="text-sm text-[#0c0910]/70">Connectez-vous pour reprendre votre progression.</p>
       </div>
-      <LoginForm />
+      <Suspense
+        fallback={
+          <div
+            className="h-64 animate-pulse rounded-xl bg-[#0c0910]/5"
+            aria-hidden
+          />
+        }
+      >
+        <LoginForm />
+      </Suspense>
       <div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-[#0c0910]/10" />
         <span className="text-xs text-[#0c0910]/50">ou</span>

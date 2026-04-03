@@ -37,11 +37,14 @@ function readEnvFile(filePath: string) {
 }
 
 const localEnv = readEnvFile(resolve(process.cwd(), ".env.local"));
-const directUrl = process.env.DIRECT_URL ?? localEnv.DIRECT_URL;
-
-if (!directUrl) {
-  throw new Error("DIRECT_URL est manquante dans l'environnement ou .env.local.");
-}
+// DIRECT_URL (Neon direct) pour migrate ; DATABASE_URL en secours (CI/Railway).
+// URL factice uniquement pour charger la config pendant `prisma generate` sans .env (aucune connexion au generate).
+const directUrl =
+  process.env.DIRECT_URL ??
+  localEnv.DIRECT_URL ??
+  process.env.DATABASE_URL ??
+  localEnv.DATABASE_URL ??
+  "postgresql://127.0.0.1:5432/prisma_generate_placeholder?sslmode=require";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
