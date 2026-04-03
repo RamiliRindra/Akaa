@@ -311,9 +311,57 @@ Ces commandes nécessitent aussi une connexion TCP → les éviter depuis le ré
 
 ---
 
+## Incident G — Railway : login OK puis `/dashboard` en erreur (« Couldn’t load » / HTTP 500)
+
+**Période :** avril 2026  
+**URL de référence :** [https://akaa-production.up.railway.app](https://akaa-production.up.railway.app) (ex. [page login avec callback dashboard](https://akaa-production.up.railway.app/login?callbackUrl=%2Fdashboard))
+
+### Symptômes observés (réseau navigateur)
+
+1. **Première visite** : `GET /dashboard` → **307** → redirection vers `/login?callbackUrl=/dashboard` (comportement attendu si non connecté ; proxy / shell protégé).
+2. **Après soumission du formulaire de connexion** : `POST /login?...` → **303 See Other** ; côté client, message du type **« Couldn’t load » / « This page couldn’t load »** (échec de chargement RSC / navigation).
+3. **Après rechargement manuel** : `GET /dashboard` → **500 Internal Server Error**.
+
+**Note réseau :** l’adresse IP affichée (ex. `151.101.x.x`) correspond souvent à une **CDN / bordure** (Fastly) devant le service ; ce n’est pas forcément l’IP du conteneur Railway.
+
+### Causes probables (hypothèses testées en code)
+
+| Hypothèse | Détails | Mesure / correctif tenté |
+|-----------|---------|---------------------------|
+| **Boucle proxy** JWT sans `role` | `getToken` voyait un cookie mais sans `role` → `/login` ↔ `/dashboard`. | Réordonnancement dans `src/proxy.ts` : ne pas envoyer `/login` → `/dashboard` sans rôle valide ; callback JWT n’écrit `role` que si l’utilisateur existe en BDD. |
+| **`signIn` client `redirect: false`** | `next-auth/react` fait `new URL(data.url)` ; URL **relative** → exception, formulaire bloqué. | Passage à `redirect: true`, puis **Server Action** + `signIn` serveur (`src/actions/auth.ts`). |
+| **Redirection Auth avec mauvaise origine** | `Location` absolue type `http://127.0.0.1:…` après login → navigateur ne suit pas correctement. | `normalizeAuthRedirectTarget()` : ne garder que `pathname` + `search` avant `redirect()`. |
+| **`getToken` sans cookie sécurisé (HTTPS)** | En prod, cookie session en `__Secure-…` ; `getToken` par défaut cherchait le mauvais nom → proxy traitait comme non connecté alors que `auth()` voyait une session. | `secureCookie: true` (via `isSecureAuthCookieEnv()`) dans `src/proxy.ts`. |
+| **Prisma sur dashboard (500)** | `ProtectedShell` fait `db.user.findUnique` après `auth()` ; échec Prisma/connexion → **500**. | En **production** uniquement : `PrismaClient` avec **`@prisma/adapter-pg` + `Pool`** (`src/lib/db.ts`) au lieu de **Neon WebSocket** ; suppression de `channel_binding` dans l’URL pour `pg` ; **SSL explicite** pour les hôtes `*.neon.tech`. |
+| **Variables d’environnement** | `NEXTAUTH_URL` / `AUTH_URL` non alignés sur l’URL publique HTTPS. | Recommandation : `AUTH_URL` + `NEXTAUTH_URL` = URL Railway sans slash final. |
+
+### Fichiers touchés (historique des correctifs)
+
+- `src/proxy.ts` — rôle JWT, `getToken` + `secureCookie`.
+- `src/lib/auth.ts` — callback JWT / rôle.
+- `src/actions/auth.ts` — `loginWithCredentialsForm`, normalisation redirect, inscription + `signIn` serveur, propagation `NEXT_REDIRECT`.
+- `src/components/auth/login-form.tsx` — formulaire + `useActionState` vers l’action serveur.
+- `src/components/auth/register-form.tsx` — plus de `signIn` client après création.
+- `src/lib/db.ts` — branche **prod** : `pg` + `PrismaPg`, sanitize URL, SSL Neon.
+
+### Pistes si le 500 persiste après dernier déploiement
+
+1. **Logs Railway** au moment exact du `GET /dashboard` : stack Prisma / `pg` / TLS (copier le message d’erreur complet).
+2. Vérifier **`DATABASE_URL`** sur Railway : URL **pooled** Neon, `sslmode=require`, **sans** `channel_binding=require` dans la chaîne (ou laisser le sanitize côté code).
+3. Option start command : `NODE_OPTIONS=--dns-result-order=ipv4first` (déjà utilisé en dev dans `package.json` pour certains réseaux) si résolution DNS IPv6 pose problème.
+4. Ajouter temporairement `src/app/(platform)/error.tsx` pour afficher l’erreur digest / message côté UI (debug).
+
+### Statut
+
+- ⚠️ **Non clos côté produit** au moment de la dernière restitution utilisateur : `GET /dashboard` peut encore renvoyer **500** après login + « Couldn’t load » sur la navigation 303.
+- ✅ Correctifs ci-dessus **commités dans le dépôt** ; validation finale = déploiement Railway + lecture des **logs serveur** pour l’erreur exacte du 500.
+
+---
+
 ## Décisions techniques retenues
 
 1. **Conserver Prisma + schéma actuel** (structure SQL validée pour `account`).
 2. **Renforcer l’observabilité Auth** pour isoler rapidement les causes réelles.
 3. **Continuer credentials localement** en cas d’instabilité Google OAuth ; sinon utiliser l’instance déployée.
 4. **Railway déployé et validé** : build avec `prisma generate`, variables Neon/NextAuth/Google configurées sur le service ; tests auth/OAuth contre l’URL publique du service.
+5. **Production Node (Railway)** : préférer **driver `pg` (TCP)** pour Prisma vers Neon plutôt que WebSocket serverless lorsque `NODE_ENV=production` (voir `src/lib/db.ts` et Incident G).

@@ -31,7 +31,14 @@ function createPrismaClient() {
       throw new Error("DATABASE_URL (ou DIRECT_URL) est manquante en production.");
     }
     const connectionString = sanitizePostgresUrl(raw);
-    const pool = globalForPrisma.pgPool ?? new Pool({ connectionString });
+    const pool =
+      globalForPrisma.pgPool ??
+      new Pool({
+        connectionString,
+        max: 10,
+        // Neon exige TLS ; sans objet `ssl`, `pg` peut échouer selon l’URL / l’OS.
+        ssl: /\.neon\.tech/i.test(connectionString) ? { rejectUnauthorized: true } : undefined,
+      });
     globalForPrisma.pgPool = pool;
     return new PrismaClient({
       adapter: new PrismaPg(pool),
