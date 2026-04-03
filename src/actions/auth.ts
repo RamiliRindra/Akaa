@@ -79,7 +79,7 @@ export async function loginWithCredentialsForm(
 ): Promise<LoginFormState> {
   const existing = await auth();
   if (existing?.user) {
-    return { error: "Vous êtes déjà connecté." };
+    redirect(sanitizeCallbackUrl(formData.get("callbackUrl")));
   }
 
   const parsed = loginSchema.safeParse({
@@ -109,7 +109,6 @@ export async function loginWithCredentialsForm(
     }
 
     const nextPath = normalizeAuthRedirectTarget(target);
-    console.error("[auth][login] redirect", { raw: target, nextPath });
     redirect(nextPath);
   } catch (error) {
     if (isNextRedirectError(error)) {
@@ -172,7 +171,6 @@ export async function registerWithCredentials(input: RegisterInput): Promise<Reg
 
       if (typeof target === "string" && !authRedirectHasError(target)) {
         const nextPath = normalizeAuthRedirectTarget(target);
-        console.error("[auth][register] redirect", { raw: target, nextPath });
         redirect(nextPath);
       }
     } catch (error) {

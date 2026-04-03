@@ -27,6 +27,14 @@ function buildLoginRedirect(request: NextRequest) {
   return NextResponse.redirect(loginUrl);
 }
 
+/** Aligné sur Auth.js : en HTTPS le cookie session utilise le préfixe __Secure- */
+function isSecureAuthCookieEnv(): boolean {
+  const publicUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "";
+  return (
+    process.env.NODE_ENV === "production" || publicUrl.startsWith("https://")
+  );
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isTrainerRoute = matchesPrefix(pathname, "/trainer");
@@ -40,6 +48,7 @@ export async function proxy(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: isSecureAuthCookieEnv(),
   });
 
   if (!token) {
