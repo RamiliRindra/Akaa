@@ -18,6 +18,12 @@ enum CourseStatus {
   ARCHIVED
 }
 
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 enum VideoType {
   YOUTUBE
   GDRIVE
@@ -149,6 +155,7 @@ model Course {
   description    String?      @db.Text
   thumbnailUrl   String?      @map("thumbnail_url") @db.Text
   status         CourseStatus @default(DRAFT)
+  level          CourseLevel  @default(BEGINNER)
   trainerId      String       @map("trainer_id") @db.Uuid
   categoryId     String?      @map("category_id") @db.Uuid
   estimatedHours Int?         @map("estimated_hours")
@@ -357,4 +364,14 @@ model Streak {
 
   @@index([userId], map: "idx_streak_user_id")
   @@map("streak")
+}
+
+model XpLevelSetting {
+  id         String      @id @default(uuid()) @db.Uuid
+  level      CourseLevel @unique
+  multiplier Decimal     @db.Decimal(5, 2)
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("xp_level_setting")
 }

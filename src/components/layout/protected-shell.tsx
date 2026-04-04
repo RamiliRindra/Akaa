@@ -30,6 +30,7 @@ export async function ProtectedShell({
     select: {
       name: true,
       email: true,
+      role: true,
       totalXp: true,
       level: true,
       streak: {
@@ -55,6 +56,7 @@ export async function ProtectedShell({
             totalXp={user.totalXp}
             level={user.level}
             currentStreak={user.streak?.currentStreak ?? 0}
+            showGamification={user.role === "LEARNER"}
           />
           <div className="absolute left-4 top-3.5 lg:hidden">
             <MobileNav items={navItems} />

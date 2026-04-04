@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { BadgeCard } from "@/components/gamification/badge-card";
+import { getHomePathForRole } from "@/lib/auth-config";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ensureDefaultBadges } from "@/lib/gamification";
@@ -11,6 +12,10 @@ export default async function ProfilePage() {
 
   if (!session?.user?.id) {
     redirect("/login");
+  }
+
+  if (session.user.role !== "LEARNER") {
+    redirect(getHomePathForRole(session.user.role));
   }
 
   await ensureDefaultBadges(db);

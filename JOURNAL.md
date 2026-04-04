@@ -647,6 +647,94 @@ Livré dans cette passe :
 
 ---
 
+## Phase 5 — Gamification apprenante, périmètre des rôles et niveau des cours
+
+**Date :** 04 Avril 2026
+
+### Décision produit retenue
+La phase 5 a été recadrée autour de deux règles structurantes :
+- la gamification apprenante (`XP`, `badges`, `streaks`, `leaderboard`) ne concerne que le rôle `LEARNER`
+- la difficulté d’un cours est portée par un niveau pédagogique (`BEGINNER`, `INTERMEDIATE`, `ADVANCED`) qui module les gains XP apprenant
+
+Le formateur choisit le niveau du cours, mais ne règle pas les coefficients.
+Les coefficients XP par niveau sont globaux et gérés par l’admin.
+
+### Correction du périmètre des rôles
+Un problème produit est apparu après la première implémentation de la gamification :
+- les rôles `TRAINER` et `ADMIN` pouvaient encore afficher ou hériter du système XP apprenant
+
+Ce comportement a été corrigé en profondeur :
+- `applyLearningGamification()` ne crédite plus que les `LEARNER`
+- le header n’affiche plus les pills XP / streak hors apprenant
+- `leaderboard` et `profile` apprenant sont maintenant réservés au rôle `LEARNER`
+
+Résultat :
+- le périmètre fonctionnel est cohérent avec l’usage métier
+- une éventuelle réputation formateur pourra être conçue plus tard sans mélanger les deux systèmes
+
+### Mise en place du niveau des cours
+Le choix retenu a été de ne pas laisser le formateur fixer librement les XP de ses cours.
+
+À la place :
+- ajout d’un champ `level` sur le cours
+- valeurs supportées :
+  - `BEGINNER`
+  - `INTERMEDIATE`
+  - `ADVANCED`
+
+Ce niveau est maintenant disponible :
+- à la création de cours
+- à l’édition de cours
+- dans l’import de cours via `manifest.csv`
+- dans l’affichage des cartes et fiches cours
+
+### Coefficients XP globaux par niveau
+Pour éviter une inflation de règles par formateur, le calcul des XP apprenant s’appuie désormais sur une configuration globale stockée en base :
+- nouvelle table `xp_level_setting`
+- un coefficient par niveau
+- pilotage par l’admin via `/admin/xp`
+
+Valeurs initiales retenues :
+- `BEGINNER = 1.00`
+- `INTERMEDIATE = 1.50`
+- `ADVANCED = 2.00`
+
+Ces coefficients sont appliqués aux événements apprenants liés au contenu :
+- chapitre terminé
+- quiz réussi
+- bonus quiz parfait
+
+### Migration base de données
+Comme pour les autres évolutions Prisma dans ce contexte réseau, la migration a été préparée localement puis appliquée manuellement via Neon SQL Editor.
+
+Migration ajoutée :
+- `prisma/migrations/20260404000100_course_level_and_xp_settings/migration.sql`
+
+Contenu :
+- création de l’enum `CourseLevel`
+- ajout de la colonne `course.level`
+- création de la table `xp_level_setting`
+- insertion des trois coefficients par défaut
+
+### Validation
+- ✅ Génération Prisma OK
+- ✅ `npm run lint`
+- ✅ `npx tsc --noEmit`
+- ✅ `npm run build`
+- ✅ Le rôle `LEARNER` continue de gagner XP/badges/streaks
+- ✅ Les rôles `TRAINER` et `ADMIN` n’utilisent plus la gamification apprenante
+- ✅ L’admin peut régler les coefficients XP par niveau
+- ✅ Le formateur peut choisir le niveau du cours
+- ✅ L’import de cours prend en charge `course_level`
+
+### Statut
+- ✅ Phase 5 fonctionnelle livrée
+- ✅ Périmètre des rôles corrigé
+- ✅ Niveau de cours et coefficients XP admin en place
+- 📝 L’ajustement XP manuel utilisateur reste explicitement reporté à la phase 6
+
+---
+
 ## Décisions techniques retenues
 
 1. **Conserver Prisma + schéma actuel** (structure SQL validée pour `account`).

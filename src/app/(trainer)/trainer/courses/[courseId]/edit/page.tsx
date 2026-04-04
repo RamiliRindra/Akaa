@@ -17,6 +17,7 @@ import {
 import { CourseStatusBadge } from "@/components/course/course-status-badge";
 import { FormFeedback } from "@/components/feedback/form-feedback";
 import { auth } from "@/lib/auth";
+import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
 import { db } from "@/lib/db";
 
 type EditCoursePageProps = {
@@ -44,6 +45,7 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
       estimatedHours: true,
       thumbnailUrl: true,
       status: true,
+      level: true,
       trainerId: true,
       categoryId: true,
       category: {
@@ -151,6 +153,25 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
             </label>
 
             <div className="grid gap-4 md:grid-cols-2">
+              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                Niveau pédagogique
+                <select
+                  name="level"
+                  defaultValue={course.level}
+                  className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+                >
+                  <option value="BEGINNER">
+                    {courseLevelLabels.BEGINNER} — {courseLevelDescriptions.BEGINNER}
+                  </option>
+                  <option value="INTERMEDIATE">
+                    {courseLevelLabels.INTERMEDIATE} — {courseLevelDescriptions.INTERMEDIATE}
+                  </option>
+                  <option value="ADVANCED">
+                    {courseLevelLabels.ADVANCED} — {courseLevelDescriptions.ADVANCED}
+                  </option>
+                </select>
+              </label>
+
               <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                 Catégorie
                 <select
@@ -414,4 +435,3 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
     </section>
   );
 }
-

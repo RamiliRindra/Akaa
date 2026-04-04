@@ -104,6 +104,8 @@ export default async function ImportCoursePage({ searchParams }: ImportCoursePag
             <p>YouTube et Google Drive uniquement.</p>
             <p className="pt-2 font-semibold text-[#0c0910]">Quiz optionnels</p>
             <p>Référencez un fichier JSON de quiz dans la colonne <code>quiz_file</code> du manifest si un chapitre doit inclure une évaluation.</p>
+            <p className="pt-2 font-semibold text-[#0c0910]">Niveau du cours</p>
+            <p>Renseignez la colonne <code>course_level</code> avec <code>BEGINNER</code>, <code>INTERMEDIATE</code> ou <code>ADVANCED</code>.</p>
             <p className="pt-2 font-semibold text-[#0c0910]">Règle d’import</p>
             <p>Une archive = un cours complet.</p>
           </div>

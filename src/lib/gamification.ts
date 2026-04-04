@@ -1,5 +1,8 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
-import { BadgeConditionType, XpSource } from "@prisma/client";
+import { BadgeConditionType, UserRole, XpSource } from "@prisma/client";
+
+import type { CourseLevelValue } from "@/lib/course-level";
+import { applyXpMultiplier, getXpLevelMultiplier } from "@/lib/xp-settings";
 
 type GamificationDbClient = Prisma.TransactionClient | PrismaClient;
 
@@ -27,6 +30,7 @@ type ActivityGamificationInput = {
   quizXpReward?: number;
   perfectQuiz?: boolean;
   updateStreak?: boolean;
+  courseLevel?: CourseLevelValue;
 };
 
 export type GamificationSummary = {
@@ -371,12 +375,54 @@ export async function applyLearningGamification(
   const userBefore = await db.user.findUniqueOrThrow({
     where: { id: input.userId },
     select: {
+      role: true,
       level: true,
     },
   });
 
+  if (userBefore.role !== UserRole.LEARNER) {
+    const streak = await db.streak.findUnique({
+      where: { userId: input.userId },
+      select: {
+        currentStreak: true,
+      },
+    });
+
+    return {
+      xpGained: 0,
+      levelBefore: userBefore.level,
+      levelAfter: userBefore.level,
+      unlockedBadges: [],
+      currentStreak: streak?.currentStreak ?? 0,
+    };
+  }
+
   let xpGained = 0;
   let currentStreak = 0;
+  let resolvedCourseLevel = input.courseLevel;
+
+  if (!resolvedCourseLevel && input.chapterId) {
+    const chapter = await db.chapter.findUnique({
+      where: { id: input.chapterId },
+      select: {
+        module: {
+          select: {
+            course: {
+              select: {
+                level: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    resolvedCourseLevel = (chapter?.module.course.level as CourseLevelValue | undefined) ?? "BEGINNER";
+  }
+
+  const xpMultiplier = resolvedCourseLevel
+    ? await getXpLevelMultiplier(db, resolvedCourseLevel)
+    : 1;
 
   if (input.updateStreak !== false) {
     const streak = await updateDailyStreak(db, input.userId);
@@ -406,44 +452,47 @@ export async function applyLearningGamification(
   }
 
   if (input.chapterId) {
+    const chapterXpAmount = applyXpMultiplier(10, xpMultiplier);
     const chapterXp = await awardXp(db, {
       userId: input.userId,
-      amount: 10,
+      amount: chapterXpAmount,
       source: XpSource.CHAPTER,
       sourceId: `chapter:${input.chapterId}`,
       description: "Chapitre terminé",
     });
 
     if (chapterXp.awarded) {
-      xpGained += 10;
+      xpGained += chapterXpAmount;
     }
   }
 
   if (input.quizId && input.quizXpReward) {
+    const quizXpAmount = applyXpMultiplier(input.quizXpReward, xpMultiplier);
     const quizXp = await awardXp(db, {
       userId: input.userId,
-      amount: input.quizXpReward,
+      amount: quizXpAmount,
       source: XpSource.QUIZ,
       sourceId: `quiz:${input.quizId}`,
       description: "Quiz réussi",
     });
 
     if (quizXp.awarded) {
-      xpGained += input.quizXpReward;
+      xpGained += quizXpAmount;
     }
   }
 
   if (input.quizId && input.perfectQuiz) {
+    const perfectXpAmount = applyXpMultiplier(25, xpMultiplier);
     const perfectXp = await awardXp(db, {
       userId: input.userId,
-      amount: 25,
+      amount: perfectXpAmount,
       source: XpSource.QUIZ,
       sourceId: `quiz-perfect:${input.quizId}`,
       description: "Quiz parfait",
     });
 
     if (perfectXp.awarded) {
-      xpGained += 25;
+      xpGained += perfectXpAmount;
     }
   }
 

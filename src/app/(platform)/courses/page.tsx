@@ -38,6 +38,7 @@ export default async function LearnerCoursesPage({ searchParams }: LearnerCourse
         slug: true,
         description: true,
         estimatedHours: true,
+        level: true,
         category: {
           select: {
             name: true,
@@ -88,6 +89,7 @@ export default async function LearnerCoursesPage({ searchParams }: LearnerCourse
               moduleCount={course.modules.length}
               chapterCount={course.modules.reduce((total, module) => total + module.chapters.length, 0)}
               estimatedHours={course.estimatedHours}
+              level={course.level}
               progressPercent={course.enrollments?.[0]?.progressPercent}
             />
           ))}

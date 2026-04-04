@@ -179,9 +179,10 @@ function assertSingleCourseManifest(rows: CourseImportRow[]) {
   const descriptionValues = new Set(rows.map((row) => row.course_description ?? ""));
   const statusValues = new Set(rows.map((row) => row.course_status));
   const hoursValues = new Set(rows.map((row) => row.estimated_hours ?? null));
+  const levelValues = new Set(rows.map((row) => row.course_level));
   const categoryValues = new Set(rows.map((row) => row.category_slug ?? ""));
 
-  if (titleValues.size !== 1 || descriptionValues.size !== 1 || statusValues.size !== 1 || hoursValues.size !== 1 || categoryValues.size !== 1) {
+  if (titleValues.size !== 1 || descriptionValues.size !== 1 || statusValues.size !== 1 || levelValues.size !== 1 || hoursValues.size !== 1 || categoryValues.size !== 1) {
     throw new Error("Le fichier manifest.csv doit décrire un seul cours avec des métadonnées cohérentes.");
   }
 }
@@ -280,6 +281,7 @@ export async function createCourseAction(formData: FormData) {
     categoryId: getString(formData, "categoryId"),
     thumbnailUrl: getString(formData, "thumbnailUrl"),
     estimatedHours: getString(formData, "estimatedHours"),
+    level: getString(formData, "level") || "BEGINNER",
     status: getString(formData, "status") || CourseStatus.DRAFT,
   });
 
@@ -296,6 +298,7 @@ export async function createCourseAction(formData: FormData) {
       categoryId: parsed.data.categoryId,
       thumbnailUrl: parsed.data.thumbnailUrl,
       estimatedHours: parsed.data.estimatedHours,
+      level: parsed.data.level,
       status: parsed.data.status,
       trainerId: session.userId,
     },
@@ -316,6 +319,7 @@ export async function updateCourseAction(formData: FormData) {
     categoryId: getString(formData, "categoryId"),
     thumbnailUrl: getString(formData, "thumbnailUrl"),
     estimatedHours: getString(formData, "estimatedHours"),
+    level: getString(formData, "level") || "BEGINNER",
     status: getString(formData, "status"),
   });
 
@@ -335,6 +339,7 @@ export async function updateCourseAction(formData: FormData) {
       categoryId: parsed.data.categoryId,
       thumbnailUrl: parsed.data.thumbnailUrl,
       estimatedHours: parsed.data.estimatedHours,
+      level: parsed.data.level,
       status: parsed.data.status,
     },
   });
@@ -705,6 +710,7 @@ export async function importCourseArchiveAction(formData: FormData) {
         slug,
         description: firstRow.course_description,
         status: firstRow.course_status,
+        level: firstRow.course_level,
         estimatedHours: firstRow.estimated_hours,
         categoryId: category?.id,
         trainerId: session.userId,

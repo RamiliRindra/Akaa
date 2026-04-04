@@ -53,6 +53,7 @@ export default async function LearnerDashboardPage() {
             slug: true,
             description: true,
             estimatedHours: true,
+            level: true,
             status: true,
             category: {
               select: {
@@ -190,6 +191,7 @@ export default async function LearnerDashboardPage() {
                     0,
                   )}
                   estimatedHours={enrollment.course.estimatedHours}
+                  level={enrollment.course.level}
                   progressPercent={enrollment.progressPercent}
                 />
               ))}

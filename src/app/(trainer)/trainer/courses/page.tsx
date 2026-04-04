@@ -32,6 +32,7 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
       slug: true,
       description: true,
       estimatedHours: true,
+      level: true,
       status: true,
       category: {
         select: {
@@ -90,6 +91,7 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
               moduleCount={course.modules.length}
               chapterCount={course.modules.reduce((total, module) => total + module.chapters.length, 0)}
               estimatedHours={course.estimatedHours}
+              level={course.level}
               status={course.status}
               href={`/trainer/courses/${course.id}/edit`}
             />

@@ -1,12 +1,28 @@
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
+import { getHomePathForRole } from "@/lib/auth-config";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ensureDefaultBadges } from "@/lib/gamification";
 
 export default async function LeaderboardPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  if (session.user.role !== "LEARNER") {
+    redirect(getHomePathForRole(session.user.role));
+  }
+
   await ensureDefaultBadges(db);
 
   const users = await db.user.findMany({
+    where: {
+      role: "LEARNER",
+    },
     orderBy: [{ totalXp: "desc" }, { createdAt: "asc" }],
     take: 50,
     select: {
@@ -40,7 +56,7 @@ export default async function LeaderboardPage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-[#0c0910]">Leaderboard</h1>
         <p className="text-sm text-[#0c0910]/70">
-          Classement général des utilisateurs selon leur XP total.
+          Classement général des apprenants selon leur XP total.
         </p>
       </div>
 

@@ -3,6 +3,7 @@ import { BookOpen, Clock3, Layers3 } from "lucide-react";
 import Link from "next/link";
 
 import { CourseStatusBadge } from "@/components/course/course-status-badge";
+import { courseLevelBadgeStyles, getCourseLevelLabel, type CourseLevelValue } from "@/lib/course-level";
 
 type CourseCardProps = {
   title: string;
@@ -14,6 +15,7 @@ type CourseCardProps = {
   estimatedHours?: number | null;
   progressPercent?: number;
   status?: CourseStatus;
+  level?: CourseLevelValue;
   href?: string;
 };
 
@@ -27,6 +29,7 @@ export function CourseCard({
   estimatedHours,
   progressPercent,
   status,
+  level,
   href,
 }: CourseCardProps) {
   const targetHref = href ?? `/courses/${slug}`;
@@ -39,6 +42,11 @@ export function CourseCard({
             {categoryName ? (
               <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
                 {categoryName}
+              </span>
+            ) : null}
+            {level ? (
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${courseLevelBadgeStyles[level]}`}>
+                {getCourseLevelLabel(level)}
               </span>
             ) : null}
             {status ? <CourseStatusBadge status={status} /> : null}
@@ -90,4 +98,3 @@ export function CourseCard({
     </article>
   );
 }
-

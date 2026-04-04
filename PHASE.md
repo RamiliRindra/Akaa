@@ -513,3 +513,148 @@ Résultat:
 - ✅ Progression réelle par cours complet disponible.
 - ✅ Import optionnel des quiz disponible.
 - 📝 Améliorations UI/UX encore possibles sur le builder de quiz, mais non bloquantes pour clôturer la phase.
+
+---
+
+## Phase 5 — Gamification
+Date: 2026-04-04
+
+### Objectif
+Implémenter la phase 5 conformément à `ARCHITECTURE.md`:
+- moteur XP apprenant
+- badges automatiques
+- streaks
+- leaderboard apprenant
+- restriction de la gamification apprenante au rôle `LEARNER`
+- ajout du niveau de cours et de coefficients XP globaux par niveau
+
+### Décisions produit retenues
+- La gamification apprenante (`XP`, `badges`, `streaks`, `leaderboard`) ne concerne que les utilisateurs `LEARNER`.
+- Les rôles `TRAINER` et `ADMIN` n’accumulent pas d’XP apprenant.
+- Le niveau de difficulté d’un cours est porté par le cours lui-même:
+  - `BEGINNER`
+  - `INTERMEDIATE`
+  - `ADVANCED`
+- Les multiplicateurs XP par niveau sont globaux et réglés par l’admin.
+- Le formateur choisit le niveau du cours, mais ne règle pas les coefficients.
+
+### Implémentation réalisée
+
+#### 1) Gamification apprenante
+Fichiers:
+- `src/lib/gamification.ts`
+- `src/actions/quiz.ts`
+- `src/components/gamification/badge-card.tsx`
+- `src/app/(platform)/dashboard/page.tsx`
+- `src/app/(platform)/profile/page.tsx`
+- `src/app/(platform)/leaderboard/page.tsx`
+
+Points livrés:
+- Création de `XpTransaction` sur les événements apprenants.
+- Mise à jour du cache `user.total_xp` et du `level`.
+- Vérification automatique des badges:
+  - `XP_THRESHOLD`
+  - `COURSES_COMPLETED`
+  - `STREAK`
+  - `QUIZ_PERFECT`
+- Suivi du streak quotidien.
+- Leaderboard apprenant réel.
+- Affichage du profil gamifié apprenant.
+
+#### 2) Correction du périmètre des rôles
+Fichiers:
+- `src/lib/gamification.ts`
+- `src/components/layout/protected-shell.tsx`
+- `src/components/layout/header.tsx`
+- `src/app/(platform)/leaderboard/page.tsx`
+- `src/app/(platform)/profile/page.tsx`
+
+Points livrés:
+- `applyLearningGamification()` ne crédite plus que les utilisateurs `LEARNER`.
+- Les rôles `TRAINER` et `ADMIN` n’affichent plus les pills XP / streak dans le header.
+- `leaderboard` et `profile` apprenant sont désormais réservés au rôle `LEARNER`.
+
+#### 3) Niveau de cours et coefficients XP
+Fichiers:
+- `prisma/schema.prisma`
+- `prisma/migrations/20260404000100_course_level_and_xp_settings/migration.sql`
+- `src/lib/course-level.ts`
+- `src/lib/xp-settings.ts`
+- `src/actions/admin.ts`
+- `src/app/(admin)/admin/xp/page.tsx`
+- `src/actions/courses.ts`
+- `src/lib/validations/course.ts`
+
+Points livrés:
+- Ajout du champ `course.level`.
+- Ajout de la table `xp_level_setting`.
+- Valeurs de niveau supportées:
+  - `BEGINNER`
+  - `INTERMEDIATE`
+  - `ADVANCED`
+- Valeurs seed initiales des coefficients:
+  - `BEGINNER = 1.00`
+  - `INTERMEDIATE = 1.50`
+  - `ADVANCED = 2.00`
+- Interface admin `/admin/xp` pour régler les coefficients.
+- Application de ces coefficients aux gains XP apprenant sur:
+  - chapitre terminé
+  - quiz réussi
+  - bonus quiz parfait
+
+#### 4) Intégration contenu / import
+Fichiers:
+- `src/app/(trainer)/trainer/courses/new/page.tsx`
+- `src/app/(trainer)/trainer/courses/[courseId]/edit/page.tsx`
+- `src/app/(trainer)/trainer/courses/import/page.tsx`
+- `public/import-templates/manifest.template.csv`
+- `src/components/course/course-card.tsx`
+- `src/app/(platform)/courses/page.tsx`
+- `src/app/(platform)/courses/[slug]/page.tsx`
+- `src/app/(trainer)/trainer/courses/page.tsx`
+
+Points livrés:
+- Le formateur choisit le niveau du cours à la création et à l’édition.
+- Le `manifest.csv` d’import supporte désormais `course_level`.
+- Les cartes de cours et la fiche détail affichent le niveau pédagogique.
+
+### Migration base de données
+Contexte local inchangé: migrations Prisma via SQL Editor Neon à cause des blocages réseau TGN.
+
+Migration appliquée:
+- `prisma/migrations/20260404000100_course_level_and_xp_settings/migration.sql`
+
+Contenu:
+- création de l’enum `CourseLevel`
+- ajout de `course.level`
+- création de `xp_level_setting`
+- insertion des trois coefficients par défaut
+
+### Validation fonctionnelle exécutée (Phase 5)
+Tests validés:
+- ✅ Un `LEARNER` continue de gagner ses XP, badges et streaks.
+- ✅ `TRAINER` et `ADMIN` ne gagnent plus d’XP apprenant.
+- ✅ `TRAINER` et `ADMIN` n’affichent plus les éléments gamifiés apprenant dans le shell.
+- ✅ L’admin peut régler les coefficients XP par niveau dans `/admin/xp`.
+- ✅ Le formateur peut choisir le niveau du cours.
+- ✅ Le niveau est pris en charge dans l’import de cours.
+
+### Validation technique exécutée (Phase 5)
+- `npx prisma generate`
+- `npm run lint`
+- `npx tsc --noEmit`
+- `npm run build`
+
+Résultat:
+- ✅ Prisma Client généré
+- ✅ Lint OK
+- ✅ TypeScript OK
+- ✅ Build production OK
+
+### Statut global Phase 5
+- ✅ Phase 5 fonctionnelle implémentée.
+- ✅ Gamification apprenante restreinte au rôle `LEARNER`.
+- ✅ Leaderboard apprenant opérationnel.
+- ✅ Niveau des cours disponible.
+- ✅ Coefficients XP par niveau pilotables par l’admin.
+- 📝 L’ajustement XP manuel par utilisateur reste prévu pour la phase 6.

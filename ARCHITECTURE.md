@@ -7,7 +7,7 @@
 
 ## 1. Vision produit
 
-Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, avec trois rôles distincts (Apprenant, Formateur, Admin). L'expérience d'apprentissage repose sur un système de progression engageant (XP, badges, streaks, leaderboard) et un contenu structuré en **Cours > Modules > Chapitres > Quiz**.
+Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, avec trois rôles distincts (Apprenant, Formateur, Admin). L'expérience d'apprentissage repose sur un système de progression engageant pour les **apprenants** (XP, badges, streaks, leaderboard) et un contenu structuré en **Cours > Modules > Chapitres > Quiz**.
 
 ### Contraintes clés
 
@@ -177,6 +177,7 @@ Le schéma est organisé en **7 domaines** :
 | description | TEXT | nullable | |
 | thumbnail_url | TEXT | nullable | URL image de couverture |
 | status | ENUM('DRAFT','PUBLISHED','ARCHIVED') | NOT NULL, default 'DRAFT' | |
+| level | ENUM('BEGINNER','INTERMEDIATE','ADVANCED') | NOT NULL, default 'BEGINNER' | Niveau pédagogique du cours, utilisé pour moduler l’XP apprenant |
 | trainer_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Formateur créateur |
 | category_id | UUID | FK -> Category(id) ON DELETE SET NULL, nullable | **INDEX** - Catégorie de rattachement |
 | estimated_hours | INTEGER | nullable | Durée estimée en heures |
@@ -321,6 +322,22 @@ Le schéma est organisé en **7 domaines** :
 > Le champ `user.total_xp` est un **cache dénormalisé** mis à jour à chaque insertion :
 > `UPDATE user SET total_xp = total_xp + NEW.amount, level = floor((total_xp + NEW.amount) / 100) + 1`
 > Cela évite un `SUM()` coûteux à chaque affichage du dashboard.
+>
+> **Périmètre rôle** : ce système d’XP apprenant ne s’applique qu’aux utilisateurs `LEARNER`.
+> Les rôles `TRAINER` et `ADMIN` n’accumulent pas d’XP, de badges ou de streaks apprenants.
+
+**XpLevelSetting** - Coefficients XP globaux par niveau de cours, gérés par l'admin
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| level | ENUM('BEGINNER','INTERMEDIATE','ADVANCED') | UNIQUE, NOT NULL | Niveau pédagogique du cours |
+| multiplier | DECIMAL(5,2) | NOT NULL | Coefficient appliqué aux gains XP apprenant liés au cours |
+| created_at | TIMESTAMP | NOT NULL, default now() | |
+| updated_at | TIMESTAMP | NOT NULL, default now() | |
+
+> Cette table centralise la configuration admin des multiplicateurs XP par niveau de cours.
+> Le formateur choisit le niveau du cours ; l’admin règle les coefficients.
 
 **Badge** - Définitions de badges, gérés par l'admin
 
@@ -545,15 +562,23 @@ CREATE INDEX idx_notification_session ON notification(related_session_id);
 
 | Événement | XP gagnés | Source |
 |-----------|-----------|--------|
-| Compléter un chapitre | +10 XP | CHAPTER |
-| Réussir un quiz | +50 XP (configurable par quiz) | QUIZ |
-| Quiz score parfait (100%) | +25 XP bonus | QUIZ |
+| Compléter un chapitre | +10 XP de base, modulés par le niveau du cours | CHAPTER |
+| Réussir un quiz | +50 XP de base (ou `quiz.xp_reward`), modulés par le niveau du cours | QUIZ |
+| Quiz score parfait (100%) | +25 XP bonus, modulés par le niveau du cours | QUIZ |
 | Maintenir un streak de 7 jours | +30 XP | STREAK |
 | Débloquer un badge avec xp_bonus | +xp_bonus du badge | BADGE |
 | Présence confirmée à une session | +xp_reward de la session (configurable par formateur) | SESSION |
 | Ajustement admin | +/- variable | ADMIN |
 
 > **Source enum** (XpTransaction.source) : `QUIZ | CHAPTER | STREAK | ADMIN | BADGE | SESSION`
+>
+> **Multiplicateurs de niveau (config admin)** :
+> - `BEGINNER` : `1.00` par défaut
+> - `INTERMEDIATE` : `1.50` par défaut
+> - `ADVANCED` : `2.00` par défaut
+>
+> Ces multiplicateurs s’appliquent aux gains XP apprenant liés au contenu du cours
+> (chapitre terminé, quiz réussi, bonus de quiz parfait).
 
 **Niveaux** : `level = floor(total_xp / 100) + 1`
 - Niveau 1 : 0-99 XP
@@ -646,7 +671,7 @@ akaa/
 │   │   │   │   ├── courses/page.tsx        # Gestion tous les cours
 │   │   │   │   ├── categories/page.tsx     # CRUD catégories de formation
 │   │   │   │   ├── badges/page.tsx         # CRUD badges
-│   │   │   │   ├── xp/page.tsx             # Ajustement XP manuel
+│   │   │   │   ├── xp/page.tsx             # Coefficients XP par niveau + ajustement manuel plus tard
 │   │   │   │   ├── calendar/
 │   │   │   │   │   ├── page.tsx            # Vue globale toutes les sessions (tous formateurs)
 │   │   │   │   │   └── sessions/
@@ -744,8 +769,8 @@ akaa/
 | Voir les cours publiés | Oui | Oui | Oui |
 | S'inscrire à un cours | Oui | Oui | Oui |
 | Suivre chapitres + quiz | Oui | Oui | Oui |
-| Gagner XP / badges | Oui | Oui | Oui |
-| Voir le leaderboard | Oui | Oui | Oui |
+| Gagner XP / badges apprenant | Oui | Non | Non |
+| Voir le leaderboard apprenant | Oui | Non | Non |
 | Créer/éditer **ses** cours | Non | Oui | Oui |
 | Voir les stats de **ses** cours | Non | Oui | Oui |
 | Gérer **tous** les cours | Non | Non | Oui |
@@ -764,6 +789,7 @@ akaa/
 | Pointer la présence (émargement) sur **ses** sessions | Non | Oui | Oui |
 | Voir les sessions des autres formateurs (lecture) | Non | Oui | Oui |
 | Configurer XP des **ses** sessions | Non | Oui | Oui |
+| Régler les coefficients XP par niveau de cours | Non | Non | Oui |
 | Gérer **toutes** les sessions/parcours | Non | Non | Oui |
 | Modifier XP des sessions de tout formateur | Non | Non | Oui |
 | Vue globale calendrier (tous formateurs) | Non | Non | Oui |
@@ -830,11 +856,14 @@ akaa/
 
 ### Phase 5 - Gamification
 
-- Moteur XP : création de XpTransaction à chaque événement
+- Moteur XP : création de XpTransaction à chaque événement apprenant
 - Mise à jour du cache `user.total_xp` et `user.level`
 - Système de badges automatiques (vérification après chaque action)
 - Système de streaks (mise à jour quotidienne)
-- Leaderboard (classement par total_xp)
+- Leaderboard apprenant (classement des `LEARNER` par total_xp)
+- Restriction de la gamification apprenante au rôle `LEARNER`
+- Ajout du niveau de cours (`BEGINNER`, `INTERMEDIATE`, `ADVANCED`)
+- Ajout des coefficients XP globaux par niveau, pilotés par l’admin
 - Animations : notification XP, badge unlock, level up
 
 ### Phase 6 - Administration

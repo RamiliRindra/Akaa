@@ -12,9 +12,10 @@ type HeaderProps = {
   totalXp: number;
   level: number;
   currentStreak: number;
+  showGamification: boolean;
 };
 
-export function Header({ title, userName, userEmail, totalXp, level, currentStreak }: HeaderProps) {
+export function Header({ title, userName, userEmail, totalXp, level, currentStreak, showGamification }: HeaderProps) {
   const initial = userName.charAt(0).toUpperCase();
 
   return (
@@ -26,24 +27,28 @@ export function Header({ title, userName, userEmail, totalXp, level, currentStre
         </div>
 
         <div className="flex items-center gap-3">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="hidden items-center gap-2 rounded-full border border-[#453750]/20 bg-[#453750]/10 px-3 py-1 text-xs font-semibold text-[#453750] sm:flex"
-          >
-            <Zap className="h-3.5 w-3.5 text-[#ffc857]" />
-            {totalXp} XP
-            <span className="text-[#453750]/70">• Niveau {level}</span>
-          </motion.div>
+          {showGamification ? (
+            <>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="hidden items-center gap-2 rounded-full border border-[#453750]/20 bg-[#453750]/10 px-3 py-1 text-xs font-semibold text-[#453750] sm:flex"
+              >
+                <Zap className="h-3.5 w-3.5 text-[#ffc857]" />
+                {totalXp} XP
+                <span className="text-[#453750]/70">• Niveau {level}</span>
+              </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="hidden items-center gap-2 rounded-full border border-[#ffc857]/30 bg-[#ffc857]/15 px-3 py-1 text-xs font-semibold text-[#8a6110] lg:flex"
-          >
-            <Flame className="h-3.5 w-3.5 text-[#f97316]" />
-            Streak {currentStreak} jour{currentStreak > 1 ? "s" : ""}
-          </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="hidden items-center gap-2 rounded-full border border-[#ffc857]/30 bg-[#ffc857]/15 px-3 py-1 text-xs font-semibold text-[#8a6110] lg:flex"
+              >
+                <Flame className="h-3.5 w-3.5 text-[#f97316]" />
+                Streak {currentStreak} jour{currentStreak > 1 ? "s" : ""}
+              </motion.div>
+            </>
+          ) : null}
 
           <div className="hidden items-center gap-2 rounded-xl border border-[#0c0910]/10 bg-white px-2 py-1 sm:flex">
             <div className="grid h-8 w-8 place-items-center rounded-full bg-[#0F63FF] text-xs font-bold text-white">

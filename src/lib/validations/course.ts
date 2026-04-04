@@ -2,6 +2,7 @@ import { CourseStatus, QuizQuestionType } from "@prisma/client";
 import { z } from "zod";
 
 import { isSupportedVideoUrl } from "@/lib/content";
+import { courseLevels } from "@/lib/course-level";
 
 const optionalText = z
   .string()
@@ -56,6 +57,7 @@ export const courseFormSchema = z.object({
     .refine((value) => !value || z.url().safeParse(value).success, "L’URL de miniature est invalide.")
     .optional(),
   estimatedHours: optionalNumber,
+  level: z.enum(courseLevels, "Le niveau du cours est invalide."),
   status: z.nativeEnum(CourseStatus, {
     error: "Le statut du cours est invalide.",
   }),
@@ -98,6 +100,7 @@ export const courseImportRowSchema = z.object({
   course_status: z.nativeEnum(CourseStatus, {
     error: "Le statut du cours est invalide.",
   }),
+  course_level: z.enum(courseLevels, "Le niveau du cours est invalide.").default("BEGINNER"),
   estimated_hours: optionalCsvNumber,
   category_slug: optionalCsvText,
   module_order: requiredCsvNumber,

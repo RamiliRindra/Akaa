@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { ProgressBar } from "@/components/course/progress-bar";
 import { auth } from "@/lib/auth";
+import { courseLevelBadgeStyles, getCourseLevelLabel } from "@/lib/course-level";
 import { db } from "@/lib/db";
 
 type CourseDetailPageProps = {
@@ -25,6 +26,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
       slug: true,
       description: true,
       estimatedHours: true,
+      level: true,
       trainer: {
         select: {
           name: true,
@@ -99,6 +101,9 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                   {course.category.name}
                 </span>
               ) : null}
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${courseLevelBadgeStyles[course.level]}`}>
+                {getCourseLevelLabel(course.level)}
+              </span>
               <span className="rounded-full bg-[#119da4]/10 px-2.5 py-1 text-xs font-semibold text-[#119da4]">
                 {progressPercent}% terminé
               </span>
