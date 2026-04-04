@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { CourseCard } from "@/components/course/course-card";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 type TrainerCoursesPageProps = {
@@ -14,7 +14,7 @@ type TrainerCoursesPageProps = {
 };
 
 export default async function TrainerCoursesPage({ searchParams }: TrainerCoursesPageProps) {
-  const session = await auth();
+  const session = await getCachedSession();
   if (!session?.user?.id) {
     redirect("/login");
   }

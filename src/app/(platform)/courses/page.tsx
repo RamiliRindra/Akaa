@@ -3,7 +3,7 @@ import { BookMarked, Compass, Layers3, Sparkles } from "lucide-react";
 
 import { CategoryFilter } from "@/components/course/category-filter";
 import { CourseCard } from "@/components/course/course-card";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 type LearnerCoursesPageProps = {
@@ -14,7 +14,7 @@ type LearnerCoursesPageProps = {
 
 export default async function LearnerCoursesPage({ searchParams }: LearnerCoursesPageProps) {
   const { category: categorySlug } = await searchParams;
-  const session = await auth();
+  const session = await getCachedSession();
   const userId = session?.user?.id;
 
   const [categories, courses] = await Promise.all([

@@ -115,29 +115,39 @@ export function getLevelFromXp(totalXp: number) {
 }
 
 export async function ensureDefaultBadges(db: GamificationDbClient) {
-  await Promise.all(
-    DEFAULT_BADGES.map((badge) =>
-      db.badge.upsert({
-        where: { name: badge.name },
-        update: {
-          description: badge.description,
-          iconUrl: badge.iconUrl,
-          conditionType: badge.conditionType,
-          conditionValue: badge.conditionValue,
-          xpBonus: badge.xpBonus,
-          isActive: true,
-        },
-        create: {
-          name: badge.name,
-          description: badge.description,
-          iconUrl: badge.iconUrl,
-          conditionType: badge.conditionType,
-          conditionValue: badge.conditionValue,
-          xpBonus: badge.xpBonus,
-        },
-      }),
-    ),
-  );
+  const existingCount = await db.badge.count({
+    where: {
+      name: {
+        in: DEFAULT_BADGES.map((badge) => badge.name),
+      },
+    },
+  });
+
+  if (existingCount === DEFAULT_BADGES.length) {
+    return;
+  }
+
+  for (const badge of DEFAULT_BADGES) {
+    await db.badge.upsert({
+      where: { name: badge.name },
+      update: {
+        description: badge.description,
+        iconUrl: badge.iconUrl,
+        conditionType: badge.conditionType,
+        conditionValue: badge.conditionValue,
+        xpBonus: badge.xpBonus,
+        isActive: true,
+      },
+      create: {
+        name: badge.name,
+        description: badge.description,
+        iconUrl: badge.iconUrl,
+        conditionType: badge.conditionType,
+        conditionValue: badge.conditionValue,
+        xpBonus: badge.xpBonus,
+      },
+    });
+  }
 }
 
 async function awardXp(db: GamificationDbClient, input: AwardXpInput) {
@@ -265,8 +275,6 @@ async function updateDailyStreak(db: GamificationDbClient, userId: string) {
 }
 
 async function evaluateAutomaticBadges(db: GamificationDbClient, userId: string) {
-  await ensureDefaultBadges(db);
-
   const [user, streak, completedCourses, perfectQuizAttempts, existingBadges, activeBadges] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: userId },

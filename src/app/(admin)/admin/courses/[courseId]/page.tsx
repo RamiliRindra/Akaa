@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { CourseStatusBadge } from "@/components/course/course-status-badge";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelBadgeStyles, getCourseLevelLabel } from "@/lib/course-level";
 import { db } from "@/lib/db";
 
@@ -12,7 +12,7 @@ type AdminCourseDetailPageProps = {
 };
 
 export default async function AdminCourseDetailPage({ params }: AdminCourseDetailPageProps) {
-  const [{ courseId }, session] = await Promise.all([params, auth()]);
+  const [{ courseId }, session] = await Promise.all([params, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

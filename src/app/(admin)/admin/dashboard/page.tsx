@@ -2,12 +2,12 @@ import Link from "next/link";
 import { UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
 export default async function AdminDashboardPage() {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (!session?.user?.id) {
     redirect("/login");

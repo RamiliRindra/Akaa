@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { createBadgeAction, deleteBadgeAction, updateBadgeAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 type AdminBadgesPageProps = {
@@ -22,7 +22,7 @@ const badgeConditionLabels: Record<BadgeConditionType, string> = {
 };
 
 export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageProps) {
-  const [feedback, session] = await Promise.all([searchParams, auth()]);
+  const [feedback, session] = await Promise.all([searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

@@ -16,7 +16,7 @@ import {
 } from "@/actions/courses";
 import { CourseStatusBadge } from "@/components/course/course-status-badge";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
 import { db } from "@/lib/db";
 
@@ -26,7 +26,7 @@ type EditCoursePageProps = {
 };
 
 export default async function EditCoursePage({ params, searchParams }: EditCoursePageProps) {
-  const [{ courseId }, feedback, session] = await Promise.all([params, searchParams, auth()]);
+  const [{ courseId }, feedback, session] = await Promise.all([params, searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

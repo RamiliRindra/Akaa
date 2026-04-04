@@ -2,13 +2,12 @@ import { redirect } from "next/navigation";
 
 import { BadgeCard } from "@/components/gamification/badge-card";
 import { getHomePathForRole } from "@/lib/auth-config";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
-import { ensureDefaultBadges } from "@/lib/gamification";
 import { formatDate } from "@/lib/utils";
 
 export default async function ProfilePage() {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (!session?.user?.id) {
     redirect("/login");
@@ -17,8 +16,6 @@ export default async function ProfilePage() {
   if (session.user.role !== "LEARNER") {
     redirect(getHomePathForRole(session.user.role));
   }
-
-  await ensureDefaultBadges(db);
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },

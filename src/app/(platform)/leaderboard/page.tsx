@@ -2,12 +2,11 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { getHomePathForRole } from "@/lib/auth-config";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
-import { ensureDefaultBadges } from "@/lib/gamification";
 
 export default async function LeaderboardPage() {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (!session?.user?.id) {
     redirect("/login");
@@ -16,8 +15,6 @@ export default async function LeaderboardPage() {
   if (session.user.role !== "LEARNER") {
     redirect(getHomePathForRole(session.user.role));
   }
-
-  await ensureDefaultBadges(db);
 
   const users = await db.user.findMany({
     where: {

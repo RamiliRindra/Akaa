@@ -8,7 +8,7 @@ import {
 import { CategoryFormFields } from "@/components/admin/category-form-fields";
 import { CategoryIcon } from "@/components/admin/category-icon";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 type AdminCategoriesPageProps = {
@@ -19,7 +19,7 @@ type AdminCategoriesPageProps = {
 };
 
 export default async function AdminCategoriesPage({ searchParams }: AdminCategoriesPageProps) {
-  const [feedback, session] = await Promise.all([searchParams, auth()]);
+  const [feedback, session] = await Promise.all([searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

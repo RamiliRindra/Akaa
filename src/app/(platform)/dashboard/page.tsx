@@ -8,13 +8,12 @@ import { ProgressBar } from "@/components/course/progress-bar";
 import { BadgeCard } from "@/components/gamification/badge-card";
 import { XpLineChart } from "@/components/gamification/xp-line-chart";
 import { getHomePathForRole } from "@/lib/auth-config";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
-import { ensureDefaultBadges } from "@/lib/gamification";
 import { formatDate } from "@/lib/utils";
 
 export default async function LearnerDashboardPage() {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (session?.user?.role === "TRAINER" || session?.user?.role === "ADMIN") {
     redirect(getHomePathForRole(session.user.role));
@@ -25,7 +24,6 @@ export default async function LearnerDashboardPage() {
   }
 
   const userId = session.user.id;
-  await ensureDefaultBadges(db);
 
   const [user, enrollments, totalCompletedChapters, totalPublishedChapters, recentBadges, recentTransactions] =
     await Promise.all([

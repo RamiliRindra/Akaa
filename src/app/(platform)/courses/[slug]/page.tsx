@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProgressBar } from "@/components/course/progress-bar";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelBadgeStyles, getCourseLevelLabel } from "@/lib/course-level";
 import { db } from "@/lib/db";
 
@@ -13,7 +13,7 @@ type CourseDetailPageProps = {
 };
 
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
-  const [{ slug }, session] = await Promise.all([params, auth()]);
+  const [{ slug }, session] = await Promise.all([params, getCachedSession()]);
 
   const course = await db.course.findFirst({
     where: {

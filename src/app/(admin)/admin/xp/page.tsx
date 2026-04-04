@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { adjustUserXpAction, updateXpLevelSettingsAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
 import { db } from "@/lib/db";
 import { getAllXpLevelSettings } from "@/lib/xp-settings";
@@ -16,7 +16,7 @@ type AdminXpPageProps = {
 };
 
 export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
-  const [feedback, session] = await Promise.all([searchParams, auth()]);
+  const [feedback, session] = await Promise.all([searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

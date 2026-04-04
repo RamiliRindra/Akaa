@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { createCourseAction } from "@/actions/courses";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
 import { db } from "@/lib/db";
 
@@ -16,7 +16,7 @@ type NewCoursePageProps = {
 };
 
 export default async function NewCoursePage({ searchParams }: NewCoursePageProps) {
-  const session = await auth();
+  const session = await getCachedSession();
   if (!session?.user?.id) {
     redirect("/login");
   }

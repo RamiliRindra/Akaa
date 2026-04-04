@@ -4,11 +4,11 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Award, BookOpen, Sparkles, Trophy } from "lucide-react";
 
 import { getHomePathForRole } from "@/lib/auth-config";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import logoAkaa from "@/img/logo_akaa.png";
 
 export default async function LandingPage() {
-  const session = await auth();
+  const session = await getCachedSession();
   if (session?.user) {
     redirect(getHomePathForRole(session.user.role));
   }

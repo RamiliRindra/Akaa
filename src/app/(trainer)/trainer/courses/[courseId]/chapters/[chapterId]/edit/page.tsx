@@ -6,7 +6,7 @@ import { updateChapterAction } from "@/actions/courses";
 import { ChapterEditorForm } from "@/components/editor/chapter-editor-form";
 import { FormFeedback } from "@/components/feedback/form-feedback";
 import { QuizManager } from "@/components/quiz/quiz-manager";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 type EditChapterPageProps = {
@@ -15,7 +15,7 @@ type EditChapterPageProps = {
 };
 
 export default async function EditChapterPage({ params, searchParams }: EditChapterPageProps) {
-  const [{ courseId, chapterId }, feedback, session] = await Promise.all([params, searchParams, auth()]);
+  const [{ courseId, chapterId }, feedback, session] = await Promise.all([params, searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

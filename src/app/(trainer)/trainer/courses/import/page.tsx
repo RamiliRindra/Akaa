@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { importCourseArchiveAction } from "@/actions/courses";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 
 type ImportCoursePageProps = {
   searchParams: Promise<{
@@ -13,7 +13,7 @@ type ImportCoursePageProps = {
 };
 
 export default async function ImportCoursePage({ searchParams }: ImportCoursePageProps) {
-  const [feedback, session] = await Promise.all([searchParams, auth()]);
+  const [feedback, session] = await Promise.all([searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

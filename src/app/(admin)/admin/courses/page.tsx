@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 
 import { CourseCard } from "@/components/course/course-card";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 export default async function AdminCoursesPage() {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (!session?.user?.id) {
     redirect("/login");

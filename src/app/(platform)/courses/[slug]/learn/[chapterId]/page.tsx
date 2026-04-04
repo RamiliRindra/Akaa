@@ -10,7 +10,7 @@ import { ProgressBar } from "@/components/course/progress-bar";
 import { RichContentRenderer } from "@/components/course/rich-content-renderer";
 import { VideoEmbed } from "@/components/course/video-embed";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 type LearnChapterPageProps = {
@@ -19,7 +19,7 @@ type LearnChapterPageProps = {
 };
 
 export default async function LearnChapterPage({ params, searchParams }: LearnChapterPageProps) {
-  const [{ slug, chapterId }, feedback, session] = await Promise.all([params, searchParams, auth()]);
+  const [{ slug, chapterId }, feedback, session] = await Promise.all([params, searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

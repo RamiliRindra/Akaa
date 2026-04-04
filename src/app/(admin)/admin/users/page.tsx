@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { updateUserActiveStateAction, updateUserRoleAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ function buildUsersHref({
 }
 
 export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
-  const [feedback, session] = await Promise.all([searchParams, auth()]);
+  const [feedback, session] = await Promise.all([searchParams, getCachedSession()]);
 
   if (!session?.user?.id) {
     redirect("/login");

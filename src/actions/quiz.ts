@@ -902,61 +902,85 @@ export async function submitQuizAttemptAction(formData: FormData) {
   const score = Math.round((correctCount / quiz.questions.length) * 100);
   const passed = score >= quiz.passingScore;
 
-  const summary = await db.$transaction(async (tx) => {
-    await ensureEnrollment(tx, userId, quiz.chapter.module.courseId);
-    await tx.quizAttempt.create({
-      data: {
-        userId,
-        quizId: quiz.id,
-        score,
-        passed,
-        answers: parsed.data.answers as Prisma.InputJsonValue,
-      },
-    });
-
-    if (passed) {
-      await markChapterCompleted(tx, userId, quiz.chapter.id);
-      await recalculateEnrollmentProgress(tx, userId, quiz.chapter.module.courseId);
-      const gamification = await applyLearningGamification(tx, {
-        userId,
-        chapterId: quiz.chapter.id,
-        quizId: quiz.id,
-        quizXpReward: quiz.xpReward,
-        perfectQuiz: score === 100,
+  try {
+    const summary = await db.$transaction(async (tx) => {
+      await ensureEnrollment(tx, userId, quiz.chapter.module.courseId);
+      await tx.quizAttempt.create({
+        data: {
+          userId,
+          quizId: quiz.id,
+          score,
+          passed,
+          answers: parsed.data.answers as Prisma.InputJsonValue,
+        },
       });
-      return gamification;
-    } else {
+
+      if (passed) {
+        await markChapterCompleted(tx, userId, quiz.chapter.id);
+        await recalculateEnrollmentProgress(tx, userId, quiz.chapter.module.courseId);
+        return applyLearningGamification(tx, {
+          userId,
+          chapterId: quiz.chapter.id,
+          quizId: quiz.id,
+          quizXpReward: quiz.xpReward,
+          perfectQuiz: score === 100,
+        });
+      }
+
       await markChapterInProgress(tx, userId, quiz.chapter.id);
       await recalculateEnrollmentProgress(tx, userId, quiz.chapter.module.courseId);
-      const gamification = await applyLearningGamification(tx, {
-        userId,
-      });
-      return gamification;
+
+      return {
+        xpGained: 0,
+        levelBefore: 0,
+        levelAfter: 0,
+        unlockedBadges: [],
+        currentStreak: 0,
+      };
+    });
+
+    revalidateQuizSurfaces(quiz.chapter.module.courseId, quiz.chapter.id, parsed.data.courseSlug);
+    const redirectPath = passed
+      ? await getNextChapterPath(quiz.chapter.module.courseId, quiz.chapter.id, parsed.data.courseSlug)
+      : `/courses/${parsed.data.courseSlug}/learn/${parsed.data.chapterId}`;
+    const successParts = [`Quiz réussi avec ${score}% de bonnes réponses.`];
+
+    if (summary.xpGained > 0) {
+      successParts.push(`+${summary.xpGained} XP`);
     }
-  });
+    if (summary.levelAfter > summary.levelBefore) {
+      successParts.push(`Niveau ${summary.levelAfter} atteint`);
+    }
+    if (summary.unlockedBadges.length) {
+      successParts.push(`Badge débloqué : ${summary.unlockedBadges.join(", ")}`);
+    }
 
-  revalidateQuizSurfaces(quiz.chapter.module.courseId, quiz.chapter.id, parsed.data.courseSlug);
-  const redirectPath = passed
-    ? await getNextChapterPath(quiz.chapter.module.courseId, quiz.chapter.id, parsed.data.courseSlug)
-    : `/courses/${parsed.data.courseSlug}/learn/${parsed.data.chapterId}`;
-  const successParts = [`Quiz réussi avec ${score}% de bonnes réponses.`];
+    redirect(
+      buildRedirectUrl(
+        redirectPath,
+        passed ? "success" : "error",
+        passed
+          ? successParts.join(" • ")
+          : `Quiz non réussi (${score}%). Vous pouvez réessayer.`,
+      ),
+    );
+  } catch (error) {
+    console.error("[quiz][submit]", {
+      quizId: quiz.id,
+      chapterId: parsed.data.chapterId,
+      courseSlug: parsed.data.courseSlug,
+      userId,
+      score,
+      passed,
+      error,
+    });
 
-  if (summary.xpGained > 0) {
-    successParts.push(`+${summary.xpGained} XP`);
+    redirect(
+      buildRedirectUrl(
+        `/courses/${parsed.data.courseSlug}/learn/${parsed.data.chapterId}`,
+        "error",
+        "Une erreur est survenue pendant la validation du quiz.",
+      ),
+    );
   }
-  if (summary.levelAfter > summary.levelBefore) {
-    successParts.push(`Niveau ${summary.levelAfter} atteint`);
-  }
-  if (summary.unlockedBadges.length) {
-    successParts.push(`Badge débloqué : ${summary.unlockedBadges.join(", ")}`);
-  }
-  redirect(
-    buildRedirectUrl(
-      redirectPath,
-      passed ? "success" : "error",
-      passed
-        ? successParts.join(" • ")
-        : `Quiz non réussi (${score}%). Vous pouvez réessayer.`,
-    ),
-  );
 }

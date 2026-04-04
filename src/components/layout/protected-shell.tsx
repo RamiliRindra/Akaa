@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/header";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import type { NavItem } from "@/components/layout/nav-config";
 import { Sidebar } from "@/components/layout/sidebar";
-import { auth } from "@/lib/auth";
+import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
 type ProtectedShellProps = {
@@ -20,31 +20,32 @@ export async function ProtectedShell({
   headerTitle,
   navItems,
 }: ProtectedShellProps) {
-  const session = await auth();
+  const session = await getCachedSession();
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      name: true,
-      email: true,
-      isActive: true,
-      role: true,
-      totalXp: true,
-      level: true,
-      streak: {
-        select: {
-          currentStreak: true,
-        },
-      },
-    },
-  });
-  if (!user) {
+  if (session.user.isActive === false) {
     redirect("/login");
   }
-  if (!user.isActive) {
+
+  const showGamification = session.user.role === "LEARNER";
+  const userGamification = showGamification
+    ? await db.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          totalXp: true,
+          level: true,
+          streak: {
+            select: {
+              currentStreak: true,
+            },
+          },
+        },
+      })
+    : null;
+
+  if (showGamification && !userGamification) {
     redirect("/login");
   }
 
@@ -55,12 +56,12 @@ export async function ProtectedShell({
         <div className="relative">
           <Header
             title={headerTitle}
-            userName={user.name}
-            userEmail={user.email}
-            totalXp={user.totalXp}
-            level={user.level}
-            currentStreak={user.streak?.currentStreak ?? 0}
-            showGamification={user.role === "LEARNER"}
+            userName={session.user.name ?? "Utilisateur Akaa"}
+            userEmail={session.user.email}
+            totalXp={userGamification?.totalXp ?? 0}
+            level={userGamification?.level ?? 1}
+            currentStreak={userGamification?.streak?.currentStreak ?? 0}
+            showGamification={showGamification}
           />
           <div className="absolute left-4 top-4 z-30 lg:hidden">
             <MobileNav title={navTitle} items={navItems} />
