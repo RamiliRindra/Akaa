@@ -5,6 +5,8 @@ import {
   deleteCategoryAction,
   updateCategoryAction,
 } from "@/actions/admin";
+import { CategoryFormFields } from "@/components/admin/category-form-fields";
+import { CategoryIcon } from "@/components/admin/category-icon";
 import { FormFeedback } from "@/components/feedback/form-feedback";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -79,17 +81,6 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
         </label>
 
         <label className="space-y-2 text-sm font-medium text-[#0c0910]">
-          Icône Lucide
-          <input
-            name="icon"
-            required
-            defaultValue="BookOpen"
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
-            placeholder="BookOpen"
-          />
-        </label>
-
-        <label className="space-y-2 text-sm font-medium text-[#0c0910]">
           Description
           <textarea
             name="description"
@@ -99,17 +90,11 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
           />
         </label>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
-            Couleur
-            <input
-              name="color"
-              required
-              type="text"
-              defaultValue="#0F63FF"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
-            />
-          </label>
+        <div className="lg:col-span-2">
+          <CategoryFormFields />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
             Ordre
             <input
@@ -150,10 +135,11 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
           >
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <span
-                className="inline-flex h-3 w-3 rounded-full"
-                style={{ backgroundColor: category.color }}
-                aria-hidden="true"
-              />
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl"
+                style={{ backgroundColor: `${category.color}1A`, color: category.color }}
+              >
+                <CategoryIcon iconName={category.icon} className="h-4 w-4" />
+              </span>
               <span className="text-lg font-semibold text-[#0c0910]">{category.name}</span>
               <span className="rounded-full bg-[#0c0910]/5 px-2.5 py-1 text-xs font-medium text-[#0c0910]/70">
                 {category.slug}
@@ -184,16 +170,6 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                   />
                 </label>
 
-                <label className="space-y-2 text-sm font-medium text-[#0c0910]">
-                  Icône Lucide
-                  <input
-                    name="icon"
-                    required
-                    defaultValue={category.icon}
-                    className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
-                  />
-                </label>
-
                 <label className="space-y-2 text-sm font-medium text-[#0c0910] lg:col-span-2">
                   Description
                   <textarea
@@ -204,16 +180,11 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                   />
                 </label>
 
-                <div className="grid gap-4 sm:grid-cols-3 lg:col-span-2">
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
-                    Couleur
-                    <input
-                      name="color"
-                      required
-                      defaultValue={category.color}
-                      className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
-                    />
-                  </label>
+                <div className="lg:col-span-2">
+                  <CategoryFormFields defaultIcon={category.icon} defaultColor={category.color} />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
                   <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                     Ordre
                     <input

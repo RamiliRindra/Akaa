@@ -54,7 +54,7 @@ export default async function AdminCoursesPage() {
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-[#0c0910]">Administration des cours</h2>
         <p className="text-sm text-[#0c0910]/70">
-          Supervisez l’ensemble du catalogue et ouvrez directement les cours en édition formateur.
+          Supervisez l’ensemble du catalogue, consultez les cours dans l’espace admin et ouvrez l’édition si nécessaire.
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export default async function AdminCoursesPage() {
                 estimatedHours={course.estimatedHours}
                 level={course.level}
                 status={course.status}
-                href={`/trainer/courses/${course.id}/edit`}
+                href={`/admin/courses/${course.id}`}
               />
               <div className="rounded-xl bg-white px-4 py-3 text-sm text-[#0c0910]/70 ring-1 ring-[#0c0910]/10">
                 Formateur : <span className="font-medium text-[#0c0910]">{course.trainer.name}</span> ({course.trainer.email})
