@@ -49,7 +49,7 @@ export async function ProtectedShell({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f7f9ff]">
+    <div className="app-shell-bg flex min-h-screen">
       <Sidebar title={navTitle} items={navItems} />
       <div className="flex min-h-screen flex-1 flex-col">
         <div className="relative">
@@ -62,11 +62,11 @@ export async function ProtectedShell({
             currentStreak={user.streak?.currentStreak ?? 0}
             showGamification={user.role === "LEARNER"}
           />
-          <div className="absolute left-4 top-3.5 lg:hidden">
+          <div className="absolute left-6 top-6 lg:hidden">
             <MobileNav items={navItems} />
           </div>
         </div>
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
+        <main className="flex-1 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5">{children}</main>
       </div>
     </div>
   );

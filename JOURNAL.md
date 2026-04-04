@@ -735,6 +735,121 @@ Contenu :
 
 ---
 
+## Phase 6 — Back-office admin, désactivation comptes et ajustements UX
+
+**Date :** 04 Avril 2026
+
+### Objectif
+Transformer l’espace admin, encore majoritairement placeholder, en vrai back-office d’exploitation.
+
+Le périmètre retenu pour cette passe a couvert :
+- gestion utilisateurs
+- catégories
+- badges
+- ajustement XP manuel
+- dashboard admin
+- supervision des cours
+
+### Désactivation des comptes
+La phase 6 a nécessité une évolution du modèle `User` :
+- ajout de `is_active`
+- conservation des comptes en base sans suppression logique
+- blocage des nouvelles connexions pour les utilisateurs désactivés
+
+Décision produit retenue :
+- l’admin peut désactiver / réactiver un compte
+- un compte désactivé n’accède plus à la plateforme
+- le bootstrap admin ne peut ni perdre son rôle admin ni être désactivé
+
+Migration ajoutée :
+- `prisma/migrations/20260404000200_user_is_active/migration.sql`
+
+### Gestion utilisateurs
+Le premier écran admin utilisateurs fonctionnait, mais il n’était pas assez scalable pour une base cible d’environ 300 comptes.
+
+Évolution apportée :
+- recherche par nom / email
+- filtre par rôle
+- filtre par statut actif / désactivé
+- pagination serveur
+- double vue :
+  - `tableau` pour l’exploitation dense
+  - `cartes` pour un usage plus lisible
+
+Résultat :
+- la page est exploitable à petite et moyenne volumétrie
+- les changements de rôle et d’état sont accessibles directement depuis la vue tableau
+
+### UX catégories
+Une faiblesse UX claire est apparue sur le CRUD catégories :
+- choix d’icône en texte brut
+- couleur seulement via champ hexadécimal
+
+Correctifs appliqués :
+- ajout d’un picker visuel d’icônes
+- ajout d’un color picker natif
+- ajout de suggestions de couleurs
+- ajout d’un aperçu en temps réel
+
+Résultat :
+- la configuration catégorie devient lisible et bien plus robuste pour un admin non technique
+
+### Badges et XP admin
+La phase 5 avait déjà posé les coefficients XP par niveau.
+La phase 6 complète cette gouvernance admin avec :
+- CRUD badges complet
+- réglage des conditions de badge
+- bonus XP de badge
+- ajustement XP manuel apprenant avec raison obligatoire
+- historique récent des ajustements admin
+
+Décision maintenue :
+- l’ajustement XP manuel concerne les `LEARNER`
+- la gamification apprenante ne s’étend pas aux `TRAINER` ni aux `ADMIN`
+
+### Dashboard admin et supervision des cours
+Le dashboard admin placeholder a été remplacé par une vue réelle avec :
+- stats utilisateurs
+- stats catalogue
+- XP distribués
+- top apprenants
+- derniers comptes créés
+- derniers ajustements XP admin
+
+Sur la supervision des cours, un problème UX a été remonté :
+- en cliquant sur un cours depuis `/admin/courses`, l’admin basculait implicitement dans le périmètre formateur
+
+Correctif appliqué :
+- création d’une vraie fiche `/admin/courses/[courseId]`
+- consultation en lecture côté admin
+- lien séparé et explicite vers l’édition formateur si nécessaire
+
+Résultat :
+- l’admin reste dans son contexte de supervision
+- l’ouverture du mode formateur devient un choix volontaire
+
+### Validation
+- ✅ Gestion utilisateurs validée
+- ✅ Désactivation / réactivation validée
+- ✅ Blocage login compte désactivé validé
+- ✅ CRUD catégories validé
+- ✅ Picker icônes / couleurs validé
+- ✅ CRUD badges validé
+- ✅ Ajustement XP manuel validé
+- ✅ Dashboard admin validé
+- ✅ Supervision cours admin validée
+- ✅ `npm run lint`
+- ✅ `npx tsc --noEmit`
+- ✅ `npm run build`
+
+### Statut
+- ✅ Phase 6 fonctionnelle livrée
+- ✅ L’administration MVP est opérationnelle
+- ✅ Les ajustements UX critiques de l’espace admin sont intégrés
+- 📝 Le polish visuel global reste reporté à la phase 7
+
+---
+
 ## Décisions techniques retenues
 
 1. **Conserver Prisma + schéma actuel** (structure SQL validée pour `account`).

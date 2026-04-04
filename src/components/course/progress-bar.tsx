@@ -7,10 +7,18 @@ export function ProgressBar({ value, label }: ProgressBarProps) {
   const safeValue = Math.min(Math.max(value, 0), 100);
 
   return (
-    <div className="space-y-2">
-      {label ? <div className="flex items-center justify-between text-sm text-[#0c0910]/70"><span>{label}</span><span className="font-semibold text-[#0c0910]">{safeValue}%</span></div> : null}
-      <div className="h-2 overflow-hidden rounded-full bg-[#0c0910]/10">
-        <div className="h-full rounded-full bg-[#0F63FF] transition-all" style={{ width: `${safeValue}%` }} />
+    <div className="space-y-2.5">
+      {label ? (
+        <div className="flex items-center justify-between text-sm text-[#2c2f31]/70">
+          <span>{label}</span>
+          <span className="font-semibold text-[#2c2f31]">{safeValue}%</span>
+        </div>
+      ) : null}
+      <div className="h-3 overflow-hidden rounded-full bg-[#dfe5ea]">
+        <div
+          className="h-full rounded-full bg-[linear-gradient(90deg,#0050d6_0%,#0f63ff_62%,#3d87ff_100%)] transition-all"
+          style={{ width: `${safeValue}%` }}
+        />
       </div>
     </div>
   );

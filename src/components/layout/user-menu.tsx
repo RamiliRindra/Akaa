@@ -16,7 +16,7 @@ export function UserMenu() {
         });
       }}
       disabled={isPending}
-      className="inline-flex items-center gap-2 rounded-xl border border-[#0c0910]/15 bg-white px-3 py-2 text-xs font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5 disabled:cursor-not-allowed disabled:opacity-60"
+      className="ghost-button ambient-ring inline-flex px-4 py-2 text-xs font-semibold text-[#0c0910] transition disabled:cursor-not-allowed disabled:opacity-60"
     >
       <LogOut className="h-4 w-4" />
       {isPending ? "Déconnexion..." : "Déconnexion"}

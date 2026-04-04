@@ -1,5 +1,5 @@
-import { CourseStatus, ChapterProgressStatus } from "@prisma/client";
-import { Clock3, PlayCircle } from "lucide-react";
+import { ChapterProgressStatus, CourseStatus } from "@prisma/client";
+import { ArrowRight, BookOpenCheck, Clock3, Layers3, PlayCircle, Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -89,30 +89,36 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   const nextChapter =
     flatChapters.find((chapter) => chapter.chapterProgresses?.[0]?.status !== ChapterProgressStatus.COMPLETED) ??
     firstChapter;
+  const moduleCount = course.modules.length;
 
   return (
-    <section className="space-y-6">
-      <div className="rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
+    <section className="space-y-8">
+      <div className="surface-section overflow-hidden p-6 sm:p-8">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_340px] xl:items-start">
+          <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-2">
-              {course.category?.name ? (
-                <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
-                  {course.category.name}
-                </span>
-              ) : null}
-              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${courseLevelBadgeStyles[course.level]}`}>
+              <span className="chip chip-primary">
+                <Sparkles className="h-3.5 w-3.5" />
+                Formation publiée
+              </span>
+              {course.category?.name ? <span className="chip chip-primary">{course.category.name}</span> : null}
+              <span className={`chip ${courseLevelBadgeStyles[course.level]}`}>
                 {getCourseLevelLabel(course.level)}
               </span>
-              <span className="rounded-full bg-[#119da4]/10 px-2.5 py-1 text-xs font-semibold text-[#119da4]">
-                {progressPercent}% terminé
-              </span>
+              <span className="chip chip-success">{progressPercent}% terminé</span>
             </div>
-            <h1 className="text-3xl font-bold text-[#0c0910]">{course.title}</h1>
-            <p className="max-w-3xl text-sm text-[#0c0910]/70">
-              {course.description?.trim() || "Aucune description n’a encore été rédigée pour ce cours."}
-            </p>
-            <div className="flex flex-wrap gap-4 text-sm text-[#0c0910]/70">
+
+            <div className="space-y-3">
+              <p className="editorial-eyebrow">Course Overview</p>
+              <h1 className="font-display text-3xl font-black tracking-tight text-[#2c2f31] sm:text-5xl">
+                {course.title}
+              </h1>
+              <p className="max-w-3xl text-sm leading-7 text-[#2c2f31]/72 sm:text-base">
+                {course.description?.trim() || "Aucune description n’a encore été rédigée pour ce cours."}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4 text-sm text-[#2c2f31]/70">
               <span>Formateur : {course.trainer.name}</span>
               {course.estimatedHours ? (
                 <span className="inline-flex items-center gap-1.5">
@@ -120,30 +126,87 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                   {course.estimatedHours} h estimées
                 </span>
               ) : null}
+              <span>{moduleCount} module{moduleCount > 1 ? "s" : ""}</span>
               <span>{flatChapters.length} chapitre{flatChapters.length > 1 ? "s" : ""}</span>
             </div>
+
             <ProgressBar value={progressPercent} label="Progression du cours" />
           </div>
 
-          {nextChapter ? (
-            <Link
-              href={`/courses/${course.slug}/learn/${nextChapter.id}`}
-              className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
-            >
-              <PlayCircle className="mr-2 h-4 w-4" />
-              {progressPercent > 0 ? "Reprendre le cours" : "Commencer le cours"}
-            </Link>
-          ) : null}
+          <aside className="glass-panel ambient-ring space-y-4 p-6">
+            <div>
+              <p className="editorial-eyebrow">Course Snapshot</p>
+              <h2 className="font-display mt-2 text-2xl font-black text-[#2c2f31]">Prêt à reprendre ?</h2>
+            </div>
+
+            <div className="grid gap-3">
+              <div className="panel-card flex items-center gap-3 p-4">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-[#119da4]/12 text-[#119da4]">
+                  <BookOpenCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#2c2f31]">
+                    {completedChapters}/{flatChapters.length} chapitres
+                  </p>
+                  <p className="text-xs text-[#2c2f31]/62">Validés sur ce parcours.</p>
+                </div>
+              </div>
+
+              <div className="panel-card flex items-center gap-3 p-4">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-[#655670]/12 text-[#655670]">
+                  <Layers3 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#2c2f31]">
+                    {moduleCount} module{moduleCount > 1 ? "s" : ""}
+                  </p>
+                  <p className="text-xs text-[#2c2f31]/62">Structure complète du cours.</p>
+                </div>
+              </div>
+
+              <div className="panel-card flex items-center gap-3 p-4">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-[#ffc857]/24 text-[#775600]">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#2c2f31]">
+                    {nextChapter ? "Chapitre suivant prêt" : "Cours complété"}
+                  </p>
+                  <p className="text-xs text-[#2c2f31]/62">
+                    {nextChapter ? "Votre prochain effort est déjà identifié." : "Tous les chapitres sont validés."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {nextChapter ? (
+              <Link
+                href={`/courses/${course.slug}/learn/${nextChapter.id}`}
+                className="cta-button w-full px-5 py-3 text-sm font-semibold"
+              >
+                <PlayCircle className="h-4 w-4" />
+                {progressPercent > 0 ? "Reprendre le cours" : "Commencer le cours"}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : null}
+          </aside>
         </div>
       </div>
 
       <div className="space-y-4">
+        <div>
+          <p className="editorial-eyebrow">Learning Path</p>
+          <h2 className="font-display text-2xl font-black text-[#2c2f31]">Parcours détaillé</h2>
+        </div>
+
         {course.modules.map((module) => (
-          <article key={module.id} className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
+          <article key={module.id} className="panel-card p-5 sm:p-6">
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#453750]">Module {module.order}</p>
-              <h2 className="text-xl font-semibold text-[#0c0910]">{module.title}</h2>
-              {module.description ? <p className="text-sm text-[#0c0910]/70">{module.description}</p> : null}
+              <p className="editorial-eyebrow">Module {module.order}</p>
+              <h2 className="font-display text-2xl font-black text-[#2c2f31]">{module.title}</h2>
+              {module.description ? (
+                <p className="text-sm leading-7 text-[#2c2f31]/70">{module.description}</p>
+              ) : null}
             </div>
 
             <div className="mt-4 space-y-2">
@@ -154,17 +217,17 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                   <Link
                     key={chapter.id}
                     href={`/courses/${course.slug}/learn/${chapter.id}`}
-                    className="flex flex-col gap-2 rounded-xl border border-[#0c0910]/10 px-4 py-3 transition hover:border-[#0F63FF]/30 hover:bg-[#0F63FF]/5 md:flex-row md:items-center md:justify-between"
+                    className="flex flex-col gap-3 rounded-[1.6rem] bg-[var(--color-surface-high)] px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <p className="font-medium text-[#0c0910]">
+                      <p className="font-semibold text-[#2c2f31]">
                         {index + 1}. {chapter.title}
                       </p>
-                      <p className="text-xs text-[#0c0910]/60">
+                      <p className="text-xs text-[#2c2f31]/60">
                         {chapter.estimatedMinutes ? `${chapter.estimatedMinutes} min` : "Durée non renseignée"}
                       </p>
                     </div>
-                    <span className="text-xs font-semibold text-[#0F63FF]">
+                    <span className="chip chip-primary">
                       {status === ChapterProgressStatus.COMPLETED
                         ? "Terminé"
                         : status === ChapterProgressStatus.IN_PROGRESS

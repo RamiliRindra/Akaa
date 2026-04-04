@@ -658,3 +658,150 @@ Résultat:
 - ✅ Niveau des cours disponible.
 - ✅ Coefficients XP par niveau pilotables par l’admin.
 - 📝 L’ajustement XP manuel par utilisateur reste prévu pour la phase 6.
+
+---
+
+## Phase 6 — Administration
+
+**Date :** 04 Avril 2026
+
+### Objectif de phase
+Livrer un vrai back-office admin pour piloter la plateforme :
+- gouvernance des comptes
+- référentiel catégories
+- référentiel badges
+- ajustement XP manuel
+- supervision globale via dashboard admin
+
+### Implémentation réalisée
+
+#### 1) Utilisateurs
+Fichiers :
+- `prisma/schema.prisma`
+- `prisma/migrations/20260404000200_user_is_active/migration.sql`
+- `src/lib/auth.ts`
+- `src/components/layout/protected-shell.tsx`
+- `src/types/next-auth.d.ts`
+- `src/app/(admin)/admin/users/page.tsx`
+- `src/actions/admin.ts`
+- `src/lib/validations/admin.ts`
+
+Points livrés :
+- Ajout de `user.is_active`.
+- Désactivation / réactivation utilisateur côté admin.
+- Blocage des connexions pour les comptes désactivés.
+- Vue admin utilisateurs avec :
+  - recherche nom / email
+  - filtres rôle / statut
+  - pagination serveur
+  - double vue `tableau` / `cartes`
+- Changement de rôle directement depuis l’interface admin.
+
+#### 2) Catégories
+Fichiers :
+- `src/app/(admin)/admin/categories/page.tsx`
+- `src/components/admin/category-form-fields.tsx`
+- `src/components/admin/category-icon.tsx`
+- `src/actions/admin.ts`
+- `src/lib/validations/admin.ts`
+
+Points livrés :
+- CRUD complet des catégories.
+- Sélection visuelle de l’icône au lieu d’un champ texte brut.
+- Sélection couleur avec :
+  - saisie hexadécimale
+  - color picker natif
+  - suggestions de couleurs
+  - aperçu temps réel
+
+#### 3) Badges
+Fichiers :
+- `src/app/(admin)/admin/badges/page.tsx`
+- `src/actions/admin.ts`
+- `src/lib/validations/admin.ts`
+
+Points livrés :
+- CRUD complet des badges.
+- Paramétrage :
+  - nom
+  - description
+  - `icon_url`
+  - type de condition
+  - valeur de condition
+  - bonus XP
+  - activation
+
+#### 4) XP admin
+Fichiers :
+- `src/app/(admin)/admin/xp/page.tsx`
+- `src/actions/admin.ts`
+- `src/lib/validations/admin.ts`
+
+Points livrés :
+- Conservation de la configuration des coefficients XP par niveau.
+- Ajout de l’ajustement XP manuel par apprenant :
+  - recherche / sélection utilisateur
+  - montant positif ou négatif
+  - raison obligatoire
+- Historique récent des ajustements admin.
+
+#### 5) Dashboard et supervision cours
+Fichiers :
+- `src/app/(admin)/admin/dashboard/page.tsx`
+- `src/app/(admin)/admin/courses/page.tsx`
+- `src/app/(admin)/admin/courses/[courseId]/page.tsx`
+
+Points livrés :
+- Dashboard admin réel :
+  - stats globales utilisateurs
+  - stats cours
+  - stats catégories / badges
+  - XP distribués
+  - top apprenants
+  - derniers comptes
+  - derniers ajustements XP admin
+- Supervision des cours côté admin.
+- Vue détail admin d’un cours sans quitter le périmètre `/admin`.
+- Lien explicite séparé si l’admin veut ouvrir l’édition formateur.
+
+### Migration base de données
+Migration ajoutée :
+- `prisma/migrations/20260404000200_user_is_active/migration.sql`
+
+Contenu :
+- ajout de `user.is_active BOOLEAN NOT NULL DEFAULT true`
+
+Contexte d’exécution :
+- migration appliquée manuellement via Neon SQL Editor
+
+### Validation fonctionnelle exécutée (Phase 6)
+Tests validés :
+- ✅ Désactivation / réactivation utilisateur OK
+- ✅ Blocage des connexions pour compte désactivé OK
+- ✅ Recherche / filtres / pagination utilisateurs OK
+- ✅ Double vue tableau / cartes utilisateurs OK
+- ✅ CRUD catégories OK
+- ✅ Picker visuel icônes / couleurs catégories OK
+- ✅ CRUD badges OK
+- ✅ Ajustement XP manuel apprenant OK
+- ✅ Dashboard admin OK
+- ✅ Consultation des cours côté admin sans bascule implicite dans l’espace formateur OK
+
+### Validation technique exécutée (Phase 6)
+- `npx prisma generate`
+- `npm run lint`
+- `npx tsc --noEmit`
+- `npm run build`
+
+Résultat :
+- ✅ Prisma Client généré
+- ✅ Lint OK
+- ✅ TypeScript OK
+- ✅ Build production OK
+
+### Statut global Phase 6
+- ✅ Phase 6 fonctionnelle implémentée.
+- ✅ Le back-office admin principal est en place.
+- ✅ La gouvernance utilisateurs / catégories / badges / XP est opérationnelle.
+- ✅ Le dashboard admin et la supervision des cours sont disponibles.
+- 📝 Les raffinements visuels globaux restent volontairement reportés à la phase 7.

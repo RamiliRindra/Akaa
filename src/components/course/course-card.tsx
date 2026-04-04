@@ -35,30 +35,30 @@ export function CourseCard({
   const targetHref = href ?? `/courses/${slug}`;
 
   return (
-    <article className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
+    <article className="panel-card overflow-hidden p-5 transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-surface-high)]">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             {categoryName ? (
-              <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+              <span className="chip chip-primary">
                 {categoryName}
               </span>
             ) : null}
             {level ? (
-              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${courseLevelBadgeStyles[level]}`}>
+              <span className={`chip ${courseLevelBadgeStyles[level]}`}>
                 {getCourseLevelLabel(level)}
               </span>
             ) : null}
             {status ? <CourseStatusBadge status={status} /> : null}
           </div>
-          <h3 className="text-lg font-bold text-[#0c0910]">{title}</h3>
-          <p className="text-sm text-[#0c0910]/70">
+          <h3 className="font-display text-xl font-extrabold text-[#2c2f31]">{title}</h3>
+          <p className="text-sm leading-6 text-[#2c2f31]/72">
             {description?.trim() || "Aucune description renseignée pour ce cours."}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-3 text-xs text-[#0c0910]/70">
+      <div className="mt-5 flex flex-wrap gap-3 text-xs text-[#2c2f31]/70">
         <span className="inline-flex items-center gap-1.5">
           <Layers3 className="h-3.5 w-3.5" />
           {moduleCount} module{moduleCount > 1 ? "s" : ""}
@@ -76,13 +76,13 @@ export function CourseCard({
       </div>
 
       {typeof progressPercent === "number" ? (
-        <div className="mt-4 space-y-1">
-          <div className="flex items-center justify-between text-xs font-medium text-[#0c0910]/70">
+        <div className="mt-5 space-y-1">
+          <div className="flex items-center justify-between text-xs font-medium text-[#2c2f31]/70">
             <span>Progression</span>
             <span>{progressPercent}%</span>
           </div>
-          <div className="h-2 rounded-full bg-[#0c0910]/8">
-            <div className="h-2 rounded-full bg-[#119da4]" style={{ width: `${progressPercent}%` }} />
+          <div className="rounded-[1.25rem] bg-[#eef1f3] p-1">
+            <div className="h-2.5 rounded-full bg-[linear-gradient(90deg,#0050d6_0%,#119da4_100%)]" style={{ width: `${progressPercent}%` }} />
           </div>
         </div>
       ) : null}
@@ -90,7 +90,7 @@ export function CourseCard({
       <div className="mt-5">
         <Link
           href={targetHref}
-          className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+          className="cta-button px-5 py-2.5 text-sm font-semibold transition"
         >
           Voir le cours
         </Link>

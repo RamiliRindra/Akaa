@@ -122,6 +122,7 @@ Le schéma est organisé en **7 domaines** :
 | image | TEXT | nullable | URL avatar |
 | password_hash | TEXT | nullable | Null si auth Google uniquement |
 | role | ENUM('LEARNER','TRAINER','ADMIN') | NOT NULL, default 'LEARNER' | |
+| is_active | BOOLEAN | NOT NULL, default true | Permet la désactivation d’un compte sans suppression |
 | total_xp | INTEGER | NOT NULL, default 0 | **Champ dénormalisé** : mis à jour à chaque XpTransaction |
 | level | INTEGER | NOT NULL, default 1 | Calculé : `floor(total_xp / 100) + 1` |
 | email_verified | TIMESTAMP | nullable | |
@@ -667,11 +668,12 @@ akaa/
 │   │   ├── (admin)/               # Route group : espace admin
 │   │   │   ├── admin/
 │   │   │   │   ├── dashboard/page.tsx      # Stats globales plateforme
-│   │   │   │   ├── users/page.tsx          # Gestion utilisateurs + rôles
-│   │   │   │   ├── courses/page.tsx        # Gestion tous les cours
-│   │   │   │   ├── categories/page.tsx     # CRUD catégories de formation
+│   │   │   │   ├── users/page.tsx          # Gestion utilisateurs + rôles, recherche, filtres, pagination
+│   │   │   │   ├── courses/page.tsx        # Gestion tous les cours + accès détail admin
+│   │   │   │   │   └── [courseId]/page.tsx # Consultation admin d’un cours sans sortir du périmètre admin
+│   │   │   │   ├── categories/page.tsx     # CRUD catégories + picker visuel icône/couleur
 │   │   │   │   ├── badges/page.tsx         # CRUD badges
-│   │   │   │   ├── xp/page.tsx             # Coefficients XP par niveau + ajustement manuel plus tard
+│   │   │   │   ├── xp/page.tsx             # Coefficients XP par niveau + ajustement manuel apprenant
 │   │   │   │   ├── calendar/
 │   │   │   │   │   ├── page.tsx            # Vue globale toutes les sessions (tous formateurs)
 │   │   │   │   │   └── sessions/
@@ -869,8 +871,8 @@ akaa/
 ### Phase 6 - Administration
 
 - Dashboard admin : stats globales (utilisateurs, cours, XP distribués)
-- Gestion utilisateurs : liste, changement de rôle, désactivation
-- CRUD catégories : nom, couleur, icône, ordre, activation
+- Gestion utilisateurs : liste, recherche, filtres, pagination, changement de rôle, désactivation
+- CRUD catégories : nom, couleur, icône, ordre, activation, avec picker visuel
 - CRUD badges : création, conditions, activation
 - Ajustement XP manuel : recherche utilisateur + saisie montant/raison
 
