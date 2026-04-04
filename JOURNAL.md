@@ -394,7 +394,90 @@ Ces commandes nécessitent aussi une connexion TCP → les éviter depuis le ré
 - ✅ Cause racine identifiée.
 - ✅ Correctif appliqué dans le dépôt local.
 - ✅ Validations locales exécutées : `npm run lint`, `npx tsc --noEmit`, `npm run build`.
-- ⏭️ Étape suivante : redéploiement Railway pour confirmer la disparition du `500` sur `/dashboard`.
+- ✅ Redéploiement Railway effectué.
+- ✅ Login mail / mot de passe validé en production.
+- ✅ `/dashboard` recharge correctement après authentification.
+
+---
+
+## Incident I — Google OAuth Railway : `OAuthAccountNotLinked` après réactivation
+
+**Date :** 04 Avril 2026
+
+### Symptôme
+- Le bouton Google redirigeait correctement vers Google.
+- Après retour sur l’application, l’UI affichait seulement `La connexion a échoué`.
+- Logs Railway utiles :
+  - `type: 'OAuthAccountNotLinked'`
+  - `Another account already exists with the same e-mail address`
+
+### Analyse
+- Le provider Google était bien configuré côté Google Cloud / Railway.
+- Le warning SSL `pg` n’était pas la cause du problème.
+- Un utilisateur existait déjà avec le même email en base via credentials.
+- Auth.js refusait par défaut de relier automatiquement ce compte local à l’identité Google.
+
+### Correctif appliqué
+- `src/lib/auth.ts`
+  - activation de `allowDangerousEmailAccountLinking: true` sur le provider Google.
+- `src/components/auth/login-form.tsx`
+  - amélioration du message d’erreur pour les cas `OAuthAccountNotLinked` / callback OAuth.
+
+### Validation
+- ✅ Google OAuth testé sur l’instance Railway : **OK**
+- ✅ Auth email / mot de passe testé sur Railway : **OK**
+
+### Notes complémentaires
+- L’utilisateur `rindra@nexthope.net` a été promu manuellement en **ADMIN** dans Neon.
+- Si le dashboard affiche encore l’ancien rôle dans une session déjà ouverte, il faut simplement **se déconnecter puis se reconnecter** pour rafraîchir le JWT/session enrichi avec `role`.
+- Ce point n’est pas un blocage Phase 2 ; c’est un effet de session déjà émise avant le changement de rôle.
+
+---
+
+## Phase 3 — Lancement du contenu pédagogique
+
+**Date :** 04 Avril 2026
+
+### Décision de priorisation
+Pour démarrer la Phase 3, le choix retenu a été :
+1. poser le **socle serveur** (validations + actions + règles d’accès),
+2. rendre l’**espace formateur** réellement utilisable,
+3. ouvrir ensuite le **parcours apprenant** sur les contenus publiés.
+
+### Mise en place réalisée
+- Installation de Tiptap :
+  - `@tiptap/react`
+  - `@tiptap/starter-kit`
+- Création des actions serveur dédiées au contenu dans `src/actions/courses.ts`.
+- Ajout des validations Zod `src/lib/validations/course.ts`.
+- Ajout d’helpers de contenu :
+  - slug
+  - contenu riche JSON par défaut
+  - détection vidéo YouTube / Google Drive
+- Implémentation des pages formateur :
+  - liste des cours
+  - création de cours
+  - édition de cours
+  - édition de chapitre avec Tiptap
+- Implémentation des pages apprenant :
+  - catalogue filtrable
+  - détail de cours
+  - lecteur de chapitre
+
+### Arbitrages techniques
+- Le réordonnancement modules/chapitres est livré **fonctionnellement** avec boutons `haut/bas`.
+- Le vrai **drag & drop visuel** n’a pas encore été ajouté dans cette passe.
+- La progression apprenant affichée sur la fiche cours lit les données `ChapterProgress` existantes, mais la logique complète de tracking automatique reste bien dans le périmètre de la **Phase 4**.
+
+### Validation
+- ✅ `npm run lint`
+- ✅ `npx tsc --noEmit`
+- ✅ `npm run build`
+
+### Statut
+- ✅ Phase 3 **démarrée sur un socle fonctionnel réel**
+- ✅ Le contenu pédagogique est maintenant éditable côté formateur et consultable côté apprenant
+- ⚠️ Il reste du polish fonctionnel avant de pouvoir considérer la phase entièrement close
 
 ---
 

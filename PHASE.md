@@ -200,18 +200,133 @@ Commande de démarrage recommandée côté prod (migrations hors réseau TGN):
 - `npm run lint`
 - `npx tsc --noEmit`
 - `npx prisma generate`
+- `npm run build`
 
 Résultat:
 - ✅ TypeScript OK
 - ✅ Lint OK
+- ✅ Build production OK
 
 ### Tests manuels et statut
-- Credentials: flux fonctionnel côté UI/action ; en local Madagascar/TGN, dépend de la connectivité Neon (WSS) — souvent bloquée ; **validation réelle sur Railway** une fois déployé.
-- Google OAuth: en local, `CallbackRouteError` / `ETIMEDOUT` vers Google (réseau sortant) ; **OAuth testable sur l’URL Railway** avec redirect URI Google mis à jour.
+- Credentials: flux fonctionnel validé sur **Railway** (login email / mot de passe OK).
+- Google OAuth: configuration Google Cloud + callback Railway validées ; **Google OAuth OK sur Railway** après activation du linking email pour les comptes déjà existants.
 - Schéma SQL `account` vérifié conforme côté Neon.
+- Promotion admin vérifiée côté Neon pour `rindra@nexthope.net`.
 - **Déploiement Railway:** build `npm run build` vert après correctifs Prisma + Suspense ; service déployé opérationnel.
 
 Statut global Phase 2:
 - ✅ Implémentation code terminée.
 - ✅ Déploiement Railway validé (build + mise en ligne).
-- ⚠️ Tests E2E auth/Google **en local** toujours limités par TGN ; scénario nominal = tests contre l’instance Railway + variables Neon/Google.
+- ✅ Auth credentials validée en production.
+- ✅ Google OAuth validé en production.
+- ✅ Phase 2 terminée.
+
+---
+
+## Phase 3 — Contenu pédagogique
+Date: 2026-04-04
+
+### Objectif
+Lancer le socle de la phase 3 conformément à `ARCHITECTURE.md`:
+- CRUD formateur des cours
+- gestion des modules et chapitres
+- éditeur riche Tiptap pour les chapitres
+- catalogue apprenant filtrable
+- page détail cours
+- lecteur de chapitre avec contenu + vidéo
+
+### Implémentation réalisée
+
+#### 1) Socle contenu et validations
+Fichiers:
+- `src/lib/utils.ts`
+- `src/lib/content.ts`
+- `src/lib/validations/course.ts`
+- `src/actions/courses.ts`
+
+Points livrés:
+- Helpers `slugify()` et `formatDate()`.
+- Détection / normalisation des vidéos supportées (`YouTube`, `Google Drive`).
+- Document JSON riche par défaut pour les chapitres.
+- Validations Zod pour:
+  - cours
+  - modules
+  - chapitres
+  - déplacements / suppressions
+- Server Actions dédiées dans `src/actions/courses.ts` avec double vérification:
+  - session obligatoire
+  - rôle `TRAINER|ADMIN`
+  - contrôle de propriété du cours pour le formateur
+
+#### 2) Espace formateur
+Fichiers:
+- `src/app/(trainer)/trainer/courses/page.tsx`
+- `src/app/(trainer)/trainer/courses/new/page.tsx`
+- `src/app/(trainer)/trainer/courses/[courseId]/edit/page.tsx`
+- `src/app/(trainer)/trainer/courses/[courseId]/chapters/[chapterId]/edit/page.tsx`
+- `src/components/editor/rich-text-editor.tsx`
+- `src/components/editor/chapter-editor-form.tsx`
+- `src/components/feedback/form-feedback.tsx`
+
+Points livrés:
+- Liste des cours du formateur.
+- Création de cours:
+  - titre
+  - description
+  - catégorie
+  - miniature
+  - durée estimée
+  - statut
+- Édition d’un cours existant.
+- Ajout / modification / suppression de modules.
+- Réordonnancement fonctionnel des modules via actions `up/down`.
+- Création / suppression / réordonnancement des chapitres.
+- Page dédiée d’édition de chapitre avec **Tiptap**.
+- Support des embeds vidéo:
+  - YouTube
+  - Google Drive
+
+#### 3) Parcours apprenant
+Fichiers:
+- `src/app/(platform)/courses/page.tsx`
+- `src/app/(platform)/courses/[slug]/page.tsx`
+- `src/app/(platform)/courses/[slug]/learn/[chapterId]/page.tsx`
+- `src/components/course/category-filter.tsx`
+- `src/components/course/course-card.tsx`
+- `src/components/course/course-status-badge.tsx`
+- `src/components/course/rich-content-renderer.tsx`
+- `src/components/course/video-embed.tsx`
+
+Points livrés:
+- Catalogue des cours publiés.
+- Filtrage par catégorie.
+- Fiche détail d’un cours:
+  - modules
+  - chapitres
+  - progression calculée à partir de `ChapterProgress` existant
+- Lecteur de chapitre:
+  - navigation précédent / suivant
+  - rendu du contenu riche JSON
+  - vidéo embarquée si disponible
+
+#### 4) Dépendances ajoutées
+- `@tiptap/react`
+- `@tiptap/starter-kit`
+
+### Validation technique exécutée (Phase 3)
+- `npm run lint`
+- `npx tsc --noEmit`
+- `npm run build`
+
+Résultat:
+- ✅ Lint OK
+- ✅ TypeScript OK
+- ✅ Build production OK
+
+### Statut global Phase 3
+- ✅ Socle fonctionnel phase 3 implémenté.
+- ✅ CRUD cours / modules / chapitres disponible.
+- ✅ Catalogue / détail / lecture apprenant disponibles.
+- ✅ Éditeur Tiptap intégré.
+- ⚠️ Réordonnancement livré en version fonctionnelle par boutons `haut/bas` ; pas encore en drag & drop visuel.
+- ⚠️ Progression affichée en lecture seule à partir des données existantes ; le tracking automatique détaillé reste aligné avec la Phase 4.
