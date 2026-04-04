@@ -753,10 +753,6 @@ export async function startChapterProgressAction(chapterId: string) {
     }
 
     await markChapterInProgress(tx, session.user.id, chapterId);
-    await recalculateEnrollmentProgress(tx, session.user.id, chapter.module.courseId);
-    await applyLearningGamification(tx, {
-      userId: session.user.id,
-    });
   });
 }
 

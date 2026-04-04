@@ -25,60 +25,130 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
     redirect("/login");
   }
 
-  const course = await db.course.findFirst({
-    where: {
-      slug,
-      status: CourseStatus.PUBLISHED,
-    },
-    select: {
-      title: true,
-      slug: true,
-      enrollments: {
-        where: { userId: session.user.id },
-        select: {
-          progressPercent: true,
-        },
+  const [course, chapter] = await Promise.all([
+    db.course.findFirst({
+      where: {
+        slug,
+        status: CourseStatus.PUBLISHED,
       },
-      modules: {
-        orderBy: { order: "asc" },
-        select: {
-          id: true,
-          title: true,
-          order: true,
-          chapters: {
-            orderBy: { order: "asc" },
-            select: {
-              id: true,
-              title: true,
-              estimatedMinutes: true,
-              quiz: {
-                select: { id: true },
-              },
-              chapterProgresses: {
-                where: { userId: session.user.id },
-                select: {
-                  status: true,
+      select: {
+        title: true,
+        slug: true,
+        enrollments: {
+          where: { userId: session.user.id },
+          select: {
+            progressPercent: true,
+          },
+        },
+        modules: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            chapters: {
+              orderBy: { order: "asc" },
+              select: {
+                id: true,
+                title: true,
+                estimatedMinutes: true,
+                quiz: {
+                  select: { id: true },
+                },
+                chapterProgresses: {
+                  where: { userId: session.user.id },
+                  select: {
+                    status: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-  });
+    }),
+    db.chapter.findFirst({
+      where: {
+        id: chapterId,
+        module: {
+          course: {
+            slug,
+            status: CourseStatus.PUBLISHED,
+          },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        videoUrl: true,
+        estimatedMinutes: true,
+        module: {
+          select: {
+            title: true,
+          },
+        },
+        chapterProgresses: {
+          where: { userId: session.user.id },
+          select: {
+            status: true,
+          },
+        },
+        quiz: {
+          select: {
+            id: true,
+            title: true,
+            passingScore: true,
+            xpReward: true,
+            questions: {
+              orderBy: { order: "asc" },
+              select: {
+                id: true,
+                questionText: true,
+                type: true,
+                order: true,
+                options: {
+                  orderBy: { optionText: "asc" },
+                  select: {
+                    id: true,
+                    optionText: true,
+                    isCorrect: true,
+                  },
+                },
+              },
+            },
+            attempts: {
+              where: { userId: session.user.id },
+              orderBy: { attemptedAt: "desc" },
+              take: 1,
+              select: {
+                score: true,
+                passed: true,
+                attemptedAt: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
 
   if (!course) {
     notFound();
   }
 
+  if (!chapter) {
+    notFound();
+  }
+
   const chapterList = course.modules.flatMap((module) =>
-    module.chapters.map((chapter) => ({
-      ...chapter,
+    module.chapters.map((chapterItem) => ({
+      ...chapterItem,
       moduleTitle: module.title,
     })),
   );
 
-  const currentIndex = chapterList.findIndex((chapter) => chapter.id === chapterId);
+  const currentIndex = chapterList.findIndex((chapterItem) => chapterItem.id === chapterId);
   if (currentIndex < 0) {
     notFound();
   }
@@ -86,78 +156,11 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
   const previousChapter = currentIndex > 0 ? chapterList[currentIndex - 1] : null;
   const nextChapter = currentIndex < chapterList.length - 1 ? chapterList[currentIndex + 1] : null;
   const completedChapters = chapterList.filter(
-    (chapter) => chapter.chapterProgresses?.[0]?.status === ChapterProgressStatus.COMPLETED,
+    (chapterItem) => chapterItem.chapterProgresses?.[0]?.status === ChapterProgressStatus.COMPLETED,
   ).length;
-  const progressPercent = course.enrollments[0]?.progressPercent ?? (chapterList.length ? Math.round((completedChapters / chapterList.length) * 100) : 0);
-
-  const chapter = await db.chapter.findFirst({
-    where: {
-      id: chapterId,
-      module: {
-        course: {
-          slug,
-          status: CourseStatus.PUBLISHED,
-        },
-      },
-    },
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      videoUrl: true,
-      estimatedMinutes: true,
-      module: {
-        select: {
-          title: true,
-        },
-      },
-      chapterProgresses: {
-        where: { userId: session.user.id },
-        select: {
-          status: true,
-        },
-      },
-      quiz: {
-        select: {
-          id: true,
-          title: true,
-          passingScore: true,
-          xpReward: true,
-          questions: {
-            orderBy: { order: "asc" },
-            select: {
-              id: true,
-              questionText: true,
-              type: true,
-              order: true,
-              options: {
-                orderBy: { optionText: "asc" },
-                select: {
-                  id: true,
-                  optionText: true,
-                  isCorrect: true,
-                },
-              },
-            },
-          },
-          attempts: {
-            where: { userId: session.user.id },
-            orderBy: { attemptedAt: "desc" },
-            take: 1,
-            select: {
-              score: true,
-              passed: true,
-              attemptedAt: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!chapter) {
-    notFound();
-  }
+  const progressPercent =
+    course.enrollments[0]?.progressPercent ??
+    (chapterList.length ? Math.round((completedChapters / chapterList.length) * 100) : 0);
 
   const chapterStatus = chapter.chapterProgresses[0]?.status ?? ChapterProgressStatus.NOT_STARTED;
   const quizAttempt = chapter.quiz?.attempts[0] ?? null;

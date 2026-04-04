@@ -1,5 +1,6 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { BadgeConditionType, UserRole, XpSource } from "@prisma/client";
+import { randomUUID } from "crypto";
 
 import type { CourseLevelValue } from "@/lib/course-level";
 import { applyXpMultiplier, getXpLevelMultiplier } from "@/lib/xp-settings";
@@ -94,6 +95,13 @@ const DEFAULT_BADGES: DefaultBadgeDefinition[] = [
 
 function getTodayDate() {
   return new Date(new Date().toISOString().slice(0, 10));
+}
+
+function isUniqueConstraintError(error: unknown) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  );
 }
 
 function addDays(date: Date, days: number) {
@@ -343,12 +351,26 @@ async function evaluateAutomaticBadges(db: GamificationDbClient, userId: string)
       continue;
     }
 
-    await db.userBadge.create({
-      data: {
-        userId,
-        badgeId: badge.id,
-      },
-    });
+    let awardedNow = false;
+
+    try {
+      await db.userBadge.create({
+        data: {
+          id: randomUUID(),
+          userId,
+          badgeId: badge.id,
+        },
+      });
+      awardedNow = true;
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) {
+        throw error;
+      }
+    }
+
+    if (!awardedNow) {
+      continue;
+    }
 
     if (badge.xpBonus > 0) {
       await awardXp(db, {
