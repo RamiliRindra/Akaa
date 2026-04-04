@@ -371,3 +371,145 @@ Résultat:
 - ⚠️ Réordonnancement livré en version fonctionnelle par boutons `haut/bas` ; pas encore en drag & drop visuel.
 - ⚠️ Progression affichée en lecture seule à partir des données existantes ; le tracking automatique détaillé reste aligné avec la Phase 4.
 - 📝 Améliorations UI/UX identifiées mais volontairement reportées à plus tard pour ne pas retarder la livraison fonctionnelle.
+
+---
+
+## Phase 4 — Quiz et progression réelle
+Date: 2026-04-04
+
+### Objectif
+Implémenter la phase 4 conformément à `ARCHITECTURE.md`:
+- quiz optionnel par chapitre
+- interface formateur de création et édition des quiz
+- passage de quiz côté apprenant
+- progression réelle par chapitre
+- progression réelle par cours complet
+- recalcul automatique de `Enrollment.progress_percent`
+
+### Règle métier retenue
+- Un chapitre peut avoir `0 ou 1 quiz`.
+- Le quiz n’est pas obligatoire pour le formateur.
+- Si un chapitre ne contient pas de quiz:
+  - l’apprenant peut le marquer comme terminé manuellement
+  - la plateforme le redirige ensuite vers le chapitre suivant
+- Si un chapitre contient un quiz:
+  - le chapitre n’est terminé qu’après réussite du quiz
+  - en cas de réussite, la plateforme redirige vers le chapitre suivant
+
+### Implémentation réalisée
+
+#### 1) Moteur de progression
+Fichiers:
+- `src/lib/progress.ts`
+- `src/actions/quiz.ts`
+
+Points livrés:
+- Création automatique de l’`Enrollment` si nécessaire lors du démarrage d’un chapitre ou d’un quiz.
+- Helpers de progression:
+  - `ensureEnrollment()`
+  - `markChapterInProgress()`
+  - `markChapterCompleted()`
+  - `recalculateEnrollmentProgress()`
+- Recalcul automatique de `Enrollment.progress_percent`.
+- Gestion des timestamps de progression:
+  - `startedAt`
+  - `completedAt`
+
+#### 2) Quiz côté formateur
+Fichiers:
+- `src/lib/validations/quiz.ts`
+- `src/actions/quiz.ts`
+- `src/components/quiz/quiz-manager.tsx`
+- `src/app/(trainer)/trainer/courses/[courseId]/chapters/[chapterId]/edit/page.tsx`
+
+Points livrés:
+- Validation Zod complète des quiz, questions, réponses et soumissions.
+- Builder quiz dans la page d’édition de chapitre.
+- Refactor du builder pour une UX plus fluide:
+  - édition locale des questions/réponses
+  - sauvegarde unique côté serveur
+  - suppression du flux “un clic = un reload”
+- Support:
+  - questions à choix unique
+  - questions à choix multiple
+- Contrainte métier respectée:
+  - au moins une bonne réponse par question
+  - exactement une bonne réponse pour `SINGLE`
+
+#### 3) Quiz et progression côté apprenant
+Fichiers:
+- `src/app/(platform)/courses/[slug]/learn/[chapterId]/page.tsx`
+- `src/app/(platform)/courses/[slug]/page.tsx`
+- `src/app/(platform)/courses/page.tsx`
+- `src/app/(platform)/dashboard/page.tsx`
+- `src/components/quiz/quiz-player.tsx`
+- `src/components/course/chapter-progress-tracker.tsx`
+- `src/components/course/progress-bar.tsx`
+
+Points livrés:
+- Démarrage automatique d’un chapitre en `IN_PROGRESS` à l’ouverture.
+- Bouton `Marquer comme terminé` pour les chapitres sans quiz.
+- Passage des quiz côté apprenant.
+- Enregistrement des tentatives de quiz (`QuizAttempt`).
+- Blocage de la complétion tant qu’un quiz requis n’est pas réussi.
+- Affichage de la progression:
+  - dans le lecteur de chapitre
+  - dans la fiche cours
+  - dans le catalogue
+  - dans le dashboard apprenant
+- Sécurisation du payload côté apprenant:
+  - les bonnes réponses ne sont pas envoyées au client
+
+#### 4) Import optionnel des quiz
+Fichiers:
+- `src/lib/validations/course.ts`
+- `src/actions/courses.ts`
+- `src/app/(trainer)/trainer/courses/import/page.tsx`
+- `public/import-templates/manifest.template.csv`
+- `public/import-templates/quiz.template.json`
+
+Points livrés:
+- Import de quiz optionnel lors de l’import d’un cours.
+- Nouvelle colonne `quiz_file` dans `manifest.csv`.
+- Support d’un fichier `quizzes/*.json` dans l’archive ZIP.
+- Modèle JSON téléchargeable pour préparer les quiz importés.
+- Le quiz reste facultatif:
+  - si `quiz_file` est absent, le chapitre est importé sans quiz
+  - si `quiz_file` est présent, le quiz est créé avec ses questions/réponses
+
+### Validation fonctionnelle exécutée (Phase 4)
+Tests validés:
+- ✅ Création et édition de quiz côté formateur.
+- ✅ Chapitre sans quiz:
+  - marquage manuel comme terminé
+  - redirection vers le chapitre suivant
+- ✅ Chapitre avec quiz:
+  - tentative enregistrée
+  - réussite requise pour la complétion
+  - redirection vers le chapitre suivant après succès
+- ✅ Progression par chapitre visible côté apprenant.
+- ✅ Progression par cours visible:
+  - lecteur
+  - fiche cours
+  - catalogue
+  - dashboard
+- ✅ Import optionnel des quiz avec l’import des cours.
+
+### Validation technique exécutée (Phase 4)
+- `npm run lint`
+- `npx tsc --noEmit`
+- `npm run build`
+
+Résultat:
+- ✅ Lint OK
+- ✅ TypeScript OK
+- ✅ Build production OK
+
+### Statut global Phase 4
+- ✅ Phase 4 fonctionnelle implémentée et validée.
+- ✅ Quiz optionnel par chapitre disponible.
+- ✅ Builder quiz côté formateur disponible.
+- ✅ Progression réelle par chapitre disponible.
+- ✅ Progression réelle par cours complet disponible.
+- ✅ Import optionnel des quiz disponible.
+- 📝 Améliorations UI/UX encore possibles sur le builder de quiz, mais non bloquantes pour clôturer la phase.

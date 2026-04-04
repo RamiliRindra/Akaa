@@ -1,0 +1,465 @@
+import type { Prisma, PrismaClient } from "@prisma/client";
+import { BadgeConditionType, XpSource } from "@prisma/client";
+
+type GamificationDbClient = Prisma.TransactionClient | PrismaClient;
+
+type DefaultBadgeDefinition = {
+  name: string;
+  description: string;
+  iconUrl: string;
+  conditionType: BadgeConditionType;
+  conditionValue: number | null;
+  xpBonus: number;
+};
+
+type AwardXpInput = {
+  userId: string;
+  amount: number;
+  source: XpSource;
+  sourceId?: string;
+  description: string;
+};
+
+type ActivityGamificationInput = {
+  userId: string;
+  chapterId?: string;
+  quizId?: string;
+  quizXpReward?: number;
+  perfectQuiz?: boolean;
+  updateStreak?: boolean;
+};
+
+export type GamificationSummary = {
+  xpGained: number;
+  levelBefore: number;
+  levelAfter: number;
+  unlockedBadges: string[];
+  currentStreak: number;
+};
+
+const DEFAULT_BADGES: DefaultBadgeDefinition[] = [
+  {
+    name: "Premier Pas",
+    description: "Compléter un premier cours.",
+    iconUrl: "/badges/premier-pas.svg",
+    conditionType: BadgeConditionType.COURSES_COMPLETED,
+    conditionValue: 1,
+    xpBonus: 20,
+  },
+  {
+    name: "Assidu",
+    description: "Maintenir un streak de 7 jours.",
+    iconUrl: "/badges/assidu.svg",
+    conditionType: BadgeConditionType.STREAK,
+    conditionValue: 7,
+    xpBonus: 30,
+  },
+  {
+    name: "Marathonien",
+    description: "Maintenir un streak de 30 jours.",
+    iconUrl: "/badges/marathonien.svg",
+    conditionType: BadgeConditionType.STREAK,
+    conditionValue: 30,
+    xpBonus: 100,
+  },
+  {
+    name: "Quiz Master",
+    description: "Obtenir 10 quiz parfaits.",
+    iconUrl: "/badges/quiz-master.svg",
+    conditionType: BadgeConditionType.QUIZ_PERFECT,
+    conditionValue: 10,
+    xpBonus: 50,
+  },
+  {
+    name: "Érudit",
+    description: "Accumuler 500 XP.",
+    iconUrl: "/badges/erudit.svg",
+    conditionType: BadgeConditionType.XP_THRESHOLD,
+    conditionValue: 500,
+    xpBonus: 25,
+  },
+  {
+    name: "Expert",
+    description: "Accumuler 2000 XP.",
+    iconUrl: "/badges/expert.svg",
+    conditionType: BadgeConditionType.XP_THRESHOLD,
+    conditionValue: 2000,
+    xpBonus: 50,
+  },
+];
+
+function getTodayDate() {
+  return new Date(new Date().toISOString().slice(0, 10));
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+export function getLevelFromXp(totalXp: number) {
+  return Math.floor(totalXp / 100) + 1;
+}
+
+export async function ensureDefaultBadges(db: GamificationDbClient) {
+  await Promise.all(
+    DEFAULT_BADGES.map((badge) =>
+      db.badge.upsert({
+        where: { name: badge.name },
+        update: {
+          description: badge.description,
+          iconUrl: badge.iconUrl,
+          conditionType: badge.conditionType,
+          conditionValue: badge.conditionValue,
+          xpBonus: badge.xpBonus,
+          isActive: true,
+        },
+        create: {
+          name: badge.name,
+          description: badge.description,
+          iconUrl: badge.iconUrl,
+          conditionType: badge.conditionType,
+          conditionValue: badge.conditionValue,
+          xpBonus: badge.xpBonus,
+        },
+      }),
+    ),
+  );
+}
+
+async function awardXp(db: GamificationDbClient, input: AwardXpInput) {
+  if (input.amount <= 0) {
+    return {
+      awarded: false,
+      newLevel: null as number | null,
+    };
+  }
+
+  if (input.sourceId) {
+    const existingTransaction = await db.xpTransaction.findFirst({
+      where: {
+        userId: input.userId,
+        source: input.source,
+        sourceId: input.sourceId,
+      },
+      select: { id: true },
+    });
+
+    if (existingTransaction) {
+      const user = await db.user.findUnique({
+        where: { id: input.userId },
+        select: { level: true },
+      });
+
+      return {
+        awarded: false,
+        newLevel: user?.level ?? null,
+      };
+    }
+  }
+
+  const user = await db.user.findUniqueOrThrow({
+    where: { id: input.userId },
+    select: {
+      totalXp: true,
+      level: true,
+    },
+  });
+
+  const nextTotalXp = user.totalXp + input.amount;
+  const nextLevel = getLevelFromXp(nextTotalXp);
+
+  await db.xpTransaction.create({
+    data: {
+      userId: input.userId,
+      amount: input.amount,
+      source: input.source,
+      sourceId: input.sourceId,
+      description: input.description,
+    },
+  });
+
+  await db.user.update({
+    where: { id: input.userId },
+    data: {
+      totalXp: nextTotalXp,
+      level: nextLevel,
+    },
+  });
+
+  return {
+    awarded: true,
+    newLevel: nextLevel,
+  };
+}
+
+async function updateDailyStreak(db: GamificationDbClient, userId: string) {
+  const today = getTodayDate();
+  const yesterday = addDays(today, -1);
+  const streak = await db.streak.findUnique({
+    where: { userId },
+    select: {
+      currentStreak: true,
+      longestStreak: true,
+      lastActivityDate: true,
+    },
+  });
+
+  if (!streak) {
+    return db.streak.create({
+      data: {
+        userId,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastActivityDate: today,
+      },
+      select: {
+        currentStreak: true,
+        longestStreak: true,
+      },
+    });
+  }
+
+  const lastActivity = streak.lastActivityDate
+    ? new Date(streak.lastActivityDate.toISOString().slice(0, 10))
+    : null;
+
+  if (lastActivity && lastActivity.getTime() === today.getTime()) {
+    return {
+      currentStreak: streak.currentStreak,
+      longestStreak: streak.longestStreak,
+    };
+  }
+
+  const nextCurrentStreak =
+    lastActivity && lastActivity.getTime() === yesterday.getTime()
+      ? streak.currentStreak + 1
+      : 1;
+  const nextLongestStreak = Math.max(streak.longestStreak, nextCurrentStreak);
+
+  return db.streak.update({
+    where: { userId },
+    data: {
+      currentStreak: nextCurrentStreak,
+      longestStreak: nextLongestStreak,
+      lastActivityDate: today,
+    },
+    select: {
+      currentStreak: true,
+      longestStreak: true,
+    },
+  });
+}
+
+async function evaluateAutomaticBadges(db: GamificationDbClient, userId: string) {
+  await ensureDefaultBadges(db);
+
+  const [user, streak, completedCourses, perfectQuizAttempts, existingBadges, activeBadges] = await Promise.all([
+    db.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: {
+        totalXp: true,
+      },
+    }),
+    db.streak.findUnique({
+      where: { userId },
+      select: {
+        currentStreak: true,
+      },
+    }),
+    db.enrollment.count({
+      where: {
+        userId,
+        progressPercent: 100,
+      },
+    }),
+    db.quizAttempt.findMany({
+      where: {
+        userId,
+        passed: true,
+        score: 100,
+      },
+      distinct: ["quizId"],
+      select: {
+        quizId: true,
+      },
+    }),
+    db.userBadge.findMany({
+      where: { userId },
+      select: {
+        badgeId: true,
+      },
+    }),
+    db.badge.findMany({
+      where: {
+        isActive: true,
+        conditionType: { not: BadgeConditionType.MANUAL },
+      },
+      select: {
+        id: true,
+        name: true,
+        conditionType: true,
+        conditionValue: true,
+        xpBonus: true,
+      },
+    }),
+  ]);
+
+  const ownedBadgeIds = new Set(existingBadges.map((badge) => badge.badgeId));
+  const unlockedBadgeNames: string[] = [];
+
+  for (const badge of activeBadges) {
+    if (ownedBadgeIds.has(badge.id)) {
+      continue;
+    }
+
+    const threshold = badge.conditionValue ?? 0;
+    let unlocked = false;
+
+    switch (badge.conditionType) {
+      case BadgeConditionType.XP_THRESHOLD:
+        unlocked = user.totalXp >= threshold;
+        break;
+      case BadgeConditionType.COURSES_COMPLETED:
+        unlocked = completedCourses >= threshold;
+        break;
+      case BadgeConditionType.STREAK:
+        unlocked = (streak?.currentStreak ?? 0) >= threshold;
+        break;
+      case BadgeConditionType.QUIZ_PERFECT:
+        unlocked = perfectQuizAttempts.length >= threshold;
+        break;
+      default:
+        unlocked = false;
+        break;
+    }
+
+    if (!unlocked) {
+      continue;
+    }
+
+    await db.userBadge.create({
+      data: {
+        userId,
+        badgeId: badge.id,
+      },
+    });
+
+    if (badge.xpBonus > 0) {
+      await awardXp(db, {
+        userId,
+        amount: badge.xpBonus,
+        source: XpSource.BADGE,
+        sourceId: `badge:${badge.id}`,
+        description: `Badge débloqué : ${badge.name}`,
+      });
+    }
+
+    unlockedBadgeNames.push(badge.name);
+  }
+
+  return unlockedBadgeNames;
+}
+
+export async function applyLearningGamification(
+  db: GamificationDbClient,
+  input: ActivityGamificationInput,
+): Promise<GamificationSummary> {
+  await ensureDefaultBadges(db);
+
+  const userBefore = await db.user.findUniqueOrThrow({
+    where: { id: input.userId },
+    select: {
+      level: true,
+    },
+  });
+
+  let xpGained = 0;
+  let currentStreak = 0;
+
+  if (input.updateStreak !== false) {
+    const streak = await updateDailyStreak(db, input.userId);
+    currentStreak = streak.currentStreak;
+
+    if (streak.currentStreak >= 7) {
+      const streakXp = await awardXp(db, {
+        userId: input.userId,
+        amount: 30,
+        source: XpSource.STREAK,
+        sourceId: "streak:7",
+        description: "Récompense de streak de 7 jours",
+      });
+
+      if (streakXp.awarded) {
+        xpGained += 30;
+      }
+    }
+  } else {
+    const streak = await db.streak.findUnique({
+      where: { userId: input.userId },
+      select: {
+        currentStreak: true,
+      },
+    });
+    currentStreak = streak?.currentStreak ?? 0;
+  }
+
+  if (input.chapterId) {
+    const chapterXp = await awardXp(db, {
+      userId: input.userId,
+      amount: 10,
+      source: XpSource.CHAPTER,
+      sourceId: `chapter:${input.chapterId}`,
+      description: "Chapitre terminé",
+    });
+
+    if (chapterXp.awarded) {
+      xpGained += 10;
+    }
+  }
+
+  if (input.quizId && input.quizXpReward) {
+    const quizXp = await awardXp(db, {
+      userId: input.userId,
+      amount: input.quizXpReward,
+      source: XpSource.QUIZ,
+      sourceId: `quiz:${input.quizId}`,
+      description: "Quiz réussi",
+    });
+
+    if (quizXp.awarded) {
+      xpGained += input.quizXpReward;
+    }
+  }
+
+  if (input.quizId && input.perfectQuiz) {
+    const perfectXp = await awardXp(db, {
+      userId: input.userId,
+      amount: 25,
+      source: XpSource.QUIZ,
+      sourceId: `quiz-perfect:${input.quizId}`,
+      description: "Quiz parfait",
+    });
+
+    if (perfectXp.awarded) {
+      xpGained += 25;
+    }
+  }
+
+  const unlockedBadges = await evaluateAutomaticBadges(db, input.userId);
+  const userAfter = await db.user.findUniqueOrThrow({
+    where: { id: input.userId },
+    select: {
+      level: true,
+    },
+  });
+
+  return {
+    xpGained,
+    levelBefore: userBefore.level,
+    levelAfter: userAfter.level,
+    unlockedBadges,
+    currentStreak,
+  };
+}

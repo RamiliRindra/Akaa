@@ -4,9 +4,12 @@ import { redirect } from "next/navigation";
 
 import { CourseCard } from "@/components/course/course-card";
 import { ProgressBar } from "@/components/course/progress-bar";
+import { BadgeCard } from "@/components/gamification/badge-card";
 import { getHomePathForRole } from "@/lib/auth-config";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { ensureDefaultBadges } from "@/lib/gamification";
+import { formatDate } from "@/lib/utils";
 
 export default async function LearnerDashboardPage() {
   const session = await auth();
@@ -20,8 +23,22 @@ export default async function LearnerDashboardPage() {
   }
 
   const userId = session.user.id;
+  await ensureDefaultBadges(db);
 
-  const [enrollments, totalCompletedChapters, totalPublishedChapters] = await Promise.all([
+  const [user, enrollments, totalCompletedChapters, totalPublishedChapters, recentBadges, recentTransactions] = await Promise.all([
+    db.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: {
+        totalXp: true,
+        level: true,
+        streak: {
+          select: {
+            currentStreak: true,
+            longestStreak: true,
+          },
+        },
+      },
+    }),
     db.enrollment.findMany({
       where: { userId },
       orderBy: [{ progressPercent: "desc" }, { enrolledAt: "desc" }],
@@ -88,19 +105,35 @@ export default async function LearnerDashboardPage() {
         },
       },
     }),
+    db.userBadge.findMany({
+      where: { userId },
+      orderBy: { earnedAt: "desc" },
+      take: 4,
+      select: {
+        earnedAt: true,
+        badge: {
+          select: {
+            name: true,
+            description: true,
+            iconUrl: true,
+          },
+        },
+      },
+    }),
+    db.xpTransaction.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        amount: true,
+        description: true,
+        createdAt: true,
+      },
+    }),
   ]);
 
   const publishedEnrollments = enrollments.filter((enrollment) => enrollment.course.status === CourseStatus.PUBLISHED);
-  const completedCourses = publishedEnrollments.filter((enrollment) => enrollment.progressPercent === 100).length;
-  const inProgressCourses = publishedEnrollments.filter(
-    (enrollment) => enrollment.progressPercent > 0 && enrollment.progressPercent < 100,
-  ).length;
-  const averageProgress = publishedEnrollments.length
-    ? Math.round(
-        publishedEnrollments.reduce((total, enrollment) => total + enrollment.progressPercent, 0) /
-          publishedEnrollments.length,
-      )
-    : 0;
   const overallProgress = totalPublishedChapters
     ? Math.round((totalCompletedChapters / totalPublishedChapters) * 100)
     : 0;
@@ -116,24 +149,24 @@ export default async function LearnerDashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
-          <p className="text-sm text-[#0c0910]/60">Cours inscrits</p>
-          <p className="mt-2 text-3xl font-bold text-[#0c0910]">{publishedEnrollments.length}</p>
+          <p className="text-sm text-[#0c0910]/60">XP total</p>
+          <p className="mt-2 text-3xl font-bold text-[#453750]">{user.totalXp}</p>
         </article>
         <article className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
-          <p className="text-sm text-[#0c0910]/60">Cours terminés</p>
-          <p className="mt-2 text-3xl font-bold text-[#119da4]">{completedCourses}</p>
+          <p className="text-sm text-[#0c0910]/60">Niveau</p>
+          <p className="mt-2 text-3xl font-bold text-[#0F63FF]">{user.level}</p>
         </article>
         <article className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
-          <p className="text-sm text-[#0c0910]/60">Cours en cours</p>
-          <p className="mt-2 text-3xl font-bold text-[#0F63FF]">{inProgressCourses}</p>
+          <p className="text-sm text-[#0c0910]/60">Streak actuel</p>
+          <p className="mt-2 text-3xl font-bold text-[#ffc857]">{user.streak?.currentStreak ?? 0}</p>
         </article>
         <article className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
-          <p className="text-sm text-[#0c0910]/60">Progression moyenne</p>
-          <p className="mt-2 text-3xl font-bold text-[#453750]">{averageProgress}%</p>
+          <p className="text-sm text-[#0c0910]/60">Record de streak</p>
+          <p className="mt-2 text-3xl font-bold text-[#119da4]">{user.streak?.longestStreak ?? 0}</p>
         </article>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[#0c0910]">Mes cours</h2>
@@ -173,9 +206,9 @@ export default async function LearnerDashboardPage() {
 
         <aside className="space-y-4 rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-[#0c0910]">Progression globale</h2>
+            <h2 className="text-lg font-semibold text-[#0c0910]">Vue gamifiée</h2>
             <p className="text-sm text-[#0c0910]/65">
-              Cette vue résume l’avancement de tous les chapitres publiés sur vos cours suivis.
+              Vos récompenses et votre rythme d’apprentissage en un coup d’œil.
             </p>
           </div>
 
@@ -195,6 +228,54 @@ export default async function LearnerDashboardPage() {
             <p>
               Lorsqu’un quiz est associé à un chapitre, sa réussite est requise pour compter ce chapitre comme terminé.
             </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-[#0c0910]">Badges récents</h3>
+              <Link href="/profile" className="text-sm font-medium text-[#0F63FF] hover:underline">
+                Voir mon profil
+              </Link>
+            </div>
+
+            {recentBadges.length ? (
+              <div className="space-y-3">
+                {recentBadges.map((entry) => (
+                  <BadgeCard
+                    key={`${entry.badge.name}-${entry.earnedAt.toISOString()}`}
+                    name={entry.badge.name}
+                    description={entry.badge.description}
+                    iconUrl={entry.badge.iconUrl}
+                    earnedAt={formatDate(entry.earnedAt)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-[#f7f9ff] px-4 py-5 text-sm text-[#0c0910]/65">
+                Aucun badge débloqué pour le moment.
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-[#0c0910]">Derniers gains XP</h3>
+            {recentTransactions.length ? (
+              <div className="space-y-2">
+                {recentTransactions.map((transaction) => (
+                  <div key={transaction.id} className="rounded-xl border border-[#0c0910]/10 bg-white px-3 py-3 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-medium text-[#0c0910]">{transaction.description ?? "Gain d’XP"}</p>
+                      <span className="font-semibold text-[#453750]">+{transaction.amount} XP</span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#0c0910]/55">{formatDate(transaction.createdAt)}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-[#f7f9ff] px-4 py-5 text-sm text-[#0c0910]/65">
+                Aucun gain XP enregistré pour le moment.
+              </div>
+            )}
           </div>
         </aside>
       </div>

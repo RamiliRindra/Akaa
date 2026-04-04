@@ -555,6 +555,98 @@ Cette décision a été consignée dans `ARCHITECTURE.md` pour rester visible pa
 
 ---
 
+## Phase 4 — Quiz et progression réelle
+
+**Date :** 04 Avril 2026
+
+### Décision produit retenue
+La règle métier validée pour la phase 4 a été la suivante :
+- un chapitre peut avoir `0 ou 1 quiz`
+- le quiz reste **optionnel** pour le formateur
+- un chapitre sans quiz peut être terminé manuellement par l’apprenant
+- un chapitre avec quiz n’est terminé qu’après **réussite** du quiz
+
+Cette règle a été appliquée de manière cohérente dans le back-office formateur, le lecteur apprenant et le calcul de progression.
+
+### Mise en place réalisée
+- Ajout du socle de progression dans `src/lib/progress.ts`:
+  - création automatique d’inscription (`Enrollment`) si nécessaire
+  - passage en `IN_PROGRESS`
+  - passage en `COMPLETED`
+  - recalcul automatique de `Enrollment.progress_percent`
+- Ajout des actions serveur quiz/progression dans `src/actions/quiz.ts`.
+- Ajout des validations Zod de la phase 4 dans `src/lib/validations/quiz.ts`.
+- Intégration du quiz dans la page d’édition de chapitre formateur.
+- Ajout du lecteur quiz côté apprenant.
+- Intégration de la progression:
+  - dans le lecteur
+  - dans la fiche cours
+  - dans le catalogue
+  - dans le dashboard apprenant
+
+### Arbitrage UX sur le builder quiz
+Le premier jet du CRUD quiz fonctionnait, mais l’expérience était trop lourde :
+- modification d’une réponse
+- soumission
+- rechargement
+- répétition sur chaque champ
+
+Ce flux a été jugé trop fatigant pour un formateur.
+
+Correctif produit/technique appliqué :
+- abandon du mini-CRUD formulaire par formulaire
+- remplacement par un **builder client** à édition locale
+- sauvegarde serveur en **une seule action**
+
+Le résultat est plus proche d’une UX type Tally :
+- les questions et réponses se préparent localement
+- l’enregistrement est déclenché à la fin
+- les reloads intermédiaires ont été supprimés
+
+### Ajustements apprenant
+- Un chapitre sans quiz possède désormais un bouton `Marquer comme terminé`.
+- Après validation, l’apprenant est redirigé automatiquement vers le **chapitre suivant**.
+- Après réussite d’un quiz, la même logique d’enchaînement est appliquée.
+
+### Sécurité / intégrité
+- Les bonnes réponses du quiz ne sont pas exposées dans le payload envoyé au client apprenant.
+- La validation serveur reste la source de vérité pour:
+  - score
+  - réussite / échec
+  - statut de progression
+
+### Extension de l’import de cours
+Après mise en place du builder, l’import de cours a été étendu pour accepter un quiz optionnel par chapitre.
+
+Choix retenu :
+- garder `manifest.csv` comme source principale de structure
+- ajouter une colonne optionnelle `quiz_file`
+- charger le quiz depuis un fichier JSON dédié dans l’archive ZIP
+
+Livré dans cette passe :
+- `manifest.template.csv` mis à jour
+- `quiz.template.json` ajouté comme modèle
+- import quiz facultatif par chapitre
+
+### Validation
+- ✅ Création et édition de quiz validées
+- ✅ Passage de quiz côté apprenant validé
+- ✅ Progression chapitre validée
+- ✅ Progression cours validée
+- ✅ Enchaînement automatique vers le chapitre suivant validé
+- ✅ Import optionnel des quiz validé
+- ✅ `npm run lint`
+- ✅ `npx tsc --noEmit`
+- ✅ `npm run build`
+
+### Statut
+- ✅ Phase 4 fonctionnelle livrée
+- ✅ Le moteur quiz/progression est en place
+- ✅ L’import de quiz est disponible sans être obligatoire
+- 📝 Des raffinements UX/UI restent possibles, mais ils ne bloquent pas la clôture de la phase
+
+---
+
 ## Décisions techniques retenues
 
 1. **Conserver Prisma + schéma actuel** (structure SQL validée pour `account`).

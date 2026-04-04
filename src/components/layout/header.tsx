@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Zap } from "lucide-react";
+import { Flame, Sparkles, Zap } from "lucide-react";
 
 import { UserMenu } from "@/components/layout/user-menu";
 
@@ -11,9 +11,10 @@ type HeaderProps = {
   userEmail?: string | null;
   totalXp: number;
   level: number;
+  currentStreak: number;
 };
 
-export function Header({ title, userName, userEmail, totalXp, level }: HeaderProps) {
+export function Header({ title, userName, userEmail, totalXp, level, currentStreak }: HeaderProps) {
   const initial = userName.charAt(0).toUpperCase();
 
   return (
@@ -33,6 +34,15 @@ export function Header({ title, userName, userEmail, totalXp, level }: HeaderPro
             <Zap className="h-3.5 w-3.5 text-[#ffc857]" />
             {totalXp} XP
             <span className="text-[#453750]/70">• Niveau {level}</span>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="hidden items-center gap-2 rounded-full border border-[#ffc857]/30 bg-[#ffc857]/15 px-3 py-1 text-xs font-semibold text-[#8a6110] lg:flex"
+          >
+            <Flame className="h-3.5 w-3.5 text-[#f97316]" />
+            Streak {currentStreak} jour{currentStreak > 1 ? "s" : ""}
           </motion.div>
 
           <div className="hidden items-center gap-2 rounded-xl border border-[#0c0910]/10 bg-white px-2 py-1 sm:flex">

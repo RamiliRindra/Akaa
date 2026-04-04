@@ -32,6 +32,11 @@ export async function ProtectedShell({
       email: true,
       totalXp: true,
       level: true,
+      streak: {
+        select: {
+          currentStreak: true,
+        },
+      },
     },
   });
   if (!user) {
@@ -49,6 +54,7 @@ export async function ProtectedShell({
             userEmail={user.email}
             totalXp={user.totalXp}
             level={user.level}
+            currentStreak={user.streak?.currentStreak ?? 0}
           />
           <div className="absolute left-4 top-3.5 lg:hidden">
             <MobileNav items={navItems} />
