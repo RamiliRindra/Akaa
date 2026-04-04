@@ -62,8 +62,8 @@ export async function ProtectedShell({
             currentStreak={user.streak?.currentStreak ?? 0}
             showGamification={user.role === "LEARNER"}
           />
-          <div className="absolute left-6 top-6 lg:hidden">
-            <MobileNav items={navItems} />
+          <div className="absolute left-4 top-4 z-30 lg:hidden">
+            <MobileNav title={navTitle} items={navItems} />
           </div>
         </div>
         <main className="flex-1 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5">{children}</main>

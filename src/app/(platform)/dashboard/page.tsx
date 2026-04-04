@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { CourseCard } from "@/components/course/course-card";
 import { ProgressBar } from "@/components/course/progress-bar";
 import { BadgeCard } from "@/components/gamification/badge-card";
+import { XpLineChart } from "@/components/gamification/xp-line-chart";
 import { getHomePathForRole } from "@/lib/auth-config";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -126,7 +127,7 @@ export default async function LearnerDashboardPage() {
       db.xpTransaction.findMany({
         where: { userId },
         orderBy: { createdAt: "desc" },
-        take: 5,
+        take: 30,
         select: {
           id: true,
           amount: true,
@@ -142,6 +143,28 @@ export default async function LearnerDashboardPage() {
   const overallProgress = totalPublishedChapters
     ? Math.round((totalCompletedChapters / totalPublishedChapters) * 100)
     : 0;
+  const displayTransactions = recentTransactions.slice(0, 5);
+  const xpTrendPoints = Array.from({ length: 7 }, (_, index) => {
+    const day = new Date();
+    day.setHours(0, 0, 0, 0);
+    day.setDate(day.getDate() - (6 - index));
+    const nextDay = new Date(day);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    const value = recentTransactions
+      .filter((transaction) => transaction.createdAt >= day && transaction.createdAt < nextDay)
+      .reduce((total, transaction) => total + transaction.amount, 0);
+
+    const label = new Intl.DateTimeFormat("fr-FR", { weekday: "short" })
+      .format(day)
+      .replace(".", "")
+      .slice(0, 3);
+
+    return {
+      label,
+      value,
+    };
+  });
 
   return (
     <section className="space-y-8">
@@ -306,7 +329,7 @@ export default async function LearnerDashboardPage() {
                   <Zap className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#2c2f31]">{recentTransactions.length} gains récents</p>
+                  <p className="text-sm font-semibold text-[#2c2f31]">{displayTransactions.length} gains récents</p>
                   <p className="text-xs text-[#2c2f31]/62">Transactions XP visibles ci-dessous.</p>
                 </div>
               </div>
@@ -338,13 +361,15 @@ export default async function LearnerDashboardPage() {
             </div>
           </div>
 
+          <XpLineChart points={xpTrendPoints} />
+
           <div className="space-y-3">
             <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-[#655670]">
               Historique récent
             </h3>
-            {recentTransactions.length ? (
+            {displayTransactions.length ? (
               <div className="space-y-3">
-                {recentTransactions.map((transaction) => (
+                {displayTransactions.map((transaction) => (
                   <div key={transaction.id} className="panel-card flex items-start justify-between gap-4 p-4">
                     <div className="space-y-1">
                       <p className="text-sm font-semibold text-[#2c2f31]">

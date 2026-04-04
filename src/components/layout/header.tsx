@@ -3,8 +3,6 @@
 import { motion } from "framer-motion";
 import { Flame, Sparkles, Zap } from "lucide-react";
 
-import { UserMenu } from "@/components/layout/user-menu";
-
 type HeaderProps = {
   title: string;
   userName: string;
@@ -60,10 +58,6 @@ export function Header({ title, userName, userEmail, totalXp, level, currentStre
               <p className="truncate text-[11px] text-[#0c0910]/60">{userEmail ?? "Compte local"}</p>
             </div>
           </div>
-
-          <motion.div whileHover={{ y: -1 }} className="hidden sm:block">
-            <UserMenu />
-          </motion.div>
 
           <div className="grid h-10 w-10 place-items-center rounded-full bg-[linear-gradient(135deg,rgba(0,80,214,0.12),rgba(15,99,255,0.18))] sm:hidden">
             <Sparkles className="h-4 w-4 text-[#0F63FF]" />

@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { AppLogo } from "@/components/layout/app-logo";
 import { getNavIcon } from "@/components/layout/nav-icons";
 import type { NavItem } from "@/components/layout/nav-config";
+import { UserMenu } from "@/components/layout/user-menu";
 
 type SidebarProps = {
   title: string;
@@ -56,6 +57,9 @@ export function Sidebar({ title, items }: SidebarProps) {
             );
           })}
         </nav>
+        <div className="mt-auto pt-6">
+          <UserMenu className="w-full justify-start rounded-[1.35rem] px-4 py-3 text-sm font-semibold" />
+        </div>
       </div>
     </aside>
   );
