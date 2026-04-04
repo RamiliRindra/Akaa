@@ -110,6 +110,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           Google({
             clientId: getGoogleOAuthConfig().clientId as string,
             clientSecret: getGoogleOAuthConfig().clientSecret as string,
+            allowDangerousEmailAccountLinking: true,
             profile(profile) {
               const fallbackName =
                 profile.name ??

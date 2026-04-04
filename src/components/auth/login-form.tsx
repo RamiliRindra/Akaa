@@ -23,6 +23,10 @@ export function LoginForm() {
     state?.error ??
     (urlAuthError === "CredentialsSignin"
       ? "Email ou mot de passe incorrect."
+      : urlAuthError === "OAuthAccountNotLinked"
+        ? "Un compte existe déjà avec cet email. La connexion Google a été autorisée pour relier ce compte. Réessayez."
+      : urlAuthError === "OAuthCallbackError" || urlAuthError === "Callback"
+        ? "Le retour Google OAuth a échoué. Vérifiez la configuration Google Cloud puis réessayez."
       : urlAuthError
         ? "La connexion a échoué. Réessayez."
         : null);
