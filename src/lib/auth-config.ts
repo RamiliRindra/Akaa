@@ -27,3 +27,15 @@ export function getGoogleOAuthConfig() {
     clientSecret: googleClientSecret,
   };
 }
+
+export function getHomePathForRole(role?: string | null) {
+  if (role === "ADMIN") {
+    return "/admin/dashboard";
+  }
+
+  if (role === "TRAINER") {
+    return "/trainer/dashboard";
+  }
+
+  return "/dashboard";
+}

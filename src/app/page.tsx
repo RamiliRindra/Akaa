@@ -2,19 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { getHomePathForRole } from "@/lib/auth-config";
 import { auth } from "@/lib/auth";
 import logoAkaa from "@/img/logo_akaa.png";
 
 export default async function LandingPage() {
   const session = await auth();
-  if (session?.user?.role === "ADMIN") {
-    redirect("/admin/dashboard");
-  }
-  if (session?.user?.role === "TRAINER") {
-    redirect("/trainer/dashboard");
-  }
   if (session?.user) {
-    redirect("/dashboard");
+    redirect(getHomePathForRole(session.user.role));
   }
 
   return (
