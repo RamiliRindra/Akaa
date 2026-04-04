@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { QuizQuestionType } from "@prisma/client";
 import { notFound, redirect } from "next/navigation";
 
 import { updateChapterAction } from "@/actions/courses";
 import { ChapterEditorForm } from "@/components/editor/chapter-editor-form";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { QuizManager } from "@/components/quiz/quiz-manager";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -30,6 +32,31 @@ export default async function EditChapterPage({ params, searchParams }: EditChap
       content: true,
       videoUrl: true,
       estimatedMinutes: true,
+      quiz: {
+        select: {
+          id: true,
+          title: true,
+          passingScore: true,
+          xpReward: true,
+          questions: {
+            orderBy: { order: "asc" },
+            select: {
+              id: true,
+              questionText: true,
+              type: true,
+              order: true,
+              options: {
+                orderBy: { optionText: "asc" },
+                select: {
+                  id: true,
+                  optionText: true,
+                  isCorrect: true,
+                },
+              },
+            },
+          },
+        },
+      },
       module: {
         select: {
           id: true,
@@ -83,7 +110,28 @@ export default async function EditChapterPage({ params, searchParams }: EditChap
           estimatedMinutes={chapter.estimatedMinutes}
         />
       </div>
+
+      <QuizManager
+        courseId={courseId}
+        chapterId={chapter.id}
+        quiz={
+          chapter.quiz
+            ? {
+                id: chapter.quiz.id,
+                title: chapter.quiz.title,
+                passingScore: chapter.quiz.passingScore,
+                xpReward: chapter.quiz.xpReward,
+                questions: chapter.quiz.questions.map((question) => ({
+                  id: question.id,
+                  questionText: question.questionText,
+                  type: question.type as QuizQuestionType,
+                  order: question.order,
+                  options: question.options,
+                })),
+              }
+            : null
+        }
+      />
     </section>
   );
 }
-

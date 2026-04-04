@@ -3,6 +3,7 @@ import { Clock3, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ProgressBar } from "@/components/course/progress-bar";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
@@ -34,6 +35,14 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
           name: true,
         },
       },
+      enrollments: session?.user?.id
+        ? {
+            where: { userId: session.user.id },
+            select: {
+              progressPercent: true,
+            },
+          }
+        : false,
       modules: {
         orderBy: { order: "asc" },
         select: {
@@ -47,6 +56,9 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
               id: true,
               title: true,
               estimatedMinutes: true,
+              quiz: {
+                select: { id: true },
+              },
               chapterProgresses: session?.user?.id
                 ? {
                     where: { userId: session.user.id },
@@ -68,10 +80,13 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   const completedChapters = flatChapters.filter(
     (chapter) => chapter.chapterProgresses?.[0]?.status === ChapterProgressStatus.COMPLETED,
   ).length;
-  const progressPercent = flatChapters.length
-    ? Math.round((completedChapters / flatChapters.length) * 100)
-    : 0;
+  const progressPercent =
+    course.enrollments[0]?.progressPercent ??
+    (flatChapters.length ? Math.round((completedChapters / flatChapters.length) * 100) : 0);
   const firstChapter = flatChapters[0];
+  const nextChapter =
+    flatChapters.find((chapter) => chapter.chapterProgresses?.[0]?.status !== ChapterProgressStatus.COMPLETED) ??
+    firstChapter;
 
   return (
     <section className="space-y-6">
@@ -102,15 +117,16 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
               ) : null}
               <span>{flatChapters.length} chapitre{flatChapters.length > 1 ? "s" : ""}</span>
             </div>
+            <ProgressBar value={progressPercent} label="Progression du cours" />
           </div>
 
-          {firstChapter ? (
+          {nextChapter ? (
             <Link
-              href={`/courses/${course.slug}/learn/${firstChapter.id}`}
+              href={`/courses/${course.slug}/learn/${nextChapter.id}`}
               className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
             >
               <PlayCircle className="mr-2 h-4 w-4" />
-              Commencer le cours
+              {progressPercent > 0 ? "Reprendre le cours" : "Commencer le cours"}
             </Link>
           ) : null}
         </div>
@@ -144,7 +160,13 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                       </p>
                     </div>
                     <span className="text-xs font-semibold text-[#0F63FF]">
-                      {status === ChapterProgressStatus.COMPLETED ? "Terminé" : "Lire le chapitre"}
+                      {status === ChapterProgressStatus.COMPLETED
+                        ? "Terminé"
+                        : status === ChapterProgressStatus.IN_PROGRESS
+                          ? "Continuer"
+                          : chapter.quiz
+                            ? "Lire + quiz"
+                            : "Lire le chapitre"}
                     </span>
                   </Link>
                 );
@@ -156,4 +178,3 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
     </section>
   );
 }
-

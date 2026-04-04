@@ -230,7 +230,8 @@ Date: 2026-04-04
 Lancer le socle de la phase 3 conformément à `ARCHITECTURE.md`:
 - CRUD formateur des cours
 - gestion des modules et chapitres
-- éditeur riche Tiptap pour les chapitres
+- éditeur manuel Markdown-first pour les chapitres
+- import massif de cours
 - catalogue apprenant filtrable
 - page détail cours
 - lecteur de chapitre avec contenu + vidéo
@@ -247,16 +248,18 @@ Fichiers:
 Points livrés:
 - Helpers `slugify()` et `formatDate()`.
 - Détection / normalisation des vidéos supportées (`YouTube`, `Google Drive`).
-- Document JSON riche par défaut pour les chapitres.
+- Compatibilité de lecture entre ancien contenu JSON riche et nouveau contenu Markdown.
 - Validations Zod pour:
   - cours
   - modules
   - chapitres
+  - import ZIP / manifest CSV
   - déplacements / suppressions
 - Server Actions dédiées dans `src/actions/courses.ts` avec double vérification:
   - session obligatoire
   - rôle `TRAINER|ADMIN`
   - contrôle de propriété du cours pour le formateur
+- Import transactionnel d’un cours complet via archive ZIP.
 
 #### 2) Espace formateur
 Fichiers:
@@ -264,7 +267,9 @@ Fichiers:
 - `src/app/(trainer)/trainer/courses/new/page.tsx`
 - `src/app/(trainer)/trainer/courses/[courseId]/edit/page.tsx`
 - `src/app/(trainer)/trainer/courses/[courseId]/chapters/[chapterId]/edit/page.tsx`
-- `src/components/editor/rich-text-editor.tsx`
+- `src/app/(trainer)/trainer/courses/import/page.tsx`
+- `src/components/editor/markdown-editor.tsx`
+- `src/components/editor/markdown-editor-client.tsx`
 - `src/components/editor/chapter-editor-form.tsx`
 - `src/components/feedback/form-feedback.tsx`
 
@@ -281,10 +286,24 @@ Points livrés:
 - Ajout / modification / suppression de modules.
 - Réordonnancement fonctionnel des modules via actions `up/down`.
 - Création / suppression / réordonnancement des chapitres.
-- Page dédiée d’édition de chapitre avec **Tiptap**.
+- Page dédiée d’édition de chapitre avec **MDXEditor**.
+- Saisie manuelle Markdown-first avec support v1:
+  - titres
+  - paragraphes
+  - listes
+  - citations
+  - liens
+  - séparateurs
+  - code inline
+  - blocs de code
 - Support des embeds vidéo:
   - YouTube
   - Google Drive
+- Page dédiée d’import de cours:
+  - une archive ZIP = un cours
+  - `manifest.csv` + fichiers `chapters/*.md`
+  - validation côté serveur
+  - modèles téléchargeables CSV / Markdown
 
 #### 3) Parcours apprenant
 Fichiers:
@@ -306,12 +325,32 @@ Points livrés:
   - progression calculée à partir de `ChapterProgress` existant
 - Lecteur de chapitre:
   - navigation précédent / suivant
-  - rendu du contenu riche JSON
+  - rendu Markdown enrichi
   - vidéo embarquée si disponible
 
 #### 4) Dépendances ajoutées
-- `@tiptap/react`
-- `@tiptap/starter-kit`
+- `@mdxeditor/editor`
+- `react-markdown`
+- `remark-gfm`
+- `jszip`
+- `csv-parse`
+
+### Validation fonctionnelle exécutée (Phase 3)
+Tests validés:
+- ✅ Permissions par rôle.
+- ✅ Côté formateur:
+  - création et gestion de cours
+  - gestion modules / chapitres
+  - édition manuelle des contenus
+- ✅ Publication des cours.
+- ✅ Visualisation côté apprenant.
+- ✅ Bug de redirection / rôle corrigé en complément de phase.
+- ✅ Import de cours validé.
+
+Retour de test à garder en amélioration:
+- ⚠️ Sur l’import, évolution souhaitée:
+  - aujourd’hui `content_file` reste requis dans le flux implémenté
+  - amélioration à prévoir: autoriser un chapitre avec `video_url` seule, à condition qu’au moins un des deux champs `content_file` ou `video_url` soit présent
 
 ### Validation technique exécutée (Phase 3)
 - `npm run lint`
@@ -324,9 +363,11 @@ Résultat:
 - ✅ Build production OK
 
 ### Statut global Phase 3
-- ✅ Socle fonctionnel phase 3 implémenté.
+- ✅ Phase 3 fonctionnelle implémentée et validée.
 - ✅ CRUD cours / modules / chapitres disponible.
 - ✅ Catalogue / détail / lecture apprenant disponibles.
-- ✅ Éditeur Tiptap intégré.
+- ✅ MDXEditor intégré en stratégie Markdown-first.
+- ✅ Import massif ZIP + CSV + Markdown disponible.
 - ⚠️ Réordonnancement livré en version fonctionnelle par boutons `haut/bas` ; pas encore en drag & drop visuel.
 - ⚠️ Progression affichée en lecture seule à partir des données existantes ; le tracking automatique détaillé reste aligné avec la Phase 4.
+- 📝 Améliorations UI/UX identifiées mais volontairement reportées à plus tard pour ne pas retarder la livraison fonctionnelle.

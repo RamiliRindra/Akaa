@@ -221,6 +221,10 @@ async function extractImportPayload(file: File) {
 
   const chapterFiles = new Map<string, string>();
   for (const row of rows) {
+    if (!row.content_file) {
+      continue;
+    }
+
     const chapterFile = zip.file(row.content_file);
     if (!chapterFile) {
       throw new Error(`Le fichier de contenu ${row.content_file} est introuvable dans l’archive.`);
@@ -704,7 +708,9 @@ export async function importCourseArchiveAction(formData: FormData) {
           data: {
             moduleId: createdModule.id,
             title: chapterRow.chapter_title,
-            content: payload.chapterFiles.get(chapterRow.content_file) ?? emptyMarkdownDocument,
+            content: chapterRow.content_file
+              ? (payload.chapterFiles.get(chapterRow.content_file) ?? emptyMarkdownDocument)
+              : emptyMarkdownDocument,
             videoUrl: chapterRow.video_url,
             videoType: deriveVideoType(chapterRow.video_url),
             estimatedMinutes: chapterRow.estimated_minutes,

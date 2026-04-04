@@ -444,40 +444,74 @@ Pour démarrer la Phase 3, le choix retenu a été :
 2. rendre l’**espace formateur** réellement utilisable,
 3. ouvrir ensuite le **parcours apprenant** sur les contenus publiés.
 
+### Re-cadrage d’architecture
+En cours de phase, une décision structurante a été prise pour éviter de figer trop tôt le projet sur un format non adapté à l’import/export :
+- abandon de la cible **Tiptap-first**
+- bascule vers une stratégie **Markdown-first**
+- choix de **MDXEditor** pour l’édition manuelle riche
+- lancement de l’import massif **après** cette bascule
+
+Cette décision a été consignée dans `ARCHITECTURE.md` pour rester visible par les autres modèles/agents et éviter les divergences futures.
+
 ### Mise en place réalisée
-- Installation de Tiptap :
-  - `@tiptap/react`
-  - `@tiptap/starter-kit`
 - Création des actions serveur dédiées au contenu dans `src/actions/courses.ts`.
 - Ajout des validations Zod `src/lib/validations/course.ts`.
 - Ajout d’helpers de contenu :
   - slug
-  - contenu riche JSON par défaut
+  - compatibilité de lecture entre ancien contenu JSON riche et nouveau contenu Markdown
   - détection vidéo YouTube / Google Drive
 - Implémentation des pages formateur :
   - liste des cours
   - création de cours
   - édition de cours
-  - édition de chapitre avec Tiptap
+  - édition de chapitre avec **MDXEditor**
+  - page d’import de cours
 - Implémentation des pages apprenant :
   - catalogue filtrable
   - détail de cours
   - lecteur de chapitre
+- Ajout du rendu Markdown côté apprenant via `react-markdown`.
+- Ajout des modèles téléchargeables d’import :
+  - `manifest.template.csv`
+  - `chapter.template.md`
+- Ajout de l’import massif :
+  - `1 ZIP = 1 cours`
+  - `manifest.csv` à la racine
+  - `chapters/*.md` pour le contenu
 
 ### Arbitrages techniques
 - Le réordonnancement modules/chapitres est livré **fonctionnellement** avec boutons `haut/bas`.
 - Le vrai **drag & drop visuel** n’a pas encore été ajouté dans cette passe.
 - La progression apprenant affichée sur la fiche cours lit les données `ChapterProgress` existantes, mais la logique complète de tracking automatique reste bien dans le périmètre de la **Phase 4**.
+- Le support Markdown v1 a été volontairement borné à :
+  - titres
+  - paragraphes
+  - listes
+  - citations
+  - liens
+  - séparateurs
+  - `code inline`
+  - blocs de code
+- Les améliorations **UI/UX** ont été identifiées, mais reportées pour ne pas retarder la livraison fonctionnelle.
 
 ### Validation
 - ✅ `npm run lint`
 - ✅ `npx tsc --noEmit`
 - ✅ `npm run build`
+- ✅ CRUD formateur validé
+- ✅ publication de cours validée
+- ✅ consultation apprenant validée
+- ✅ import de cours validé
 
 ### Statut
-- ✅ Phase 3 **démarrée sur un socle fonctionnel réel**
-- ✅ Le contenu pédagogique est maintenant éditable côté formateur et consultable côté apprenant
-- ⚠️ Il reste du polish fonctionnel avant de pouvoir considérer la phase entièrement close
+- ✅ Phase 3 **fonctionnelle livrée**
+- ✅ Le contenu pédagogique est éditable côté formateur et consultable côté apprenant
+- ✅ L’éditeur manuel est désormais aligné avec la stratégie **Markdown-first**
+- ✅ L’import massif de cours est disponible
+- ⚠️ Amélioration produit à prévoir sur l’import :
+  - aujourd’hui `content_file` est encore requis dans le flux implémenté
+  - évolution souhaitée : accepter `content_file` **ou** `video_url`, avec au moins un des deux
+- 📝 Le polish UI/UX reste volontairement hors de cette livraison
 
 ---
 

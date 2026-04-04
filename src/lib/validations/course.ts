@@ -107,8 +107,14 @@ export const courseImportRowSchema = z.object({
   chapter_title: requiredCsvText,
   estimated_minutes: optionalCsvNumber,
   video_url: optionalCsvText.refine((value) => !value || isSupportedVideoUrl(value), "Seuls YouTube et Google Drive sont autorisés pour les vidéos."),
-  content_file: requiredCsvText,
-});
+  content_file: optionalCsvText,
+}).refine(
+  (row) => Boolean(row.video_url || row.content_file),
+  {
+    message: "Chaque chapitre doit renseigner au moins un contenu Markdown ou une URL vidéo.",
+    path: ["content_file"],
+  },
+);
 
 export const courseImportManifestSchema = z.array(courseImportRowSchema).min(1, "Le manifest doit contenir au moins un chapitre.");
 

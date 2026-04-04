@@ -2,6 +2,7 @@ import { CourseStatus } from "@prisma/client";
 
 import { CategoryFilter } from "@/components/course/category-filter";
 import { CourseCard } from "@/components/course/course-card";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 type LearnerCoursesPageProps = {
@@ -12,6 +13,8 @@ type LearnerCoursesPageProps = {
 
 export default async function LearnerCoursesPage({ searchParams }: LearnerCoursesPageProps) {
   const { category: categorySlug } = await searchParams;
+  const session = await auth();
+  const userId = session?.user?.id;
 
   const [categories, courses] = await Promise.all([
     db.category.findMany({
@@ -40,6 +43,14 @@ export default async function LearnerCoursesPage({ searchParams }: LearnerCourse
             name: true,
           },
         },
+        enrollments: userId
+          ? {
+              where: { userId },
+              select: {
+                progressPercent: true,
+              },
+            }
+          : false,
         modules: {
           select: {
             id: true,
@@ -77,6 +88,7 @@ export default async function LearnerCoursesPage({ searchParams }: LearnerCourse
               moduleCount={course.modules.length}
               chapterCount={course.modules.reduce((total, module) => total + module.chapters.length, 0)}
               estimatedHours={course.estimatedHours}
+              progressPercent={course.enrollments?.[0]?.progressPercent}
             />
           ))}
         </div>
