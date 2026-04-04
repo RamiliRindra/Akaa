@@ -1,5 +1,5 @@
 import { ChapterProgressStatus, CourseStatus } from "@prisma/client";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, PlayCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -182,16 +182,17 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
     : null;
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+    <section className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
       <ChapterProgressTracker chapterId={chapter.id} enabled={chapterStatus !== ChapterProgressStatus.COMPLETED} />
 
-      <aside className="space-y-3 rounded-2xl border border-[#0c0910]/10 bg-white p-4 shadow-sm">
+      <aside className="surface-section space-y-4 p-4 sm:p-5">
         <Link href={`/courses/${course.slug}`} className="text-sm font-medium text-[#0F63FF] hover:underline">
           ← Retour à la fiche du cours
         </Link>
         <div>
-          <h2 className="text-lg font-semibold text-[#0c0910]">{course.title}</h2>
-          <p className="text-sm text-[#0c0910]/60">{chapterList.length} chapitres</p>
+          <p className="editorial-eyebrow">Course Flow</p>
+          <h2 className="font-display mt-2 text-2xl font-black text-[#2c2f31]">{course.title}</h2>
+          <p className="text-sm text-[#2c2f31]/60">{chapterList.length} chapitres</p>
         </div>
 
         <ProgressBar value={progressPercent} label="Progression du cours" />
@@ -205,10 +206,10 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
               <Link
                 key={item.id}
                 href={`/courses/${course.slug}/learn/${item.id}`}
-                className={`block rounded-xl border px-3 py-3 text-sm transition ${
+                className={`block rounded-[1.35rem] px-4 py-4 text-sm transition ${
                   isActive
-                    ? "border-[#0F63FF]/30 bg-[#0F63FF]/8 text-[#0F63FF]"
-                    : "border-[#0c0910]/10 text-[#0c0910]/75 hover:border-[#0F63FF]/20 hover:bg-[#0F63FF]/5"
+                    ? "bg-[linear-gradient(135deg,rgba(0,80,214,0.13),rgba(15,99,255,0.08))] text-[#0050d6] ring-1 ring-[#0050d6]/14"
+                    : "text-[#2c2f31]/75 ring-1 ring-[#2c2f31]/8 hover:bg-white hover:text-[#0050d6]"
                 }`}
               >
                 <p className="font-medium">{index + 1}. {item.title}</p>
@@ -228,21 +229,33 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
         </div>
       </aside>
 
-      <article className="space-y-6 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
-        <header className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#453750]">{chapter.module.title}</p>
-          <h1 className="text-3xl font-bold text-[#0c0910]">{chapter.title}</h1>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[#0c0910]/60">
-            <p>
-            {chapter.estimatedMinutes ? `${chapter.estimatedMinutes} min estimées` : "Durée non renseignée"}
-            </p>
-            <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+      <article className="space-y-6">
+        <header className="surface-section space-y-4 p-6 sm:p-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="chip chip-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              {chapter.module.title}
+            </span>
+            <span className="chip chip-success">
               {chapterStatus === ChapterProgressStatus.COMPLETED
                 ? "Chapitre terminé"
                 : chapterStatus === ChapterProgressStatus.IN_PROGRESS
                   ? "Chapitre en cours"
                   : "Chapitre à commencer"}
             </span>
+          </div>
+
+          <div className="space-y-2">
+            <p className="editorial-eyebrow">Chapter Focus</p>
+            <h1 className="font-display text-3xl font-black tracking-tight text-[#2c2f31] sm:text-5xl">
+              {chapter.title}
+            </h1>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[#2c2f31]/60">
+            <p>
+              {chapter.estimatedMinutes ? `${chapter.estimatedMinutes} min estimées` : "Durée non renseignée"}
+            </p>
           </div>
         </header>
 
@@ -252,20 +265,21 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
         <RichContentRenderer content={chapter.content} />
 
         {chapter.quiz ? (
-          <section className="space-y-4 rounded-2xl border border-[#0c0910]/10 bg-white p-5">
+          <section className="surface-section space-y-4 p-5 sm:p-6">
             <div className="space-y-2">
-              <h2 className="text-lg font-semibold text-[#0c0910]">Quiz du chapitre</h2>
-              <p className="text-sm text-[#0c0910]/65">
+              <p className="editorial-eyebrow">Knowledge Check</p>
+              <h2 className="font-display text-2xl font-black text-[#2c2f31]">Quiz du chapitre</h2>
+              <p className="text-sm text-[#2c2f31]/65">
                 La réussite du quiz est nécessaire pour marquer ce chapitre comme terminé.
               </p>
             </div>
 
             {quizAttempt ? (
               <div
-                className={`rounded-2xl border px-4 py-3 text-sm ${
+                className={`rounded-[1.4rem] px-4 py-4 text-sm ${
                   quizAttempt.passed
-                    ? "border-[#119da4]/20 bg-[#119da4]/10 text-[#0c0910]"
-                    : "border-red-200 bg-red-50 text-red-700"
+                    ? "bg-[#119da4]/10 text-[#2c2f31] ring-1 ring-[#119da4]/20"
+                    : "bg-red-50 text-red-700 ring-1 ring-red-200"
                 }`}
               >
                 Dernière tentative : {quizAttempt.score}% {quizAttempt.passed ? "• Quiz réussi" : "• Quiz non réussi"}
@@ -280,22 +294,23 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
                 hasAttempt={Boolean(quizAttempt)}
               />
             ) : (
-              <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-[#f7f9ff] px-4 py-4 text-sm text-[#0c0910]/65">
+              <div className="rounded-[1.4rem] bg-[#f7f9ff] px-4 py-4 text-sm text-[#2c2f31]/65 ring-1 ring-dashed ring-[#2c2f31]/16">
                 Ce quiz n’est pas encore entièrement configuré par le formateur.
               </div>
             )}
           </section>
         ) : (
-          <section className="space-y-3 rounded-2xl border border-[#0c0910]/10 bg-white p-5">
+          <section className="surface-section space-y-4 p-5 sm:p-6">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-[#0c0910]">Compléter ce chapitre</h2>
-              <p className="text-sm text-[#0c0910]/65">
+              <p className="editorial-eyebrow">Completion</p>
+              <h2 className="font-display text-2xl font-black text-[#2c2f31]">Compléter ce chapitre</h2>
+              <p className="text-sm text-[#2c2f31]/65">
                 Ce chapitre ne contient pas de quiz. Vous pouvez le marquer comme terminé une fois la lecture terminée.
               </p>
             </div>
 
             {chapterStatus === ChapterProgressStatus.COMPLETED ? (
-              <div className="rounded-2xl border border-[#119da4]/20 bg-[#119da4]/10 px-4 py-3 text-sm text-[#0c0910]">
+              <div className="rounded-[1.4rem] bg-[#119da4]/10 px-4 py-4 text-sm text-[#2c2f31] ring-1 ring-[#119da4]/20">
                 Ce chapitre est déjà terminé.
               </div>
             ) : (
@@ -304,8 +319,9 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
                 <input type="hidden" name="courseSlug" value={course.slug} />
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center rounded-xl bg-[#119da4] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#119da4]/90"
+                  className="primary-button bg-[linear-gradient(135deg,#119da4,#0f8d94)] px-4 py-2 text-sm font-semibold"
                 >
+                  <PlayCircle className="h-4 w-4" />
                   Marquer comme terminé
                 </button>
               </form>
@@ -317,7 +333,7 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
           {previousChapter ? (
             <Link
               href={`/courses/${course.slug}/learn/${previousChapter.id}`}
-              className="inline-flex items-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+              className="secondary-button px-4 py-2 text-sm font-semibold"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               Chapitre précédent
@@ -327,7 +343,7 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
           {nextChapter ? (
             <Link
               href={`/courses/${course.slug}/learn/${nextChapter.id}`}
-              className="inline-flex items-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+              className="primary-button px-4 py-2 text-sm font-semibold"
             >
               Chapitre suivant
               <ChevronRight className="ml-2 h-4 w-4" />

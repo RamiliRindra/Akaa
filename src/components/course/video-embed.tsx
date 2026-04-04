@@ -13,7 +13,7 @@ export function VideoEmbed({ url, title }: VideoEmbedProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#0c0910]/10 bg-white shadow-sm">
+    <div className="panel-card overflow-hidden">
       <div className="aspect-video">
         <iframe
           src={embedUrl}
@@ -26,4 +26,3 @@ export function VideoEmbed({ url, title }: VideoEmbedProps) {
     </div>
   );
 }
-

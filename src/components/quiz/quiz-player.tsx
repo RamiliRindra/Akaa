@@ -54,6 +54,7 @@ function toggleOption(
 
 export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlayerProps) {
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  const answeredQuestions = Object.values(answers).filter((selected) => selected.length > 0).length;
 
   return (
     <form action={submitQuizAttemptAction} className="space-y-5">
@@ -62,11 +63,22 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
       <input type="hidden" name="courseSlug" value={courseSlug} />
       <input type="hidden" name="answers" value={JSON.stringify(answers)} readOnly />
 
-      <div className="space-y-2">
-        <h3 className="text-xl font-semibold text-[#0c0910]">{quiz.title}</h3>
-        <p className="text-sm text-[#0c0910]/65">
-          Score minimum : {quiz.passingScore}% • Récompense prévue : {quiz.xpReward} XP
-        </p>
+      <div className="surface-section p-5 sm:p-6">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="chip chip-primary">
+              {quiz.questions.length} question{quiz.questions.length > 1 ? "s" : ""}
+            </span>
+            <span className="chip chip-secondary">{answeredQuestions}/{quiz.questions.length} répondues</span>
+            <span className="chip chip-accent">{quiz.xpReward} XP</span>
+          </div>
+          <div>
+            <h3 className="font-display text-2xl font-black text-[#2c2f31]">{quiz.title}</h3>
+            <p className="mt-2 text-sm text-[#2c2f31]/65">
+              Score minimum : {quiz.passingScore}% • Récompense prévue : {quiz.xpReward} XP
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -74,12 +86,12 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
           const selected = answers[question.id] ?? [];
 
           return (
-            <article key={question.id} className="space-y-3 rounded-2xl border border-[#0c0910]/10 bg-[#f7f9ff] p-4">
+            <article key={question.id} className="panel-card space-y-4 p-5 sm:p-6">
               <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#453750]">
+                <p className="editorial-eyebrow">
                   Question {question.order} • {question.type === QuizQuestionType.SINGLE ? "Choix unique" : "Choix multiple"}
                 </p>
-                <p className="font-medium text-[#0c0910]">{question.questionText}</p>
+                <p className="text-base font-semibold text-[#2c2f31] sm:text-lg">{question.questionText}</p>
               </div>
 
               <div className="space-y-2">
@@ -89,10 +101,10 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
                   return (
                     <label
                       key={option.id}
-                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 text-sm transition ${
+                      className={`flex cursor-pointer items-start gap-3 rounded-[1.2rem] px-4 py-4 text-sm transition ${
                         checked
-                          ? "border-[#0F63FF]/30 bg-white text-[#0F63FF]"
-                          : "border-[#0c0910]/10 bg-white text-[#0c0910]/80 hover:border-[#0F63FF]/20"
+                          ? "bg-[linear-gradient(135deg,rgba(0,80,214,0.12),rgba(15,99,255,0.06))] text-[#0050d6] ring-1 ring-[#0050d6]/14"
+                          : "bg-[var(--color-surface-high)] text-[#2c2f31]/80 ring-1 ring-[#2c2f31]/8 hover:bg-white hover:ring-[#0F63FF]/14"
                       }`}
                     >
                       <input
@@ -116,7 +128,7 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
 
       <button
         type="submit"
-        className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+        className="primary-button px-4 py-2 text-sm font-semibold"
       >
         {hasAttempt ? "Repasser le quiz" : "Valider le quiz"}
       </button>
