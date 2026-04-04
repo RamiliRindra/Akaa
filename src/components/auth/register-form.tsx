@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FormEvent, useState, useTransition } from "react";
 
 import { registerWithCredentials } from "@/actions/auth";
+import { Spinner } from "@/components/ui/spinner";
 import { type RegisterInput, registerSchema } from "@/lib/validations/auth";
 
 const INITIAL_FORM: RegisterInput = {
@@ -153,8 +154,9 @@ export function RegisterForm() {
         type="submit"
         whileTap={{ scale: 0.98 }}
         disabled={isPending}
-        className="primary-button h-11 w-full px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+        className="primary-button inline-flex h-11 w-full items-center justify-center gap-2 px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
       >
+        {isPending ? <Spinner /> : null}
         {isPending ? "Création du compte..." : "Créer mon compte"}
       </motion.button>
 

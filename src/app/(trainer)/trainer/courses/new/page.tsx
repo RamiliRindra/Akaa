@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { createCourseAction } from "@/actions/courses";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
 import { db } from "@/lib/db";
@@ -142,12 +143,12 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
           </label>
         </div>
 
-        <button
-          type="submit"
-          className="primary-button px-4 py-2 text-sm font-semibold"
+        <SubmitButton
+          className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+          pendingLabel="Création..."
         >
           Créer le cours
-        </button>
+        </SubmitButton>
       </form>
     </section>
   );

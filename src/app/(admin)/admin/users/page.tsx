@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { updateUserActiveStateAction, updateUserRoleAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
@@ -288,12 +289,12 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                             </option>
                           ))}
                         </select>
-                        <button
-                          type="submit"
-                          className="inline-flex h-10 items-center justify-center rounded-lg bg-[#0F63FF] px-3 text-xs font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                        <SubmitButton
+                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#0F63FF] px-3 text-xs font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                          pendingLabel="..."
                         >
                           OK
-                        </button>
+                        </SubmitButton>
                       </form>
                     </td>
                     <td className="px-4 py-4">
@@ -324,16 +325,16 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                     <td className="px-4 py-4">
                       <form action={updateUserActiveStateAction.bind(null, user.id)}>
                         <input type="hidden" name="isActive" value={String(!user.isActive)} />
-                        <button
-                          type="submit"
-                          className={`inline-flex h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold text-white transition ${
+                        <SubmitButton
+                          className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg px-3 text-xs font-semibold text-white transition ${
                             user.isActive
                               ? "bg-[#c2410c] hover:bg-[#c2410c]/90"
                               : "bg-[#119da4] hover:bg-[#119da4]/90"
                           }`}
+                          pendingLabel={user.isActive ? "..." : "..."}
                         >
                           {user.isActive ? "Désactiver" : "Réactiver"}
-                        </button>
+                        </SubmitButton>
                       </form>
                     </td>
                   </tr>
@@ -400,12 +401,12 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                         ))}
                       </select>
                     </label>
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center rounded-lg bg-[#0F63FF] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                    <SubmitButton
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F63FF] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                      pendingLabel="Enregistrement..."
                     >
                       Enregistrer le rôle
-                    </button>
+                    </SubmitButton>
                   </form>
 
                   <form
@@ -419,16 +420,16 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                         ? "Bloquer les prochaines connexions de cet utilisateur."
                         : "Réautoriser l’accès à la plateforme."}
                     </p>
-                    <button
-                      type="submit"
-                      className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold text-white transition ${
+                    <SubmitButton
+                      className={`inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-white transition ${
                         user.isActive
                           ? "bg-[#c2410c] hover:bg-[#c2410c]/90"
                           : "bg-[#119da4] hover:bg-[#119da4]/90"
                       }`}
+                      pendingLabel={user.isActive ? "Désactivation..." : "Réactivation..."}
                     >
                       {user.isActive ? "Désactiver le compte" : "Réactiver le compte"}
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               </div>

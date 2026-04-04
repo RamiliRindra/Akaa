@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { useState, useTransition } from "react";
 
+import { Spinner } from "@/components/ui/spinner";
+
 type GoogleButtonProps = {
   callbackUrl?: string;
   enabled?: boolean;
@@ -58,9 +60,9 @@ export function GoogleButton({ callbackUrl = "/dashboard", enabled = false }: Go
           });
         }}
         disabled={isPending}
-        className="secondary-button w-full px-4 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+        className="secondary-button inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <GoogleIcon />
+        {isPending ? <Spinner /> : <GoogleIcon />}
         {isPending ? "Connexion Google..." : "Continuer avec Google"}
       </motion.button>
       {error ? <p className="text-xs text-red-600">{error}</p> : null}

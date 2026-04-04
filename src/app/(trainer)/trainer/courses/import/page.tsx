@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { importCourseArchiveAction } from "@/actions/courses";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 
 type ImportCoursePageProps = {
@@ -57,12 +58,12 @@ export default async function ImportCoursePage({ searchParams }: ImportCoursePag
             />
           </label>
 
-          <button
-            type="submit"
-            className="primary-button px-4 py-2 text-sm font-semibold"
+          <SubmitButton
+            className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+            pendingLabel="Import en cours..."
           >
             Valider et importer
-          </button>
+          </SubmitButton>
         </form>
 
         <div className="space-y-4 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">

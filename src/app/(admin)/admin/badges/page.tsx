@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { createBadgeAction, deleteBadgeAction, updateBadgeAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
@@ -155,12 +156,12 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
           </label>
         </div>
 
-        <button
-          type="submit"
-          className="primary-button px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
+        <SubmitButton
+          className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
+          pendingLabel="Ajout..."
         >
           Ajouter le badge
-        </button>
+        </SubmitButton>
       </form>
 
       <div className="space-y-4">
@@ -270,21 +271,21 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
                   </label>
                 </div>
 
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
+                <SubmitButton
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
+                  pendingLabel="Enregistrement..."
                 >
                   Enregistrer
-                </button>
+                </SubmitButton>
               </form>
 
               <form action={deleteBadgeAction.bind(null, badge.id)} className="xl:self-start">
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded-xl bg-[#c2410c] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c2410c]/90"
+                <SubmitButton
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#c2410c] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c2410c]/90"
+                  pendingLabel="Suppression..."
                 >
                   Supprimer
-                </button>
+                </SubmitButton>
               </form>
             </div>
           </article>

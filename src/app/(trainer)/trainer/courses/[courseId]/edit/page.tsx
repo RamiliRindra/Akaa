@@ -16,6 +16,7 @@ import {
 } from "@/actions/courses";
 import { CourseStatusBadge } from "@/components/course/course-status-badge";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
 import { db } from "@/lib/db";
@@ -108,13 +109,13 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
 
         <form action={deleteCourseAction}>
           <input type="hidden" name="courseId" value={course.id} />
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+          <SubmitButton
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            pendingLabel="Suppression..."
           >
             <Trash2 className="h-4 w-4" />
             Supprimer le cours
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -227,12 +228,12 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
 
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs text-[#0c0910]/50">Slug public actuel : /courses/{course.slug}</p>
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+              <SubmitButton
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                pendingLabel="Enregistrement..."
               >
                 Enregistrer le cours
-              </button>
+              </SubmitButton>
             </div>
           </form>
 
@@ -257,13 +258,13 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                 placeholder="Description du module"
                 className="h-11 rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
               />
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+              <SubmitButton
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                pendingLabel="Ajout..."
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Ajouter
-              </button>
+              </SubmitButton>
             </form>
 
             <div className="space-y-4">
@@ -286,12 +287,12 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                             defaultValue={module.description ?? ""}
                             className="h-11 rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
                           />
-                          <button
-                            type="submit"
-                            className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+                          <SubmitButton
+                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+                            pendingLabel="Enregistrement..."
                           >
                             Enregistrer
-                          </button>
+                          </SubmitButton>
                         </div>
                       </form>
 
@@ -300,24 +301,39 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                           <input type="hidden" name="courseId" value={course.id} />
                           <input type="hidden" name="moduleId" value={module.id} />
                           <input type="hidden" name="direction" value="up" />
-                          <button type="submit" className="rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5">
+                          <SubmitButton
+                            className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5"
+                            showSpinner={false}
+                            pendingChildren={<span className="text-xs font-semibold">...</span>}
+                            aria-label="Monter le module"
+                          >
                             <ArrowUp className="h-4 w-4" />
-                          </button>
+                          </SubmitButton>
                         </form>
                         <form action={moveModuleAction}>
                           <input type="hidden" name="courseId" value={course.id} />
                           <input type="hidden" name="moduleId" value={module.id} />
                           <input type="hidden" name="direction" value="down" />
-                          <button type="submit" className="rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5">
+                          <SubmitButton
+                            className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5"
+                            showSpinner={false}
+                            pendingChildren={<span className="text-xs font-semibold">...</span>}
+                            aria-label="Descendre le module"
+                          >
                             <ArrowDown className="h-4 w-4" />
-                          </button>
+                          </SubmitButton>
                         </form>
                         <form action={deleteModuleAction}>
                           <input type="hidden" name="courseId" value={course.id} />
                           <input type="hidden" name="moduleId" value={module.id} />
-                          <button type="submit" className="rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50">
+                          <SubmitButton
+                            className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50"
+                            showSpinner={false}
+                            pendingChildren={<span className="text-xs font-semibold">...</span>}
+                            aria-label="Supprimer le module"
+                          >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </SubmitButton>
                         </form>
                       </div>
                     </div>
@@ -331,13 +347,13 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                         <form action={createChapterAction}>
                           <input type="hidden" name="courseId" value={course.id} />
                           <input type="hidden" name="moduleId" value={module.id} />
-                          <button
-                            type="submit"
-                            className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                          <SubmitButton
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                            pendingLabel="Création..."
                           >
                             <Plus className="mr-2 h-4 w-4" />
                             Nouveau chapitre
-                          </button>
+                          </SubmitButton>
                         </form>
                       </div>
 
@@ -361,18 +377,28 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                                   <input type="hidden" name="moduleId" value={module.id} />
                                   <input type="hidden" name="chapterId" value={chapter.id} />
                                   <input type="hidden" name="direction" value="up" />
-                                  <button type="submit" className="rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5">
+                                  <SubmitButton
+                                    className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5"
+                                    showSpinner={false}
+                                    pendingChildren={<span className="text-xs font-semibold">...</span>}
+                                    aria-label="Monter le chapitre"
+                                  >
                                     <ArrowUp className="h-4 w-4" />
-                                  </button>
+                                  </SubmitButton>
                                 </form>
                                 <form action={moveChapterAction}>
                                   <input type="hidden" name="courseId" value={course.id} />
                                   <input type="hidden" name="moduleId" value={module.id} />
                                   <input type="hidden" name="chapterId" value={chapter.id} />
                                   <input type="hidden" name="direction" value="down" />
-                                  <button type="submit" className="rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5">
+                                  <SubmitButton
+                                    className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white p-2 text-[#0c0910] hover:bg-[#0F63FF]/5"
+                                    showSpinner={false}
+                                    pendingChildren={<span className="text-xs font-semibold">...</span>}
+                                    aria-label="Descendre le chapitre"
+                                  >
                                     <ArrowDown className="h-4 w-4" />
-                                  </button>
+                                  </SubmitButton>
                                 </form>
                                 <Link
                                   href={`/trainer/courses/${course.id}/chapters/${chapter.id}/edit`}
@@ -385,9 +411,14 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                                   <input type="hidden" name="courseId" value={course.id} />
                                   <input type="hidden" name="moduleId" value={module.id} />
                                   <input type="hidden" name="chapterId" value={chapter.id} />
-                                  <button type="submit" className="rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50">
+                                  <SubmitButton
+                                    className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50"
+                                    showSpinner={false}
+                                    pendingChildren={<span className="text-xs font-semibold">...</span>}
+                                    aria-label="Supprimer le chapitre"
+                                  >
                                     <Trash2 className="h-4 w-4" />
-                                  </button>
+                                  </SubmitButton>
                                 </form>
                               </div>
                             </div>

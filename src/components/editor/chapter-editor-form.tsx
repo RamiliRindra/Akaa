@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import { MarkdownEditor } from "@/components/editor/markdown-editor";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { emptyMarkdownDocument, getMarkdownFromStoredContent } from "@/lib/content";
 
 type ChapterEditorFormProps = {
@@ -83,12 +84,12 @@ export function ChapterEditorForm({
         </p>
       </div>
 
-      <button
-        type="submit"
-        className="primary-button px-4 py-2 text-sm font-semibold"
+      <SubmitButton
+        className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+        pendingLabel="Enregistrement..."
       >
         Enregistrer le chapitre
-      </button>
+      </SubmitButton>
     </form>
   );
 }

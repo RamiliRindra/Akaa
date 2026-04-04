@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useActionState, useState } from "react";
 
 import { loginWithCredentialsForm, type LoginFormState } from "@/actions/auth";
+import { Spinner } from "@/components/ui/spinner";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -91,8 +92,9 @@ export function LoginForm() {
           type="submit"
           whileTap={{ scale: 0.98 }}
           disabled={isPending}
-          className="primary-button h-11 w-full px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+          className="primary-button inline-flex h-11 w-full items-center justify-center gap-2 px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
         >
+          {isPending ? <Spinner /> : null}
           {isPending ? "Connexion..." : "Se connecter"}
         </motion.button>
       </form>

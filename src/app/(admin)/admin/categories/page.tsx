@@ -8,6 +8,7 @@ import {
 import { CategoryFormFields } from "@/components/admin/category-form-fields";
 import { CategoryIcon } from "@/components/admin/category-icon";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
@@ -119,12 +120,12 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
           </label>
         </div>
 
-        <button
-          type="submit"
-          className="primary-button px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
+        <SubmitButton
+          className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
+          pendingLabel="Ajout..."
         >
           Ajouter la catégorie
-        </button>
+        </SubmitButton>
       </form>
 
       <div className="space-y-4">
@@ -209,21 +210,21 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                   </label>
                 </div>
 
-                <button
-                  type="submit"
-                  className="primary-button px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
+                <SubmitButton
+                  className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
+                  pendingLabel="Enregistrement..."
                 >
                   Enregistrer
-                </button>
+                </SubmitButton>
               </form>
 
               <form action={deleteCategoryAction.bind(null, category.id)} className="xl:self-start">
-                <button
-                  type="submit"
-                  className="danger-button px-4 py-2 text-sm font-semibold"
+                <SubmitButton
+                  className="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                  pendingLabel="Suppression..."
                 >
                   Supprimer
-                </button>
+                </SubmitButton>
               </form>
             </div>
           </article>

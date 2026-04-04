@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/course/progress-bar";
 import { RichContentRenderer } from "@/components/course/rich-content-renderer";
 import { VideoEmbed } from "@/components/course/video-embed";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
@@ -320,13 +321,13 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
               <form action={markChapterCompletedAction}>
                 <input type="hidden" name="chapterId" value={chapter.id} />
                 <input type="hidden" name="courseSlug" value={course.slug} />
-                <button
-                  type="submit"
-                  className="primary-button bg-[linear-gradient(135deg,#119da4,#0f8d94)] px-4 py-2 text-sm font-semibold"
+                <SubmitButton
+                  className="primary-button inline-flex items-center justify-center gap-2 bg-[linear-gradient(135deg,#119da4,#0f8d94)] px-4 py-2 text-sm font-semibold"
+                  pendingLabel="Validation..."
                 >
                   <PlayCircle className="h-4 w-4" />
                   Marquer comme terminé
-                </button>
+                </SubmitButton>
               </form>
             )}
           </section>

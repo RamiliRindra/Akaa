@@ -4,6 +4,7 @@ import { QuizQuestionType } from "@prisma/client";
 import { useState } from "react";
 
 import { submitQuizAttemptAction } from "@/actions/quiz";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 type QuizPlayerProps = {
   quiz: {
@@ -126,12 +127,12 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
         })}
       </div>
 
-      <button
-        type="submit"
-        className="primary-button px-4 py-2 text-sm font-semibold"
+      <SubmitButton
+        className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+        pendingLabel="Validation..."
       >
         {hasAttempt ? "Repasser le quiz" : "Valider le quiz"}
-      </button>
+      </SubmitButton>
     </form>
   );
 }

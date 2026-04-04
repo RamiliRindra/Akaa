@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { adjustUserXpAction, updateXpLevelSettingsAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
 import { db } from "@/lib/db";
@@ -148,12 +149,12 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="primary-button px-4 py-2 text-sm font-semibold"
+            <SubmitButton
+              className="primary-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+              pendingLabel="Enregistrement..."
             >
               Enregistrer les coefficients
-            </button>
+            </SubmitButton>
           </form>
 
           <form
@@ -207,12 +208,12 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="primary-button bg-[linear-gradient(135deg,#453750,#655670)] px-4 py-2 text-sm font-semibold"
+            <SubmitButton
+              className="primary-button inline-flex items-center justify-center gap-2 bg-[linear-gradient(135deg,#453750,#655670)] px-4 py-2 text-sm font-semibold"
+              pendingLabel="Ajustement..."
             >
               Enregistrer l’ajustement
-            </button>
+            </SubmitButton>
           </form>
         </div>
 

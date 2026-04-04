@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { saveQuizBuilderAction, type QuizBuilderActionState } from "@/actions/quiz";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 type QuizManagerProps = {
   courseId: string;
@@ -290,13 +291,13 @@ export function QuizManager({ courseId, chapterId, quiz }: QuizManagerProps) {
               <p className="text-sm text-red-600">
                 Le quiz existant sera supprimé lorsque vous enregistrerez cette modification.
               </p>
-              <button
-                type="submit"
+              <SubmitButton
                 disabled={isPending}
-                className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                pendingLabel="Suppression..."
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending ? "Suppression..." : "Confirmer la suppression"}
-              </button>
+              </SubmitButton>
             </form>
           ) : null}
         </div>
@@ -492,13 +493,13 @@ export function QuizManager({ courseId, chapterId, quiz }: QuizManagerProps) {
             <p className="text-sm text-[#0c0910]/60">
               Les modifications ne seront envoyées qu’au clic sur « Enregistrer le quiz ».
             </p>
-            <button
-              type="submit"
+            <SubmitButton
               disabled={isPending}
-              className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 disabled:cursor-not-allowed disabled:opacity-60"
+              pendingLabel="Enregistrement..."
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Enregistrement..." : "Enregistrer le quiz"}
-            </button>
+            </SubmitButton>
           </div>
         </form>
       )}
