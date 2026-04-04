@@ -42,7 +42,7 @@ export default async function ImportCoursePage({ searchParams }: ImportCoursePag
             <h3 className="text-lg font-semibold text-[#0c0910]">Archive d’import</h3>
             <p className="text-sm text-[#0c0910]/60">
               L’archive doit contenir un fichier <code>manifest.csv</code> à la racine et un dossier{" "}
-              <code>chapters/</code> avec les fichiers Markdown.
+              <code>chapters/</code> avec les fichiers Markdown. Vous pouvez aussi ajouter des quiz optionnels via un dossier <code>quizzes/</code>.
             </p>
           </div>
 
@@ -88,6 +88,13 @@ export default async function ImportCoursePage({ searchParams }: ImportCoursePag
             >
               Télécharger le modèle Markdown
             </a>
+            <a
+              href="/import-templates/quiz.template.json"
+              download
+              className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+            >
+              Télécharger le modèle Quiz JSON
+            </a>
           </div>
 
           <div className="space-y-2 rounded-2xl bg-[#f7f9ff] p-4 text-sm text-[#0c0910]/75">
@@ -95,6 +102,8 @@ export default async function ImportCoursePage({ searchParams }: ImportCoursePag
             <p>Titres, paragraphes, listes, citations, liens, séparateurs, code inline et blocs de code.</p>
             <p className="pt-2 font-semibold text-[#0c0910]">Vidéos autorisées</p>
             <p>YouTube et Google Drive uniquement.</p>
+            <p className="pt-2 font-semibold text-[#0c0910]">Quiz optionnels</p>
+            <p>Référencez un fichier JSON de quiz dans la colonne <code>quiz_file</code> du manifest si un chapitre doit inclure une évaluation.</p>
             <p className="pt-2 font-semibold text-[#0c0910]">Règle d’import</p>
             <p>Une archive = un cours complet.</p>
           </div>

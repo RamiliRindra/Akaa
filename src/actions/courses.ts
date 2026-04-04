@@ -14,6 +14,7 @@ import {
   chapterFormSchema,
   courseImportArchiveSchema,
   courseImportManifestSchema,
+  courseImportQuizFileSchema,
   courseFormSchema,
   createChapterSchema,
   deleteItemSchema,
@@ -28,6 +29,7 @@ type TrainerSession = {
 };
 
 type CourseImportRow = z.infer<typeof courseImportManifestSchema>[number];
+type CourseImportQuizFile = z.infer<typeof courseImportQuizFileSchema>;
 
 function buildRedirectUrl(path: string, type: "success" | "error", message: string) {
   const url = new URL(path, "https://akaa.local");
@@ -167,6 +169,11 @@ function parseManifestCsv(csvContent: string) {
   return courseImportManifestSchema.parse(records);
 }
 
+function parseQuizFile(content: string) {
+  const parsed = JSON.parse(content);
+  return courseImportQuizFileSchema.parse(parsed);
+}
+
 function assertSingleCourseManifest(rows: CourseImportRow[]) {
   const titleValues = new Set(rows.map((row) => row.course_title));
   const descriptionValues = new Set(rows.map((row) => row.course_description ?? ""));
@@ -220,22 +227,35 @@ async function extractImportPayload(file: File) {
   assertManifestOrdering(rows);
 
   const chapterFiles = new Map<string, string>();
+  const quizFiles = new Map<string, CourseImportQuizFile>();
   for (const row of rows) {
     if (!row.content_file) {
+      // no-op
+    } else {
+      const chapterFile = zip.file(row.content_file);
+      if (!chapterFile) {
+        throw new Error(`Le fichier de contenu ${row.content_file} est introuvable dans l’archive.`);
+      }
+
+      chapterFiles.set(row.content_file, sanitizeMarkdown(await chapterFile.async("string")));
+    }
+
+    if (!row.quiz_file || quizFiles.has(row.quiz_file)) {
       continue;
     }
 
-    const chapterFile = zip.file(row.content_file);
-    if (!chapterFile) {
-      throw new Error(`Le fichier de contenu ${row.content_file} est introuvable dans l’archive.`);
+    const quizFile = zip.file(row.quiz_file);
+    if (!quizFile) {
+      throw new Error(`Le fichier de quiz ${row.quiz_file} est introuvable dans l’archive.`);
     }
 
-    chapterFiles.set(row.content_file, sanitizeMarkdown(await chapterFile.async("string")));
+    quizFiles.set(row.quiz_file, parseQuizFile(await quizFile.async("string")));
   }
 
   return {
     rows,
     chapterFiles,
+    quizFiles,
   };
 }
 
@@ -704,7 +724,7 @@ export async function importCourseArchiveAction(formData: FormData) {
       });
 
       for (const chapterRow of [...moduleRow.chapters].sort((left, right) => left.chapter_order - right.chapter_order)) {
-        await tx.chapter.create({
+        const createdChapter = await tx.chapter.create({
           data: {
             moduleId: createdModule.id,
             title: chapterRow.chapter_title,
@@ -716,7 +736,48 @@ export async function importCourseArchiveAction(formData: FormData) {
             estimatedMinutes: chapterRow.estimated_minutes,
             order: chapterRow.chapter_order,
           },
+          select: { id: true },
         });
+
+        if (chapterRow.quiz_file) {
+          const quizFile = payload.quizFiles.get(chapterRow.quiz_file);
+
+          if (!quizFile) {
+            throw new Error(`Le fichier de quiz ${chapterRow.quiz_file} est introuvable dans l’archive.`);
+          }
+
+          const createdQuiz = await tx.quiz.create({
+            data: {
+              chapterId: createdChapter.id,
+              title: quizFile.title,
+              passingScore: quizFile.passing_score,
+              xpReward: quizFile.xp_reward,
+            },
+            select: { id: true },
+          });
+
+          for (const [questionIndex, question] of quizFile.questions.entries()) {
+            const createdQuestion = await tx.quizQuestion.create({
+              data: {
+                quizId: createdQuiz.id,
+                questionText: question.question_text,
+                type: question.type,
+                order: questionIndex + 1,
+              },
+              select: { id: true },
+            });
+
+            for (const option of question.options) {
+              await tx.quizOption.create({
+                data: {
+                  questionId: createdQuestion.id,
+                  optionText: option.option_text,
+                  isCorrect: option.is_correct,
+                },
+              });
+            }
+          }
+        }
       }
     }
 

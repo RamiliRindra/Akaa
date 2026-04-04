@@ -1,4 +1,4 @@
-import { CourseStatus } from "@prisma/client";
+import { CourseStatus, QuizQuestionType } from "@prisma/client";
 import { z } from "zod";
 
 import { isSupportedVideoUrl } from "@/lib/content";
@@ -108,6 +108,7 @@ export const courseImportRowSchema = z.object({
   estimated_minutes: optionalCsvNumber,
   video_url: optionalCsvText.refine((value) => !value || isSupportedVideoUrl(value), "Seuls YouTube et Google Drive sont autorisés pour les vidéos."),
   content_file: optionalCsvText,
+  quiz_file: optionalCsvText,
 }).refine(
   (row) => Boolean(row.video_url || row.content_file),
   {
@@ -117,6 +118,46 @@ export const courseImportRowSchema = z.object({
 );
 
 export const courseImportManifestSchema = z.array(courseImportRowSchema).min(1, "Le manifest doit contenir au moins un chapitre.");
+
+const courseImportQuizOptionSchema = z.object({
+  option_text: requiredCsvText,
+  is_correct: z.boolean(),
+});
+
+const courseImportQuizQuestionSchema = z
+  .object({
+    question_text: requiredCsvText,
+    type: z.nativeEnum(QuizQuestionType, {
+      error: "Le type de question du quiz est invalide.",
+    }),
+    options: z.array(courseImportQuizOptionSchema).min(2, "Chaque question importée doit contenir au moins deux réponses."),
+  })
+  .superRefine((question, ctx) => {
+    const correctCount = question.options.filter((option) => option.is_correct).length;
+
+    if (correctCount === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "Chaque question importée doit avoir au moins une bonne réponse.",
+      });
+    }
+
+    if (question.type === QuizQuestionType.SINGLE && correctCount !== 1) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "Une question à choix unique importée doit avoir exactement une bonne réponse.",
+      });
+    }
+  });
+
+export const courseImportQuizFileSchema = z.object({
+  title: z.string().trim().min(3, "Le titre du quiz importé doit contenir au moins 3 caractères."),
+  passing_score: z.number().int().min(1).max(100).default(70),
+  xp_reward: z.number().int().positive().default(50),
+  questions: z.array(courseImportQuizQuestionSchema).min(1, "Le quiz importé doit contenir au moins une question."),
+});
 
 export const moveItemSchema = z.object({
   id: z.uuid("Identifiant invalide."),

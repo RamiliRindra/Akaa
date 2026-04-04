@@ -1,4 +1,4 @@
-course_title,course_description,course_status,estimated_hours,category_slug,module_order,module_title,module_description,chapter_order,chapter_title,estimated_minutes,video_url,content_file
-SEO complet,"Maîtriser les bases du SEO jusqu'aux optimisations avancées",DRAFT,12,,1,Introduction,"Bases du SEO",1,Bienvenue,10,https://www.youtube.com/watch?v=dQw4w9WgXcQ,chapters/bienvenue.md
-SEO complet,"Maîtriser les bases du SEO jusqu'aux optimisations avancées",DRAFT,12,,1,Introduction,"Bases du SEO",2,Recherche de mots-clés,20,,chapters/recherche-mots-cles.md
-SEO complet,"Maîtriser les bases du SEO jusqu'aux optimisations avancées",DRAFT,12,,2,Technique,"SEO technique",1,Core Web Vitals,25,https://drive.google.com/file/d/FILE_ID/view,chapters/core-web-vitals.md
+course_title,course_description,course_status,estimated_hours,category_slug,module_order,module_title,module_description,chapter_order,chapter_title,estimated_minutes,video_url,content_file,quiz_file
+SEO complet,"Maîtriser les bases du SEO jusqu'aux optimisations avancées",DRAFT,12,,1,Introduction,"Bases du SEO",1,Bienvenue,10,https://www.youtube.com/watch?v=dQw4w9WgXcQ,chapters/bienvenue.md,quizzes/bienvenue.quiz.json
+SEO complet,"Maîtriser les bases du SEO jusqu'aux optimisations avancées",DRAFT,12,,1,Introduction,"Bases du SEO",2,Recherche de mots-clés,20,,chapters/recherche-mots-cles.md,
+SEO complet,"Maîtriser les bases du SEO jusqu'aux optimisations avancées",DRAFT,12,,2,Technique,"SEO technique",1,Core Web Vitals,25,https://drive.google.com/file/d/FILE_ID/view,chapters/core-web-vitals.md,

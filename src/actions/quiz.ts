@@ -16,6 +16,7 @@ import {
   chapterProgressFormSchema,
   deleteQuizEntitySchema,
   moveQuizQuestionSchema,
+  quizBuilderFormSchema,
   quizFormSchema,
   quizOptionFormSchema,
   quizQuestionFormSchema,
@@ -25,6 +26,11 @@ import {
 type TrainerSession = {
   userId: string;
   role: UserRole;
+};
+
+export type QuizBuilderActionState = {
+  status: "idle" | "success" | "error";
+  message?: string;
 };
 
 function buildRedirectUrl(path: string, type: "success" | "error", message: string) {
@@ -41,6 +47,14 @@ function getString(formData: FormData, key: string) {
 
 function getBoolean(formData: FormData, key: string) {
   return formData.get(key) === "on";
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "Une erreur est survenue pendant l’enregistrement du quiz.";
 }
 
 async function requireTrainerSession(): Promise<TrainerSession> {
@@ -243,6 +257,134 @@ function revalidateQuizSurfaces(courseId: string, chapterId: string, courseSlug?
 
 function getQuestionAnswerSet(answers: Record<string, string[]>, questionId: string) {
   return new Set((answers[questionId] ?? []).filter(Boolean));
+}
+
+async function getNextChapterPath(courseId: string, currentChapterId: string, courseSlug: string) {
+  const modules = await db.module.findMany({
+    where: { courseId },
+    orderBy: { order: "asc" },
+    select: {
+      chapters: {
+        orderBy: { order: "asc" },
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  const chapterIds = modules.flatMap((module) => module.chapters.map((chapter) => chapter.id));
+  const currentIndex = chapterIds.findIndex((chapterId) => chapterId === currentChapterId);
+  const nextChapterId = currentIndex >= 0 ? chapterIds[currentIndex + 1] : undefined;
+
+  return nextChapterId ? `/courses/${courseSlug}/learn/${nextChapterId}` : `/courses/${courseSlug}`;
+}
+
+export async function saveQuizBuilderAction(
+  _previousState: QuizBuilderActionState,
+  formData: FormData,
+): Promise<QuizBuilderActionState> {
+  try {
+    const session = await requireTrainerSession();
+    const parsed = quizBuilderFormSchema.safeParse({
+      courseId: getString(formData, "courseId"),
+      chapterId: getString(formData, "chapterId"),
+      payload: getString(formData, "payload"),
+    });
+
+    if (!parsed.success) {
+      return {
+        status: "error",
+        message: parsed.error.issues[0]?.message ?? "Quiz invalide.",
+      };
+    }
+
+    const chapter = await assertChapterManagementAccess(parsed.data.chapterId, parsed.data.courseId, session);
+    const payload = parsed.data.payload;
+
+    if (!payload.enabled) {
+      if (chapter.quiz?.id) {
+        await db.quiz.delete({
+          where: { id: chapter.quiz.id },
+        });
+      }
+
+      revalidateQuizSurfaces(parsed.data.courseId, parsed.data.chapterId, chapter.module.course.slug);
+      return {
+        status: "success",
+        message: chapter.quiz?.id ? "Quiz supprimé." : "Aucun quiz à enregistrer.",
+      };
+    }
+
+    await db.$transaction(async (tx) => {
+      const quiz = chapter.quiz?.id
+        ? await tx.quiz.update({
+            where: { id: chapter.quiz.id },
+            data: {
+              title: payload.title!,
+              passingScore: payload.passingScore!,
+              xpReward: payload.xpReward!,
+            },
+            select: { id: true },
+          })
+        : await tx.quiz.create({
+            data: {
+              chapterId: parsed.data.chapterId,
+              title: payload.title!,
+              passingScore: payload.passingScore!,
+              xpReward: payload.xpReward!,
+            },
+            select: { id: true },
+          });
+
+      await tx.quizOption.deleteMany({
+        where: {
+          question: {
+            quizId: quiz.id,
+          },
+        },
+      });
+      await tx.quizQuestion.deleteMany({
+        where: {
+          quizId: quiz.id,
+        },
+      });
+
+      for (const [questionIndex, question] of payload.questions!.entries()) {
+        const createdQuestion = await tx.quizQuestion.create({
+          data: {
+            quizId: quiz.id,
+            questionText: question.questionText,
+            type: question.type,
+            order: questionIndex + 1,
+          },
+          select: { id: true },
+        });
+
+        for (const option of question.options) {
+          await tx.quizOption.create({
+            data: {
+              questionId: createdQuestion.id,
+              optionText: option.optionText,
+              isCorrect: option.isCorrect,
+            },
+          });
+        }
+      }
+    });
+
+    revalidateQuizSurfaces(parsed.data.courseId, parsed.data.chapterId, chapter.module.course.slug);
+
+    return {
+      status: "success",
+      message: "Quiz enregistré.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: getErrorMessage(error),
+    };
+  }
 }
 
 export async function createQuizAction(formData: FormData) {
@@ -654,7 +796,8 @@ export async function markChapterCompletedAction(formData: FormData) {
   });
 
   revalidateQuizSurfaces(chapter.module.courseId, chapter.id, parsed.data.courseSlug);
-  redirect(buildRedirectUrl(`/courses/${parsed.data.courseSlug}/learn/${parsed.data.chapterId}`, "success", "Chapitre marqué comme terminé."));
+  const nextPath = await getNextChapterPath(chapter.module.courseId, chapter.id, parsed.data.courseSlug);
+  redirect(buildRedirectUrl(nextPath, "success", "Chapitre marqué comme terminé."));
 }
 
 export async function submitQuizAttemptAction(formData: FormData) {
@@ -762,9 +905,12 @@ export async function submitQuizAttemptAction(formData: FormData) {
   });
 
   revalidateQuizSurfaces(quiz.chapter.module.courseId, quiz.chapter.id, parsed.data.courseSlug);
+  const redirectPath = passed
+    ? await getNextChapterPath(quiz.chapter.module.courseId, quiz.chapter.id, parsed.data.courseSlug)
+    : `/courses/${parsed.data.courseSlug}/learn/${parsed.data.chapterId}`;
   redirect(
     buildRedirectUrl(
-      `/courses/${parsed.data.courseSlug}/learn/${parsed.data.chapterId}`,
+      redirectPath,
       passed ? "success" : "error",
       passed
         ? `Quiz réussi avec ${score}% de bonnes réponses.`

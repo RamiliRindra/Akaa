@@ -1,0 +1,25 @@
+{
+  "title": "Quiz de validation",
+  "passing_score": 70,
+  "xp_reward": 50,
+  "questions": [
+    {
+      "question_text": "Quelle balise HTML définit le titre principal d'une page ?",
+      "type": "SINGLE",
+      "options": [
+        { "option_text": "<h1>", "is_correct": true },
+        { "option_text": "<title>", "is_correct": false },
+        { "option_text": "<header>", "is_correct": false }
+      ]
+    },
+    {
+      "question_text": "Quels éléments sont utiles pour améliorer le référencement naturel ?",
+      "type": "MULTIPLE",
+      "options": [
+        { "option_text": "Des titres structurés", "is_correct": true },
+        { "option_text": "Des liens internes cohérents", "is_correct": true },
+        { "option_text": "Une balise blink", "is_correct": false }
+      ]
+    }
+  ]
+}

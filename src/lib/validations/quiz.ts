@@ -96,3 +96,117 @@ export const chapterProgressFormSchema = z.object({
   chapterId: requiredUuid("Chapitre invalide."),
   courseSlug: z.string().trim().min(1, "Cours invalide."),
 });
+
+const quizBuilderOptionSchema = z.object({
+  id: z.string().trim().optional(),
+  optionText: z.string().trim().min(1, "Le texte de chaque réponse est requis."),
+  isCorrect: z.boolean(),
+});
+
+const quizBuilderQuestionSchema = z
+  .object({
+    id: z.string().trim().optional(),
+    questionText: z.string().trim().min(5, "Chaque question doit contenir au moins 5 caractères."),
+    type: z.nativeEnum(QuizQuestionType, {
+      error: "Le type de question est invalide.",
+    }),
+    options: z.array(quizBuilderOptionSchema).min(2, "Chaque question doit contenir au moins deux réponses."),
+  })
+  .superRefine((question, ctx) => {
+    const correctCount = question.options.filter((option) => option.isCorrect).length;
+
+    if (correctCount === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "Chaque question doit avoir au moins une bonne réponse.",
+      });
+    }
+
+    if (question.type === QuizQuestionType.SINGLE && correctCount !== 1) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "Une question à choix unique doit avoir exactement une bonne réponse.",
+      });
+    }
+  });
+
+export const quizBuilderPayloadSchema = z
+  .object({
+    enabled: z.boolean(),
+    title: z.string().trim().optional(),
+    passingScore: z.number().int().min(1).max(100).optional(),
+    xpReward: z.number().int().positive().optional(),
+    questions: z.array(quizBuilderQuestionSchema).optional(),
+  })
+  .superRefine((payload, ctx) => {
+    if (!payload.enabled) {
+      return;
+    }
+
+    if (!payload.title || payload.title.length < 3) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["title"],
+        message: "Le titre du quiz doit contenir au moins 3 caractères.",
+      });
+    }
+
+    if (payload.passingScore === undefined) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["passingScore"],
+        message: "Le score de réussite est requis.",
+      });
+    }
+
+    if (payload.xpReward === undefined) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["xpReward"],
+        message: "La récompense XP est requise.",
+      });
+    }
+
+    if (!payload.questions?.length) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["questions"],
+        message: "Ajoutez au moins une question pour enregistrer le quiz.",
+      });
+    }
+  });
+
+export const quizBuilderFormSchema = z.object({
+  courseId: requiredUuid("Cours invalide."),
+  chapterId: requiredUuid("Chapitre invalide."),
+  payload: z
+    .string()
+    .trim()
+    .refine((value) => value.length > 0, "La configuration du quiz est vide.")
+    .refine((value) => {
+      try {
+        JSON.parse(value);
+        return true;
+      } catch {
+        return false;
+      }
+    }, "Le format du quiz est invalide.")
+    .transform((value, ctx) => {
+      const parsedPayload = quizBuilderPayloadSchema.safeParse(JSON.parse(value));
+
+      if (!parsedPayload.success) {
+        const [firstIssue] = parsedPayload.error.issues;
+        ctx.addIssue({
+          code: "custom",
+          path: firstIssue?.path,
+          message: firstIssue?.message ?? "La configuration du quiz est invalide.",
+        });
+
+        return z.NEVER;
+      }
+
+      return parsedPayload.data;
+    }),
+});
