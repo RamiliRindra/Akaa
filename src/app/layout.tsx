@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@mdxeditor/editor/style.css";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";

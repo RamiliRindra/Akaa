@@ -39,3 +39,42 @@ body {
   color: var(--color-text);
   background: var(--color-background);
 }
+
+.mdxeditor-shell {
+  border-radius: 1rem;
+}
+
+.mdxeditor-toolbar {
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  background: #f7f9ff;
+  padding: 0.75rem;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.mdxeditor-toolbar button,
+.mdxeditor-toolbar [role="combobox"] {
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  background: white;
+  color: var(--color-text);
+}
+
+.mdxeditor-content {
+  min-height: 18rem;
+  padding: 1rem;
+  color: var(--color-text);
+  font-family: var(--font-sans-stack);
+}
+
+.mdxeditor-content h1,
+.mdxeditor-content h2,
+.mdxeditor-content h3 {
+  color: var(--color-text);
+}
+
+.mdxeditor-content pre {
+  overflow-x: auto;
+  border-radius: 1rem;
+  background: #0c0910;
+}

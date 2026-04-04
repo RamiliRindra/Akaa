@@ -60,12 +60,20 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
             Créez vos cours, structurez-les en modules et pilotez leur publication.
           </p>
         </div>
-        <Link
-          href="/trainer/courses/new"
-          className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
-        >
-          Nouveau cours
-        </Link>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/trainer/courses/import"
+            className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+          >
+            Importer un cours
+          </Link>
+          <Link
+            href="/trainer/courses/new"
+            className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+          >
+            Nouveau cours
+          </Link>
+        </div>
       </div>
 
       <FormFeedback type={feedback.type} message={feedback.message} />

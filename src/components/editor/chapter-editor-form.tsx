@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 
-import { RichTextEditor } from "@/components/editor/rich-text-editor";
-import { emptyRichTextDocument } from "@/lib/content";
+import { MarkdownEditor } from "@/components/editor/markdown-editor";
+import { emptyMarkdownDocument, getMarkdownFromStoredContent } from "@/lib/content";
 
 type ChapterEditorFormProps = {
   action: (formData: FormData) => void | Promise<void>;
@@ -26,12 +26,12 @@ export function ChapterEditorForm({
   videoUrl,
   estimatedMinutes,
 }: ChapterEditorFormProps) {
-  const initialContent = useMemo(() => {
+  const initialMarkdown = useMemo(() => {
     if (!content) {
-      return JSON.stringify(emptyRichTextDocument);
+      return emptyMarkdownDocument;
     }
 
-    return JSON.stringify(content);
+    return getMarkdownFromStoredContent(content);
   }, [content]);
 
   return (
@@ -76,7 +76,11 @@ export function ChapterEditorForm({
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-[#0c0910]">Contenu du chapitre</p>
-        <RichTextEditor initialContent={initialContent} inputName="content" />
+        <MarkdownEditor initialMarkdown={initialMarkdown} inputName="content" />
+        <p className="text-xs text-[#0c0910]/55">
+          Syntaxe supportée v1 : titres, paragraphes, listes, citations, liens, séparateurs, code inline et blocs
+          de code.
+        </p>
       </div>
 
       <button

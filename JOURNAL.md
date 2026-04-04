@@ -481,6 +481,46 @@ Pour démarrer la Phase 3, le choix retenu a été :
 
 ---
 
+## Incident J — Redirection initiale vers le mauvais dashboard selon le rôle
+
+**Date :** 04 Avril 2026
+
+### Symptôme
+- Après connexion avec un compte `TRAINER` ou `ADMIN`, l’utilisateur arrivait sur `/dashboard`.
+- Le rôle réel était pourtant correct en base et en session.
+- En cliquant ensuite sur le logo de la plateforme, la redirection se faisait correctement vers :
+  - `/trainer/dashboard`
+  - ou `/admin/dashboard`
+
+### Cause racine
+- Le point d’entrée après authentification restait `/dashboard`.
+- La page `src/app/(platform)/dashboard/page.tsx` ne re-router pas les utilisateurs non apprenants.
+- La landing `/` gérait déjà correctement la redirection par rôle, mais pas `/dashboard`.
+
+### Correctif appliqué
+- `src/lib/auth-config.ts`
+  - ajout d’un helper `getHomePathForRole()` centralisant la destination par rôle.
+- `src/app/page.tsx`
+  - utilisation du helper pour rediriger depuis la landing.
+- `src/app/(platform)/dashboard/page.tsx`
+  - redirection serveur immédiate vers :
+    - `/trainer/dashboard` si rôle `TRAINER`
+    - `/admin/dashboard` si rôle `ADMIN`
+    - maintien sur `/dashboard` pour `LEARNER`
+
+### Validation
+- ✅ Login `TRAINER` : arrivée correcte sur `/trainer/dashboard`
+- ✅ Login `ADMIN` : arrivée correcte sur `/admin/dashboard`
+- ✅ `npm run lint`
+- ✅ `npx tsc --noEmit`
+- ✅ `npm run build`
+
+### Statut
+- ✅ Incident corrigé
+- ✅ Comportement validé après déploiement
+
+---
+
 ## Décisions techniques retenues
 
 1. **Conserver Prisma + schéma actuel** (structure SQL validée pour `account`).

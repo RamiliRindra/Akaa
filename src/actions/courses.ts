@@ -1,14 +1,19 @@
 "use server";
 
+import { parse } from "csv-parse/sync";
+import JSZip from "jszip";
 import { CourseStatus, Prisma, UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { auth } from "@/lib/auth";
-import { deriveVideoType, emptyRichTextDocument } from "@/lib/content";
+import { deriveVideoType, emptyMarkdownDocument } from "@/lib/content";
 import { db } from "@/lib/db";
 import {
   chapterFormSchema,
+  courseImportArchiveSchema,
+  courseImportManifestSchema,
   courseFormSchema,
   createChapterSchema,
   deleteItemSchema,
@@ -22,6 +27,8 @@ type TrainerSession = {
   role: UserRole;
 };
 
+type CourseImportRow = z.infer<typeof courseImportManifestSchema>[number];
+
 function buildRedirectUrl(path: string, type: "success" | "error", message: string) {
   const url = new URL(path, "https://akaa.local");
   url.searchParams.set("type", type);
@@ -32,6 +39,27 @@ function buildRedirectUrl(path: string, type: "success" | "error", message: stri
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+function getFile(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return value instanceof File ? value : null;
+}
+
+function sanitizeMarkdown(markdown: string) {
+  return markdown.replace(/\r\n/g, "\n").trim();
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof z.ZodError) {
+    return error.issues[0]?.message ?? fallback;
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
 }
 
 async function requireTrainerSession(): Promise<TrainerSession> {
@@ -129,8 +157,87 @@ async function createUniqueCourseSlug(title: string, excludeCourseId?: string) {
   }
 }
 
+function parseManifestCsv(csvContent: string) {
+  const records = parse(csvContent, {
+    columns: true,
+    skip_empty_lines: true,
+    trim: true,
+  }) as Record<string, string>[];
+
+  return courseImportManifestSchema.parse(records);
+}
+
+function assertSingleCourseManifest(rows: CourseImportRow[]) {
+  const titleValues = new Set(rows.map((row) => row.course_title));
+  const descriptionValues = new Set(rows.map((row) => row.course_description ?? ""));
+  const statusValues = new Set(rows.map((row) => row.course_status));
+  const hoursValues = new Set(rows.map((row) => row.estimated_hours ?? null));
+  const categoryValues = new Set(rows.map((row) => row.category_slug ?? ""));
+
+  if (titleValues.size !== 1 || descriptionValues.size !== 1 || statusValues.size !== 1 || hoursValues.size !== 1 || categoryValues.size !== 1) {
+    throw new Error("Le fichier manifest.csv doit décrire un seul cours avec des métadonnées cohérentes.");
+  }
+}
+
+function assertManifestOrdering(rows: CourseImportRow[]) {
+  const moduleMap = new Map<number, { title: string; description?: string; chapterOrders: Set<number> }>();
+
+  for (const row of rows) {
+    const existingModule = moduleMap.get(row.module_order);
+    if (!existingModule) {
+      moduleMap.set(row.module_order, {
+        title: row.module_title,
+        description: row.module_description,
+        chapterOrders: new Set([row.chapter_order]),
+      });
+      continue;
+    }
+
+    if (existingModule.title !== row.module_title || (existingModule.description ?? "") !== (row.module_description ?? "")) {
+      throw new Error(`Le module ${row.module_order} a des informations incohérentes dans le manifest.`);
+    }
+
+    if (existingModule.chapterOrders.has(row.chapter_order)) {
+      throw new Error(`Le chapitre ${row.chapter_order} est dupliqué dans le module ${row.module_order}.`);
+    }
+
+    existingModule.chapterOrders.add(row.chapter_order);
+  }
+}
+
+async function extractImportPayload(file: File) {
+  const parsedArchive = courseImportArchiveSchema.parse({ name: file.name });
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const manifestFile = zip.file("manifest.csv");
+
+  if (!manifestFile) {
+    throw new Error(`L’archive ${parsedArchive.name} doit contenir un fichier manifest.csv à la racine.`);
+  }
+
+  const manifestContent = await manifestFile.async("string");
+  const rows = parseManifestCsv(manifestContent);
+  assertSingleCourseManifest(rows);
+  assertManifestOrdering(rows);
+
+  const chapterFiles = new Map<string, string>();
+  for (const row of rows) {
+    const chapterFile = zip.file(row.content_file);
+    if (!chapterFile) {
+      throw new Error(`Le fichier de contenu ${row.content_file} est introuvable dans l’archive.`);
+    }
+
+    chapterFiles.set(row.content_file, sanitizeMarkdown(await chapterFile.async("string")));
+  }
+
+  return {
+    rows,
+    chapterFiles,
+  };
+}
+
 function revalidateCourseSurfaces(slug?: string) {
   revalidatePath("/trainer/courses");
+  revalidatePath("/trainer/courses/import");
   revalidatePath("/courses");
 
   if (slug) {
@@ -390,7 +497,7 @@ export async function createChapterAction(formData: FormData) {
     data: {
       moduleId: parsed.data.moduleId,
       title: "Nouveau chapitre",
-      content: emptyRichTextDocument as Prisma.InputJsonValue,
+      content: emptyMarkdownDocument,
       order: (lastChapter?.order ?? 0) + 1,
     },
     select: { id: true },
@@ -428,7 +535,7 @@ export async function updateChapterAction(formData: FormData) {
     where: { id: parsed.data.chapterId },
     data: {
       title: parsed.data.title,
-      content: JSON.parse(parsed.data.content) as Prisma.InputJsonValue,
+      content: sanitizeMarkdown(parsed.data.content),
       videoUrl: parsed.data.videoUrl,
       videoType: deriveVideoType(parsed.data.videoUrl),
       estimatedMinutes: parsed.data.estimatedMinutes,
@@ -523,4 +630,98 @@ export async function deleteChapterAction(formData: FormData) {
 
   revalidatePath(`/trainer/courses/${courseId}/edit`);
   redirect(buildRedirectUrl(`/trainer/courses/${courseId}/edit`, "success", "Chapitre supprimé."));
+}
+
+export async function importCourseArchiveAction(formData: FormData) {
+  const session = await requireTrainerSession();
+  const archive = getFile(formData, "archive");
+
+  if (!archive) {
+    redirect(buildRedirectUrl("/trainer/courses/import", "error", "Ajoutez une archive .zip avant de lancer l’import."));
+  }
+
+  let payload;
+  try {
+    payload = await extractImportPayload(archive);
+  } catch (error) {
+    redirect(buildRedirectUrl("/trainer/courses/import", "error", getErrorMessage(error, "Archive d’import invalide.")));
+  }
+
+  const [firstRow] = payload.rows;
+  const slug = await createUniqueCourseSlug(firstRow.course_title);
+  const category = firstRow.category_slug
+    ? await db.category.findFirst({
+        where: {
+          slug: firstRow.category_slug,
+          isActive: true,
+        },
+        select: { id: true, name: true },
+      })
+    : null;
+
+  const moduleRows = new Map<number, { title: string; description?: string; chapters: CourseImportRow[] }>();
+  for (const row of payload.rows) {
+    const existing = moduleRows.get(row.module_order);
+    if (existing) {
+      existing.chapters.push(row);
+      continue;
+    }
+
+    moduleRows.set(row.module_order, {
+      title: row.module_title,
+      description: row.module_description,
+      chapters: [row],
+    });
+  }
+
+  const course = await db.$transaction(async (tx) => {
+    const createdCourse = await tx.course.create({
+      data: {
+        title: firstRow.course_title,
+        slug,
+        description: firstRow.course_description,
+        status: firstRow.course_status,
+        estimatedHours: firstRow.estimated_hours,
+        categoryId: category?.id,
+        trainerId: session.userId,
+      },
+      select: { id: true },
+    });
+
+    for (const [moduleOrder, moduleRow] of [...moduleRows.entries()].sort((left, right) => left[0] - right[0])) {
+      const createdModule = await tx.module.create({
+        data: {
+          courseId: createdCourse.id,
+          title: moduleRow.title,
+          description: moduleRow.description,
+          order: moduleOrder,
+        },
+        select: { id: true },
+      });
+
+      for (const chapterRow of [...moduleRow.chapters].sort((left, right) => left.chapter_order - right.chapter_order)) {
+        await tx.chapter.create({
+          data: {
+            moduleId: createdModule.id,
+            title: chapterRow.chapter_title,
+            content: payload.chapterFiles.get(chapterRow.content_file) ?? emptyMarkdownDocument,
+            videoUrl: chapterRow.video_url,
+            videoType: deriveVideoType(chapterRow.video_url),
+            estimatedMinutes: chapterRow.estimated_minutes,
+            order: chapterRow.chapter_order,
+          },
+        });
+      }
+    }
+
+    return createdCourse;
+  });
+
+  revalidateCourseSurfaces(slug);
+
+  const importMessage = category || !firstRow.category_slug
+    ? "Cours importé avec succès."
+    : "Cours importé avec succès. Catégorie ignorée car introuvable.";
+
+  redirect(buildRedirectUrl(`/trainer/courses/${course.id}/edit`, "success", importMessage));
 }

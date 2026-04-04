@@ -1,7 +1,7 @@
 # Akaa - Architecture Plateforme E-Learning Gamifiée
 
 > Document de référence pour l'architecture technique du projet Akaa.
-> Dernière mise à jour : 2 avril 2026
+> Dernière mise à jour : 4 avril 2026
 
 ---
 
@@ -12,7 +12,8 @@ Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, ave
 ### Contraintes clés
 
 - Plateforme gratuite (pas de monétisation)
-- Contenu : texte riche (éditeur Tiptap) + vidéos embarquées (YouTube / Google Drive)
+- Contenu : texte riche Markdown-first (éditeur MDXEditor cible) + vidéos embarquées (YouTube / Google Drive)
+- Création de contenu : saisie manuelle via éditeur Markdown riche ou import massif via package ZIP structuré
 - Interface en français, architecture i18n-ready pour ajout futur de l'anglais
 - Budget infrastructure minimal : Railway Hobby + Neon Free
 - **Light mode uniquement** pour le MVP (dark mode envisagé en fin de projet)
@@ -201,12 +202,24 @@ Le schéma est organisé en **7 domaines** :
 |---------|------|-------------|-------|
 | id | UUID | PK | |
 | title | VARCHAR(255) | NOT NULL | |
-| content | JSONB | nullable | Contenu Tiptap au format JSON |
+| content | JSONB | nullable | Contenu riche actuel ; migration prévue vers Markdown canonique avant import massif |
 | video_url | TEXT | nullable | URL YouTube ou Google Drive |
 | video_type | ENUM('YOUTUBE','GDRIVE','NONE') | NOT NULL, default 'NONE' | |
 | order | INTEGER | NOT NULL | Ordre dans le module |
 | estimated_minutes | INTEGER | nullable | |
 | module_id | UUID | FK -> Module(id) ON DELETE CASCADE | **INDEX** |
+
+> **Décision d'architecture** : avant l'import massif, l'éditeur manuel bascule vers **MDXEditor**
+> avec une approche **Markdown-first**. Le Markdown devient le format canonique de travail
+> pour la saisie manuelle, les templates et l'import/export.
+>
+> **Transition prévue** : l'implémentation actuelle peut encore stocker du JSON riche pendant
+> la migration, mais l'import massif ne doit pas être construit tant que cette bascule
+> MDXEditor/Markdown n'est pas terminée.
+>
+> **Markdown supporté v1** : sous-ensemble officiel uniquement
+> (titres, paragraphes, listes, blockquotes, liens, séparateurs, code inline, blocs de code).
+> Les vidéos importées restent limitées à YouTube / Google Drive.
 
 ---
 
@@ -658,7 +671,7 @@ akaa/
 │   │   ├── program/               # ProgramCard, ProgramDetail, ProgramForm
 │   │   ├── attendance/            # AttendanceSheet, AttendanceRow, AttendanceStatus
 │   │   ├── notifications/         # NotificationBell, NotificationList, NotificationItem
-│   │   ├── editor/                # RichTextEditor (Tiptap), CourseBuilder
+│   │   ├── editor/                # MarkdownEditor (MDXEditor), CourseBuilder
 │   │   └── layout/                # Sidebar, Header, MobileNav
 │   │
 │   ├── lib/
@@ -716,6 +729,9 @@ akaa/
 ├── package.json
 └── package-lock.json
 ```
+
+> **Extension phase 3** : ajouter une page dédiée à l'import massif côté formateur,
+> typiquement `src/app/(trainer)/trainer/courses/import/page.tsx`, sans remplacer le CRUD manuel existant.
 
 ---
 
@@ -788,11 +804,21 @@ akaa/
 ### Phase 3 - Contenu pédagogique
 
 - **Formateur** : CRUD cours (titre, description, catégorie, thumbnail)
-- **Formateur** : Gestion modules (drag & drop pour réordonner)
-- **Formateur** : Éditeur de chapitre avec Tiptap (texte riche) + embed vidéo
+- **Formateur** : Gestion modules (réordonnancement fonctionnel ; drag & drop optionnel en amélioration)
+- **Formateur** : Bascule éditeur manuel vers **MDXEditor** avec stratégie **Markdown-first**
+- **Formateur** : Définition du sous-ensemble Markdown officiel v1 (dont `code inline` et blocs de code)
+- **Formateur** : Import massif d'un cours via ZIP unique (`manifest.csv` + `chapters/*.md`) **après** la bascule MDXEditor
+- **Formateur** : Prévalidation d'import avant écriture en base + téléchargement de modèles CSV/Markdown
 - **Apprenant** : Catalogue de cours filtrable par catégorie
 - **Apprenant** : Page détail cours (modules, chapitres, progression)
 - **Apprenant** : Lecteur de chapitre (contenu + vidéo)
+
+> **Ordre d'implémentation verrouillé** : migration éditeur vers MDXEditor d'abord, import massif ensuite.
+>
+> **Contrat d'import v1** : un import = un cours. Le ZIP contient un `manifest.csv` pour la
+> structure (cours, modules, chapitres, ordres, métadonnées) et des fichiers Markdown pour
+> le contenu détaillé des chapitres. Le CRUD manuel Markdown-first reste disponible et
+> constitue la voie standard de secours.
 
 ### Phase 4 - Quiz et Progression
 
