@@ -65,6 +65,7 @@ model User {
   image         String?   @db.Text
   passwordHash  String?   @map("password_hash") @db.Text
   role          UserRole  @default(LEARNER)
+  isActive      Boolean   @default(true) @map("is_active")
   totalXp       Int       @default(0) @map("total_xp")
   level         Int       @default(1)
   emailVerified DateTime? @map("email_verified") @db.Timestamp(6)

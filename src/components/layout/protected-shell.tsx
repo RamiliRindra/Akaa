@@ -30,6 +30,7 @@ export async function ProtectedShell({
     select: {
       name: true,
       email: true,
+      isActive: true,
       role: true,
       totalXp: true,
       level: true,
@@ -41,6 +42,9 @@ export async function ProtectedShell({
     },
   });
   if (!user) {
+    redirect("/login");
+  }
+  if (!user.isActive) {
     redirect("/login");
   }
 

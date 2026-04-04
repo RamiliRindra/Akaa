@@ -66,6 +66,21 @@ async function ensureBootstrapAdminRole(user: {
   return UserRole.ADMIN;
 }
 
+async function getAuthUserState(userId: string) {
+  try {
+    return await db.user.findUnique({
+      where: { id: userId },
+      select: {
+        role: true,
+        isActive: true,
+      },
+    });
+  } catch (error) {
+    logPrismaAuthError("auth.getUserState", error);
+    return null;
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: (() => {
     const baseAdapter = PrismaAdapter(db);
@@ -158,6 +173,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        if (!user.isActive) {
+          return null;
+        }
+
         const isPasswordValid = await compare(parsed.data.password, user.passwordHash);
         if (!isPasswordValid) {
           return null;
@@ -174,16 +193,47 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      const userId = user.id ?? null;
+
+      if (!userId) {
+        return false;
+      }
+
+      const state = await getAuthUserState(userId);
+      return state?.isActive ?? user.isActive ?? true;
+    },
     async jwt({ token, user }) {
       if (user) {
+        if (!user.id) {
+          token.isActive = user.isActive ?? true;
+          token.role = (user.role as UserRole | undefined) ?? token.role;
+          return token;
+        }
+
+        const state = await getAuthUserState(user.id);
+        if (state && !state.isActive) {
+          token.isActive = false;
+          return token;
+        }
+
         const role = await ensureBootstrapAdminRole({
           id: user.id,
           email: user.email,
-          role: (user.role as UserRole | undefined) ?? null,
+          role: state?.role ?? (user.role as UserRole | undefined) ?? null,
         });
         token.sub = user.id;
         token.role = role ?? user.role;
+        token.isActive = state?.isActive ?? user.isActive ?? true;
         return token;
+      }
+
+      if (token.sub) {
+        const state = await getAuthUserState(token.sub);
+        if (state) {
+          token.isActive = state.isActive;
+          token.role = state.role;
+        }
       }
 
       if (isBootstrapAdminEmail(token.email)) {
@@ -196,27 +246,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return token;
       }
 
-      if (!token.role && token.sub) {
-        let dbUser: { role: UserRole } | null = null;
-        try {
-          dbUser = await db.user.findUnique({
-            where: { id: token.sub },
-            select: { role: true },
-          });
-        } catch (error) {
-          logPrismaAuthError("callbacks.jwt.findRole", error);
-        }
-        if (dbUser) {
-          token.role = dbUser.role;
-        }
-      }
-
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub ?? "";
         session.user.role = (token.role as UserRole | undefined) ?? "LEARNER";
+        session.user.isActive = token.isActive ?? true;
       }
 
       return session;
