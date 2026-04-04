@@ -3,6 +3,7 @@
 import { ChapterProgressStatus, Prisma, QuizQuestionType, UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -965,6 +966,10 @@ export async function submitQuizAttemptAction(formData: FormData) {
       ),
     );
   } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     console.error("[quiz][submit]", {
       quizId: quiz.id,
       chapterId: parsed.data.chapterId,
