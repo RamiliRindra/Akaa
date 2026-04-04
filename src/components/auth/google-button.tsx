@@ -46,6 +46,7 @@ export function GoogleButton({ callbackUrl = "/dashboard", enabled = false }: Go
       <motion.button
         type="button"
         whileTap={{ scale: 0.98 }}
+        data-interactive="true"
         onClick={() => {
           setError(null);
           if (!enabled) {
@@ -57,7 +58,7 @@ export function GoogleButton({ callbackUrl = "/dashboard", enabled = false }: Go
           });
         }}
         disabled={isPending}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#0c0910]/15 bg-white px-4 py-3 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5 disabled:cursor-not-allowed disabled:opacity-60"
+        className="secondary-button w-full px-4 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
       >
         <GoogleIcon />
         {isPending ? "Connexion Google..." : "Continuer avec Google"}

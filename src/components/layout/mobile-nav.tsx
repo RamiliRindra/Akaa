@@ -25,6 +25,7 @@ export function MobileNav({ title, items }: MobileNavProps) {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
+        data-interactive="true"
         className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/92 text-[#0c0910] shadow-[0_16px_30px_-18px_rgba(44,47,49,0.45)] backdrop-blur"
       >
         {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -52,6 +53,7 @@ export function MobileNav({ title, items }: MobileNavProps) {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
+                  data-interactive="true"
                   className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/82 text-[#0c0910]"
                 >
                   <X className="h-4 w-4" />
@@ -71,6 +73,7 @@ export function MobileNav({ title, items }: MobileNavProps) {
                     <Link
                       key={item.href}
                       href={item.href}
+                      data-interactive="true"
                       onClick={() => setOpen(false)}
                       className={`flex items-center gap-3 rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
                         isActive

@@ -164,7 +164,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
             name="q"
             defaultValue={searchQuery}
             placeholder="Nom ou email"
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+            className="form-input text-sm"
           />
         </label>
 
@@ -173,7 +173,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
           <select
             name="role"
             defaultValue={selectedRole ?? ""}
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+            className="form-select text-sm"
           >
             <option value="">Tous les rôles</option>
             {Object.values(UserRole).map((role) => (
@@ -189,7 +189,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
           <select
             name="status"
             defaultValue={selectedStatus ?? ""}
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+            className="form-select text-sm"
           >
             <option value="">Tous les statuts</option>
             <option value="active">Actifs</option>
@@ -200,13 +200,13 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
         <div className="flex items-end gap-3">
           <button
             type="submit"
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-[#0F63FF] px-4 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+            className="primary-button h-11 px-4 text-sm font-semibold"
           >
             Filtrer
           </button>
           <Link
             href={buildUsersHref({ view: currentView })}
-            className="inline-flex h-11 items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+            className="secondary-button h-11 px-4 text-sm font-semibold"
           >
             Réinitialiser
           </Link>

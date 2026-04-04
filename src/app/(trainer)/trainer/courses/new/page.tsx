@@ -54,7 +54,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
           <input
             name="title"
             required
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-input text-sm"
             placeholder="Ex. Fondamentaux du community management"
           />
         </label>
@@ -64,7 +64,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
           <textarea
             name="description"
             rows={4}
-            className="w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 py-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-textarea text-sm"
             placeholder="Décrivez le résultat attendu, le public visé et les compétences couvertes."
           />
         </label>
@@ -75,7 +75,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
             <select
               name="level"
               defaultValue="BEGINNER"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+              className="form-select text-sm"
             >
               <option value="BEGINNER">
                 {courseLevelLabels.BEGINNER} — {courseLevelDescriptions.BEGINNER}
@@ -93,7 +93,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
             Catégorie
             <select
               name="categoryId"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+              className="form-select text-sm"
               defaultValue=""
             >
               <option value="">Sans catégorie</option>
@@ -110,7 +110,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
             <select
               name="status"
               defaultValue={CourseStatus.DRAFT}
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+              className="form-select text-sm"
             >
               <option value={CourseStatus.DRAFT}>Brouillon</option>
               <option value={CourseStatus.PUBLISHED}>Publié</option>
@@ -125,7 +125,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
             <input
               name="thumbnailUrl"
               type="url"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+              className="form-input text-sm"
               placeholder="https://..."
             />
           </label>
@@ -136,7 +136,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
               name="estimatedHours"
               type="number"
               min="1"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+              className="form-input text-sm"
               placeholder="6"
             />
           </label>
@@ -144,7 +144,7 @@ export default async function NewCoursePage({ searchParams }: NewCoursePageProps
 
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+          className="primary-button px-4 py-2 text-sm font-semibold"
         >
           Créer le cours
         </button>

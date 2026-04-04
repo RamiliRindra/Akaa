@@ -75,7 +75,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
           <input
             name="name"
             required
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+            className="form-input text-sm"
             placeholder="Marketing digital"
           />
         </label>
@@ -85,7 +85,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
           <textarea
             name="description"
             rows={3}
-            className="w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 py-3 text-sm text-[#0c0910]"
+            className="form-textarea text-sm"
             placeholder="Regroupe les cours orientés acquisition, marque et performance."
           />
         </label>
@@ -103,7 +103,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
               type="number"
               min="0"
               defaultValue="0"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+              className="form-input text-sm"
             />
           </label>
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
@@ -111,7 +111,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
             <select
               name="isActive"
               defaultValue="true"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+              className="form-select text-sm"
             >
               <option value="true">Active</option>
               <option value="false">Inactive</option>
@@ -121,7 +121,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
 
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
+          className="primary-button px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
         >
           Ajouter la catégorie
         </button>
@@ -166,7 +166,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                     name="name"
                     required
                     defaultValue={category.name}
-                    className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                    className="form-input text-sm"
                   />
                 </label>
 
@@ -176,7 +176,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                     name="description"
                     rows={3}
                     defaultValue={category.description ?? ""}
-                    className="w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 py-3 text-sm text-[#0c0910]"
+                    className="form-textarea text-sm"
                   />
                 </label>
 
@@ -193,7 +193,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                       type="number"
                       min="0"
                       defaultValue={category.order}
-                      className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                      className="form-input text-sm"
                     />
                   </label>
                   <label className="space-y-2 text-sm font-medium text-[#0c0910]">
@@ -201,7 +201,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                     <select
                       name="isActive"
                       defaultValue={String(category.isActive)}
-                      className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                      className="form-select text-sm"
                     >
                       <option value="true">Active</option>
                       <option value="false">Inactive</option>
@@ -211,7 +211,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
 
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
+                  className="primary-button px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
                 >
                   Enregistrer
                 </button>
@@ -220,7 +220,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
               <form action={deleteCategoryAction.bind(null, category.id)} className="xl:self-start">
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center rounded-xl bg-[#c2410c] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c2410c]/90"
+                  className="danger-button px-4 py-2 text-sm font-semibold"
                 >
                   Supprimer
                 </button>

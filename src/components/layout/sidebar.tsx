@@ -33,6 +33,7 @@ export function Sidebar({ title, items }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                data-interactive="true"
                 className={`relative flex items-center gap-3 rounded-[1.35rem] px-4 py-3 text-sm font-semibold transition ${
                   isActive
                     ? "bg-[linear-gradient(135deg,rgba(0,80,214,0.14),rgba(15,99,255,0.08))] text-[#0050d6]"

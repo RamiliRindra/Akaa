@@ -78,7 +78,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
           <input
             name="name"
             required
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+            className="form-input text-sm"
             placeholder="Mentor du mois"
           />
         </label>
@@ -89,7 +89,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
             name="iconUrl"
             required
             defaultValue="/badges/premier-pas.svg"
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+            className="form-input text-sm"
           />
         </label>
 
@@ -98,7 +98,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
           <textarea
             name="description"
             rows={3}
-            className="w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 py-3 text-sm text-[#0c0910]"
+            className="form-textarea text-sm"
             placeholder="Récompense accordée aux apprenants qui..."
           />
         </label>
@@ -109,7 +109,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
             <select
               name="conditionType"
               defaultValue={BadgeConditionType.XP_THRESHOLD}
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+              className="form-select text-sm"
             >
               {Object.values(BadgeConditionType).map((type) => (
                 <option key={type} value={type}>
@@ -125,7 +125,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
               name="conditionValue"
               type="number"
               min="0"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+              className="form-input text-sm"
               placeholder="10"
             />
           </label>
@@ -138,7 +138,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
               min="0"
               defaultValue="0"
               required
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+              className="form-input text-sm"
             />
           </label>
 
@@ -147,7 +147,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
             <select
               name="isActive"
               defaultValue="true"
-              className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+              className="form-select text-sm"
             >
               <option value="true">Actif</option>
               <option value="false">Inactif</option>
@@ -157,7 +157,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
 
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
+          className="primary-button px-4 py-2 text-sm font-semibold lg:col-span-2 lg:w-fit"
         >
           Ajouter le badge
         </button>

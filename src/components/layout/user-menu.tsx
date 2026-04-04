@@ -14,6 +14,7 @@ export function UserMenu({ className }: UserMenuProps) {
   return (
     <button
       type="button"
+      data-interactive="true"
       onClick={() => {
         startTransition(async () => {
           await signOut({ callbackUrl: "/login" });

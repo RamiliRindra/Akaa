@@ -106,7 +106,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   step="0.1"
                   required
                   defaultValue={beginner?.multiplier ?? 1}
-                  className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+                  className="form-input text-sm"
                 />
                 <span className="block text-xs font-normal text-[#0c0910]/60">
                   {courseLevelDescriptions.BEGINNER}
@@ -123,7 +123,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   step="0.1"
                   required
                   defaultValue={intermediate?.multiplier ?? 1.5}
-                  className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+                  className="form-input text-sm"
                 />
                 <span className="block text-xs font-normal text-[#0c0910]/60">
                   {courseLevelDescriptions.INTERMEDIATE}
@@ -140,7 +140,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   step="0.1"
                   required
                   defaultValue={advanced?.multiplier ?? 2}
-                  className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+                  className="form-input text-sm"
                 />
                 <span className="block text-xs font-normal text-[#0c0910]/60">
                   {courseLevelDescriptions.ADVANCED}
@@ -150,7 +150,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+              className="primary-button px-4 py-2 text-sm font-semibold"
             >
               Enregistrer les coefficients
             </button>
@@ -172,7 +172,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
               <select
                 name="userId"
                 required
-                className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                className="form-select text-sm"
               >
                 <option value="">Sélectionner un apprenant</option>
                 {learners.map((learner) => (
@@ -191,7 +191,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   type="number"
                   required
                   step="1"
-                  className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                  className="form-input text-sm"
                   placeholder="+50 ou -25"
                 />
               </label>
@@ -201,7 +201,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                 <input
                   name="reason"
                   required
-                  className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                  className="form-input text-sm"
                   placeholder="Correction manuelle après audit pédagogique"
                 />
               </label>
@@ -209,7 +209,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-xl bg-[#453750] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#453750]/90"
+              className="primary-button bg-[linear-gradient(135deg,#453750,#655670)] px-4 py-2 text-sm font-semibold"
             >
               Enregistrer l’ajustement
             </button>

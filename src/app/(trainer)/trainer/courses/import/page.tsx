@@ -53,13 +53,13 @@ export default async function ImportCoursePage({ searchParams }: ImportCoursePag
               type="file"
               accept=".zip,application/zip"
               required
-              className="block w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 py-3 text-sm text-[#0c0910] file:mr-4 file:rounded-lg file:border-0 file:bg-[#0F63FF] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#0F63FF]/90"
+              className="block w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 py-3 text-sm text-[#0c0910] transition file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#0F63FF] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-[#0F63FF]/90"
             />
           </label>
 
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+            className="primary-button px-4 py-2 text-sm font-semibold"
           >
             Valider et importer
           </button>
@@ -77,21 +77,21 @@ export default async function ImportCoursePage({ searchParams }: ImportCoursePag
             <a
               href="/import-templates/manifest.template.csv"
               download
-              className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+              className="secondary-button px-4 py-2 text-sm font-semibold"
             >
               Télécharger le modèle CSV
             </a>
             <a
               href="/import-templates/chapter.template.md"
               download
-              className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+              className="secondary-button px-4 py-2 text-sm font-semibold"
             >
               Télécharger le modèle Markdown
             </a>
             <a
               href="/import-templates/quiz.template.json"
               download
-              className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+              className="secondary-button px-4 py-2 text-sm font-semibold"
             >
               Télécharger le modèle Quiz JSON
             </a>

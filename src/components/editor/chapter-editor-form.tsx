@@ -47,7 +47,7 @@ export function ChapterEditorForm({
             name="title"
             defaultValue={title}
             required
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-input text-sm"
           />
         </label>
 
@@ -58,7 +58,7 @@ export function ChapterEditorForm({
             type="number"
             min="1"
             defaultValue={estimatedMinutes ?? ""}
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-input text-sm"
           />
         </label>
       </div>
@@ -70,7 +70,7 @@ export function ChapterEditorForm({
           type="url"
           defaultValue={videoUrl ?? ""}
           placeholder="https://www.youtube.com/watch?v=..."
-          className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+          className="form-input text-sm"
         />
       </label>
 
@@ -85,7 +85,7 @@ export function ChapterEditorForm({
 
       <button
         type="submit"
-        className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+        className="primary-button px-4 py-2 text-sm font-semibold"
       >
         Enregistrer le chapitre
       </button>

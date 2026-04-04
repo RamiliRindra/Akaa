@@ -17,6 +17,7 @@ export function CategoryFilter({ categories, activeSlug }: CategoryFilterProps) 
       <div className="flex flex-wrap gap-2">
       <Link
         href="/courses"
+        data-interactive="true"
         className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
           !activeSlug
             ? "bg-[linear-gradient(135deg,#0050d6,#0f63ff)] !text-white shadow-[0_18px_28px_-22px_rgba(0,80,214,0.9)] hover:!text-white"
@@ -31,6 +32,7 @@ export function CategoryFilter({ categories, activeSlug }: CategoryFilterProps) 
           <Link
             key={category.id}
             href={`/courses?category=${category.slug}`}
+            data-interactive="true"
             className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
               isActive
                 ? "bg-[linear-gradient(135deg,#0050d6,#0f63ff)] !text-white shadow-[0_18px_28px_-22px_rgba(0,80,214,0.9)] hover:!text-white"

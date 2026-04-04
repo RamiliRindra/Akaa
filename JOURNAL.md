@@ -857,3 +857,20 @@ Résultat :
 3. **Continuer credentials localement** en cas d’instabilité Google OAuth ; sinon utiliser l’instance déployée.
 4. **Railway déployé et validé** : build avec `prisma generate`, variables Neon/NextAuth/Google configurées sur le service ; tests auth/OAuth contre l’URL publique du service.
 5. **Production Node (Railway)** : préférer **driver `pg` (TCP)** pour Prisma vers Neon plutôt que WebSocket serverless lorsque `NODE_ENV=production` (voir `src/lib/db.ts` et Incident G).
+
+---
+
+## Piste structurelle notée — Sidebar phase 7+
+
+Une piste d’évolution a été retenue pour une itération ultérieure du shell applicatif, sans intégration immédiate afin d’éviter une régression sur la navigation stabilisée.
+
+### Idées à réévaluer plus tard
+- `SidebarFooter` natif pour structurer proprement la zone de déconnexion et les actions de fin de menu
+- `SidebarTrigger` plus standardisé pour le comportement mobile et les états compact/expanded
+- `SidebarRail` si le menu latéral devient dense ou nécessite un mode réduit
+- éventuels groupes repliables si les sections `trainer` et `admin` grossissent
+
+### Décision actuelle
+- conserver la sidebar custom actuelle en phase 7
+- reprendre seulement les idées structurelles utiles plus tard
+- ne pas migrer maintenant vers un composant sidebar externe tant que le shell visuel reste en stabilisation

@@ -68,7 +68,7 @@ export function RegisterForm() {
             autoComplete="name"
             value={form.name}
             onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white pl-10 pr-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-input pl-10 pr-3 text-sm"
             placeholder="Votre nom"
           />
         </div>
@@ -86,7 +86,7 @@ export function RegisterForm() {
             autoComplete="email"
             value={form.email}
             onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white pl-10 pr-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-input pl-10 pr-3 text-sm"
             placeholder="vous@akaa.fr"
           />
         </div>
@@ -104,11 +104,12 @@ export function RegisterForm() {
             autoComplete="new-password"
             value={form.password}
             onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white pl-10 pr-11 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-input pl-10 pr-11 text-sm"
             placeholder="Minimum 8 caractères"
           />
           <button
             type="button"
+            data-interactive="true"
             onClick={() => setShowPassword((value) => !value)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
           >
@@ -131,11 +132,12 @@ export function RegisterForm() {
             onChange={(event) =>
               setForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
             }
-            className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white pl-10 pr-11 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
+            className="form-input pl-10 pr-11 text-sm"
             placeholder="Retapez votre mot de passe"
           />
           <button
             type="button"
+            data-interactive="true"
             onClick={() => setShowConfirmPassword((value) => !value)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
           >
@@ -151,7 +153,7 @@ export function RegisterForm() {
         type="submit"
         whileTap={{ scale: 0.98 }}
         disabled={isPending}
-        className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#0F63FF] px-4 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="primary-button h-11 w-full px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? "Création du compte..." : "Créer mon compte"}
       </motion.button>
