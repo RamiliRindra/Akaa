@@ -17,3 +17,6 @@ export function formatDate(date: Date | string) {
   }).format(typeof date === "string" ? new Date(date) : date);
 }
 
+export function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}

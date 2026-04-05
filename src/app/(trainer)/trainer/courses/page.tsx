@@ -6,6 +6,15 @@ import { FormFeedback } from "@/components/feedback/form-feedback";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "A";
+}
+
 type TrainerCoursesPageProps = {
   searchParams: Promise<{
     type?: string;
@@ -47,6 +56,24 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
               id: true,
             },
           },
+        },
+      },
+      enrollments: {
+        orderBy: { enrolledAt: "desc" },
+        take: 3,
+        select: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          enrollments: true,
         },
       },
     },
@@ -94,6 +121,13 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
               level={course.level}
               status={course.status}
               href={`/trainer/courses/${course.id}/edit`}
+              learnerCount={course._count.enrollments}
+              learnerPreview={course.enrollments.map((enrollment) => ({
+                src: enrollment.user.image,
+                fallback: getInitials(enrollment.user.name),
+                name: enrollment.user.name,
+              }))}
+              learnersHref={`/trainer/courses/${course.id}/learners`}
             />
           ))}
         </div>

@@ -17,6 +17,8 @@ Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, ave
 - Interface en français, architecture i18n-ready pour ajout futur de l'anglais
 - Budget infrastructure minimal : Railway Hobby + Neon Free
 - **Light mode uniquement** pour le MVP (dark mode envisagé en fin de projet)
+- Les emails transactionnels (confirmation d'inscription, bienvenue par rôle, etc.) sont **prévu plus tard** et ne seront pas implémentés avant la stabilisation du domaine/emailing de la plateforme
+- L'architecture doit rester compatible avec une **séparation future entre le site vitrine et l'application**, par exemple `domaine-principal.tld` pour la landing publique et `app.domaine-principal.tld` pour l'application authentifiée
 
 ### Identité visuelle
 
@@ -63,6 +65,7 @@ Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, ave
 | **Base de données** | Neon PostgreSQL (Free) | 0.5 Go stockage, 190h compute/mois, auto-suspend à 5 min |
 | **ORM** | Prisma 7.6.0 | Schema unique, migrations, connection pooling via Neon |
 | **Authentification** | NextAuth v5 + @auth/prisma-adapter | Google OAuth + Email/Password (bcryptjs) |
+| **Emails transactionnels** | Non implémentés en MVP | Prévoir plus tard confirmation d'inscription et messages de bienvenue par rôle, une fois le domaine de plateforme stabilisé |
 | **Médias** | YouTube / Google Drive embed | Zéro stockage côté serveur pour les vidéos |
 | **Styling** | Tailwind CSS v4 | Config CSS-first via PostCSS, light mode uniquement |
 | **State client** | React Query (TanStack) | Cache, invalidation, optimistic updates |
@@ -890,6 +893,7 @@ akaa/
 - Tests de performance avec Neon (cold start, requêtes)
 - Dark mode (optionnel, si temps disponible)
 - Déploiement Railway
+- Préserver une séparation logique entre **site vitrine public** et **application authentifiée**, afin de permettre plus tard une bascule vers une topologie du type `www` / racine pour la landing et `app.` pour la plateforme
 
 ### Phase 8 - Calendrier de formation (post-MVP)
 
@@ -936,6 +940,13 @@ akaa/
 - **Rappels** : notifications automatiques avant chaque session (configurable via `reminder_minutes` : 24h et 1h avant par défaut)
 - **Stratégie de rappels** : vérification côté serveur au chargement de page (acceptable pour ~300 utilisateurs) ou cron Railway
 - **Liste** : page/panel de notifications avec marquage lu/non lu, lien direct vers la session concernée
+
+#### 8.5 bis — Emails transactionnels (post-MVP)
+
+- **Confirmation d'inscription** : email envoyé après création de compte, une fois le domaine d'envoi de la plateforme configuré
+- **Messages de bienvenue par rôle** : variantes dédiées `LEARNER`, `TRAINER`, `ADMIN`
+- **Précondition** : ne pas implémenter avant la stabilisation du domaine principal et de la stratégie d'envoi email (DNS, SPF, DKIM, DMARC, expéditeur)
+- **Séparation d'URL à anticiper** : les liens email devront être compatibles avec une future séparation entre la landing publique et l'application (`app.`)
 
 #### 8.6 — Gamification sessions
 
