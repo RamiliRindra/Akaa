@@ -1,5 +1,5 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
-import { BadgeConditionType, UserRole, XpSource } from "@prisma/client";
+import { AttendanceStatus, BadgeConditionType, UserRole, XpSource } from "@prisma/client";
 import { randomUUID } from "crypto";
 
 import type { CourseLevelValue } from "@/lib/course-level";
@@ -32,6 +32,14 @@ type ActivityGamificationInput = {
   perfectQuiz?: boolean;
   updateStreak?: boolean;
   courseLevel?: CourseLevelValue;
+};
+
+type SessionGamificationInput = {
+  userId: string;
+  sessionId: string;
+  sessionTitle: string;
+  xpReward: number;
+  attendanceStatus: AttendanceStatus;
 };
 
 export type GamificationSummary = {
@@ -90,6 +98,22 @@ const DEFAULT_BADGES: DefaultBadgeDefinition[] = [
     conditionType: BadgeConditionType.XP_THRESHOLD,
     conditionValue: 2000,
     xpBonus: 50,
+  },
+  {
+    name: "Premier Atelier",
+    description: "Participer à une première session.",
+    iconUrl: "/badges/premier-pas.svg",
+    conditionType: BadgeConditionType.SESSIONS_ATTENDED,
+    conditionValue: 1,
+    xpBonus: 15,
+  },
+  {
+    name: "Participant Assidu",
+    description: "Participer à 5 sessions.",
+    iconUrl: "/badges/assidu.svg",
+    conditionType: BadgeConditionType.SESSIONS_ATTENDED,
+    conditionValue: 5,
+    xpBonus: 40,
   },
 ];
 
@@ -275,56 +299,65 @@ async function updateDailyStreak(db: GamificationDbClient, userId: string) {
 }
 
 async function evaluateAutomaticBadges(db: GamificationDbClient, userId: string) {
-  const [user, streak, completedCourses, perfectQuizAttempts, existingBadges, activeBadges] = await Promise.all([
-    db.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: {
-        totalXp: true,
-      },
-    }),
-    db.streak.findUnique({
-      where: { userId },
-      select: {
-        currentStreak: true,
-      },
-    }),
-    db.enrollment.count({
-      where: {
-        userId,
-        progressPercent: 100,
-      },
-    }),
-    db.quizAttempt.findMany({
-      where: {
-        userId,
-        passed: true,
-        score: 100,
-      },
-      distinct: ["quizId"],
-      select: {
-        quizId: true,
-      },
-    }),
-    db.userBadge.findMany({
-      where: { userId },
-      select: {
-        badgeId: true,
-      },
-    }),
-    db.badge.findMany({
-      where: {
-        isActive: true,
-        conditionType: { not: BadgeConditionType.MANUAL },
-      },
-      select: {
-        id: true,
-        name: true,
-        conditionType: true,
-        conditionValue: true,
-        xpBonus: true,
-      },
-    }),
-  ]);
+  const [user, streak, completedCourses, perfectQuizAttempts, attendedSessions, existingBadges, activeBadges] =
+    await Promise.all([
+      db.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: {
+          totalXp: true,
+        },
+      }),
+      db.streak.findUnique({
+        where: { userId },
+        select: {
+          currentStreak: true,
+        },
+      }),
+      db.enrollment.count({
+        where: {
+          userId,
+          progressPercent: 100,
+        },
+      }),
+      db.quizAttempt.findMany({
+        where: {
+          userId,
+          passed: true,
+          score: 100,
+        },
+        distinct: ["quizId"],
+        select: {
+          quizId: true,
+        },
+      }),
+      db.sessionAttendance.count({
+        where: {
+          userId,
+          status: {
+            in: [AttendanceStatus.PRESENT, AttendanceStatus.LATE],
+          },
+        },
+      }),
+      db.userBadge.findMany({
+        where: { userId },
+        select: {
+          badgeId: true,
+        },
+      }),
+      db.badge.findMany({
+        where: {
+          isActive: true,
+          conditionType: { not: BadgeConditionType.MANUAL },
+        },
+        select: {
+          id: true,
+          name: true,
+          conditionType: true,
+          conditionValue: true,
+          xpBonus: true,
+        },
+      }),
+    ]);
 
   const ownedBadgeIds = new Set(existingBadges.map((badge) => badge.badgeId));
   const unlockedBadgeNames: string[] = [];
@@ -349,6 +382,9 @@ async function evaluateAutomaticBadges(db: GamificationDbClient, userId: string)
         break;
       case BadgeConditionType.QUIZ_PERFECT:
         unlocked = perfectQuizAttempts.length >= threshold;
+        break;
+      case BadgeConditionType.SESSIONS_ATTENDED:
+        unlocked = attendedSessions >= threshold;
         break;
       default:
         unlocked = false;
@@ -540,5 +576,70 @@ export async function applyLearningGamification(
     levelAfter: userAfter.level,
     unlockedBadges,
     currentStreak,
+  };
+}
+
+export async function applySessionAttendanceGamification(
+  db: GamificationDbClient,
+  input: SessionGamificationInput,
+): Promise<GamificationSummary> {
+  await ensureDefaultBadges(db);
+
+  const [userBefore, streak] = await Promise.all([
+    db.user.findUniqueOrThrow({
+      where: { id: input.userId },
+      select: {
+        role: true,
+        level: true,
+      },
+    }),
+    db.streak.findUnique({
+      where: { userId: input.userId },
+      select: {
+        currentStreak: true,
+      },
+    }),
+  ]);
+
+  if (userBefore.role !== UserRole.LEARNER) {
+    return {
+      xpGained: 0,
+      levelBefore: userBefore.level,
+      levelAfter: userBefore.level,
+      unlockedBadges: [],
+      currentStreak: streak?.currentStreak ?? 0,
+    };
+  }
+
+  let xpGained = 0;
+
+  if (input.attendanceStatus === AttendanceStatus.PRESENT || input.attendanceStatus === AttendanceStatus.LATE) {
+    const sessionXp = await awardXp(db, {
+      userId: input.userId,
+      amount: input.xpReward,
+      source: XpSource.SESSION,
+      sourceId: input.sessionId,
+      description: `Présence à la session « ${input.sessionTitle} »`,
+    });
+
+    if (sessionXp.awarded) {
+      xpGained += input.xpReward;
+    }
+  }
+
+  const unlockedBadges = await evaluateAutomaticBadges(db, input.userId);
+  const userAfter = await db.user.findUniqueOrThrow({
+    where: { id: input.userId },
+    select: {
+      level: true,
+    },
+  });
+
+  return {
+    xpGained,
+    levelBefore: userBefore.level,
+    levelAfter: userAfter.level,
+    unlockedBadges,
+    currentStreak: streak?.currentStreak ?? 0,
   };
 }

@@ -1125,3 +1125,29 @@ Une première cloche exploitable a été branchée dans le header des espaces pr
 Portée retenue :
 - on livre un MVP utile immédiatement
 - sans introduire encore une page dédiée ni des rappels automatiques complets
+
+### Suite — rappels automatiques MVP
+Le rappel de session a ensuite été branché sans dépendre d’un cron externe :
+- un sync client discret déclenche une server action lors des navigations apprenant
+- la server action crée les notifications `SESSION_REMINDER` manquantes uniquement si la fenêtre de rappel est atteinte
+- déduplication par session via `relatedUrl`
+- refresh applicatif uniquement lorsqu’un nouveau rappel est effectivement créé
+
+Choix d’implémentation :
+- pas d’écriture en Server Component pendant le render
+- pas de scheduler externe pour cette étape
+- comportement opportuniste mais robuste pour le MVP
+
+### Suite — gamification de présence
+Le pointage de présence ne se contente plus d’écrire `session_attendance` :
+- la récompense XP de session passe par la couche gamification commune
+- les badges automatiques savent maintenant évaluer `SESSIONS_ATTENDED`
+- deux badges par défaut ont été ajoutés pour matérialiser ce nouveau seuil :
+  - `Premier Atelier`
+  - `Participant Assidu`
+- le pointage déclenche aussi des notifications `XP_GAINED` et `BADGE_UNLOCKED` quand il y a réellement une nouveauté
+
+Résultat :
+- pas de double attribution d’XP pour une même session
+- badges cohérents avec les présences réellement comptabilisées
+- la cloche devient utile jusqu’au bout du flux session

@@ -1089,4 +1089,12 @@ Résultat :
   - compteur non lu
   - dernières notifications
   - action “marquer comme lu”
+- ✅ Rappels automatiques MVP :
+  - génération opportuniste des rappels de session pour les apprenants approuvés
+  - déduplication par session pour éviter les doublons
+  - rafraîchissement du header après création d’un rappel
+- ✅ Gamification des sessions finalisée :
+  - attribution d’XP sur présence `PRESENT` / `LATE`
+  - badges automatiques `SESSIONS_ATTENDED`
+  - notifications `XP_GAINED` et `BADGE_UNLOCKED` après pointage
 - ⚠️ Les rappels automatiques, la cloche étendue et la page dédiée de notifications restent à compléter si l’on veut aller au-delà du MVP de phase 8

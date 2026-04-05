@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/header";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import type { NavItem } from "@/components/layout/nav-config";
 import { Sidebar } from "@/components/layout/sidebar";
+import { SessionReminderSync } from "@/components/notifications/session-reminder-sync";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 
@@ -84,19 +85,20 @@ export async function ProtectedShell({
         userRole={session.user.role}
       />
       <div className="flex min-h-screen flex-1 flex-col">
+        <SessionReminderSync enabled={session.user.role === "LEARNER"} />
         <div className="relative">
           <Header
             title={headerTitle}
-          totalXp={userGamification?.totalXp ?? 0}
-          level={userGamification?.level ?? 1}
-          currentStreak={userGamification?.streak?.currentStreak ?? 0}
-          showGamification={showGamification}
-          notifications={notifications.map((notification) => ({
-            ...notification,
-            createdAt: notification.createdAt.toISOString(),
-          }))}
-          unreadNotificationCount={unreadNotificationCount}
-        />
+            totalXp={userGamification?.totalXp ?? 0}
+            level={userGamification?.level ?? 1}
+            currentStreak={userGamification?.streak?.currentStreak ?? 0}
+            showGamification={showGamification}
+            notifications={notifications.map((notification) => ({
+              ...notification,
+              createdAt: notification.createdAt.toISOString(),
+            }))}
+            unreadNotificationCount={unreadNotificationCount}
+          />
           <div className="absolute left-4 top-4 z-30 lg:hidden">
             <MobileNav
               title={navTitle}

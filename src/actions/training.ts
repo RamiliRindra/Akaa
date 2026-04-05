@@ -1,21 +1,20 @@
 "use server";
 
 import {
-  AttendanceStatus,
   NotificationType,
   ProgramStatus,
   SessionAccessPolicy,
   SessionEnrollmentStatus,
   SessionStatus,
   UserRole,
-  XpSource,
 } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getLevelFromXp } from "@/lib/gamification";
+import { applySessionAttendanceGamification } from "@/lib/gamification";
+import { formatDateTime } from "@/lib/training";
 import { slugify } from "@/lib/utils";
 import {
   programDeleteSchema,
@@ -848,45 +847,34 @@ export async function markSessionAttendanceAction(formData: FormData) {
     },
   });
 
-  if (
-    (parsed.data.status === AttendanceStatus.PRESENT || parsed.data.status === AttendanceStatus.LATE) &&
-    enrollment.user.role === UserRole.LEARNER
-  ) {
-    const existingXp = await db.xpTransaction.findFirst({
-      where: {
+  if (enrollment.user.role === UserRole.LEARNER) {
+    const summary = await db.$transaction((tx) =>
+      applySessionAttendanceGamification(tx, {
         userId: parsed.data.userId,
-        source: XpSource.SESSION,
-        sourceId: parsed.data.sessionId,
-      },
-      select: { id: true },
-    });
+        sessionId: parsed.data.sessionId,
+        sessionTitle: session.title,
+        xpReward: session.xpReward,
+        attendanceStatus: parsed.data.status,
+      }),
+    );
 
-    if (!existingXp) {
-      await db.$transaction(async (tx) => {
-        await tx.xpTransaction.create({
-          data: {
-            userId: parsed.data.userId,
-            amount: session.xpReward,
-            source: XpSource.SESSION,
-            sourceId: parsed.data.sessionId,
-            description: `Présence à la session « ${session.title} »`,
-          },
-        });
+    if (summary.xpGained > 0) {
+      await createNotification({
+        userId: parsed.data.userId,
+        type: NotificationType.XP_GAINED,
+        title: "XP gagnée sur session",
+        message: `Vous avez gagné ${summary.xpGained} XP grâce à votre présence à la session « ${session.title} ».`,
+        relatedUrl: `/calendar?sessionId=${parsed.data.sessionId}`,
+      });
+    }
 
-        const learner = await tx.user.findUniqueOrThrow({
-          where: { id: parsed.data.userId },
-          select: { totalXp: true },
-        });
-
-        const nextTotalXp = learner.totalXp + session.xpReward;
-
-        await tx.user.update({
-          where: { id: parsed.data.userId },
-          data: {
-            totalXp: nextTotalXp,
-            level: getLevelFromXp(nextTotalXp),
-          },
-        });
+    if (summary.unlockedBadges.length > 0) {
+      await createNotification({
+        userId: parsed.data.userId,
+        type: NotificationType.BADGE_UNLOCKED,
+        title: "Nouveau badge débloqué",
+        message: `Badge${summary.unlockedBadges.length > 1 ? "s débloqués" : " débloqué"} : ${summary.unlockedBadges.join(", ")}.`,
+        relatedUrl: "/profile",
       });
     }
   }
@@ -917,6 +905,109 @@ export async function markNotificationReadInlineAction(notificationId: string) {
   revalidatePath("/dashboard");
   revalidatePath("/courses");
   revalidatePath("/profile");
+}
+
+export async function triggerPendingSessionRemindersAction() {
+  const user = await requireAuthenticatedUser();
+
+  if (user.role !== UserRole.LEARNER) {
+    return 0;
+  }
+
+  const now = new Date();
+  const approvedEnrollments = await db.sessionEnrollment.findMany({
+    where: {
+      userId: user.id,
+      status: SessionEnrollmentStatus.APPROVED,
+      session: {
+        status: SessionStatus.SCHEDULED,
+        startsAt: {
+          gt: now,
+        },
+      },
+    },
+    select: {
+      session: {
+        select: {
+          id: true,
+          title: true,
+          startsAt: true,
+          reminderMinutes: true,
+          course: {
+            select: {
+              title: true,
+            },
+          },
+          program: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const dueSessions = approvedEnrollments
+    .map(({ session }) => session)
+    .filter((session) => {
+      const reminderAt = new Date(session.startsAt.getTime() - session.reminderMinutes * 60_000);
+      return reminderAt <= now;
+    });
+
+  if (!dueSessions.length) {
+    return 0;
+  }
+
+  const reminderUrls = dueSessions.map((session) => `/calendar?sessionId=${session.id}`);
+  const existingReminders = await db.notification.findMany({
+    where: {
+      userId: user.id,
+      type: NotificationType.SESSION_REMINDER,
+      relatedUrl: {
+        in: reminderUrls,
+      },
+    },
+    select: {
+      relatedUrl: true,
+    },
+  });
+
+  const existingReminderUrls = new Set(
+    existingReminders.map((notification) => notification.relatedUrl).filter((value): value is string => Boolean(value)),
+  );
+
+  const notificationsToCreate = dueSessions
+    .filter((session) => !existingReminderUrls.has(`/calendar?sessionId=${session.id}`))
+    .map((session) => {
+      const targetLabel = session.course?.title ?? session.program?.title;
+      const startLabel = formatDateTime(session.startsAt);
+
+      return {
+        userId: user.id,
+        type: NotificationType.SESSION_REMINDER,
+        title: "Rappel de session",
+        message: targetLabel
+          ? `Votre session « ${session.title} » liée à « ${targetLabel} » démarre le ${startLabel}.`
+          : `Votre session « ${session.title} » démarre le ${startLabel}.`,
+        relatedUrl: `/calendar?sessionId=${session.id}`,
+      };
+    });
+
+  if (!notificationsToCreate.length) {
+    return 0;
+  }
+
+  await db.notification.createMany({
+    data: notificationsToCreate,
+  });
+
+  revalidateTrainingSurfaces();
+  revalidatePath("/dashboard");
+  revalidatePath("/courses");
+  revalidatePath("/profile");
+
+  return notificationsToCreate.length;
 }
 
 export async function deleteTrainingProgramAsAdminAction(formData: FormData) {
