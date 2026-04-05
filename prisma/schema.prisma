@@ -47,6 +47,7 @@ enum XpSource {
   STREAK
   ADMIN
   BADGE
+  SESSION
 }
 
 enum BadgeConditionType {
@@ -54,7 +55,44 @@ enum BadgeConditionType {
   COURSES_COMPLETED
   STREAK
   QUIZ_PERFECT
+  SESSIONS_ATTENDED
   MANUAL
+}
+
+enum ProgramStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum SessionEnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum NotificationType {
+  SESSION_REQUEST
+  SESSION_APPROVED
+  SESSION_REJECTED
+  SESSION_CANCELLED
+  SESSION_REMINDER
+  XP_GAINED
+  BADGE_UNLOCKED
 }
 
 // Authentification (NextAuth + modèle métier User)
@@ -76,12 +114,18 @@ model User {
   sessions Session[]
 
   courses           Course[]          @relation("TrainerCourses")
+  trainingPrograms  TrainingProgram[] @relation("TrainerPrograms")
+  trainingSessions  TrainingSession[] @relation("TrainerSessions")
   quizAttempts      QuizAttempt[]
   enrollments       Enrollment[]
   chapterProgresses ChapterProgress[]
+  sessionEnrollments SessionEnrollment[]
+  sessionAttendances SessionAttendance[] @relation("LearnerSessionAttendances")
   xpTransactions    XpTransaction[]
   badges            UserBadge[]       @relation("UserBadges")
   badgesGranted     UserBadge[]       @relation("BadgesGrantedBy")
+  attendanceMarked  SessionAttendance[] @relation("AttendanceMarkedBy")
+  notifications     Notification[]
   streak            Streak?
 
   @@index([totalXp(sort: Desc)], map: "idx_user_total_xp_desc")
@@ -167,6 +211,7 @@ model Course {
   category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   modules     Module[]
   enrollments Enrollment[]
+  sessions    TrainingSession[]
 
   @@index([trainerId], map: "idx_course_trainer_id")
   @@index([categoryId], map: "idx_course_category_id")
@@ -375,4 +420,112 @@ model XpLevelSetting {
   updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamp(6)
 
   @@map("xp_level_setting")
+}
+
+// Planification
+model TrainingProgram {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       String        @db.VarChar(255)
+  slug        String        @unique @db.VarChar(255)
+  description String?       @db.Text
+  status      ProgramStatus @default(DRAFT)
+  trainerId   String        @map("trainer_id") @db.Uuid
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  trainer  User              @relation("TrainerPrograms", fields: [trainerId], references: [id], onDelete: Cascade)
+  sessions TrainingSession[]
+
+  @@index([trainerId], map: "idx_training_program_trainer_id")
+  @@index([status], map: "idx_training_program_status")
+  @@map("training_program")
+}
+
+model TrainingSession {
+  id             String        @id @default(uuid()) @db.Uuid
+  title          String        @db.VarChar(255)
+  description    String?       @db.Text
+  status         SessionStatus @default(SCHEDULED)
+  startsAt       DateTime      @map("starts_at") @db.Timestamp(6)
+  endsAt         DateTime      @map("ends_at") @db.Timestamp(6)
+  isAllDay       Boolean       @default(false) @map("is_all_day")
+  location       String?       @db.VarChar(255)
+  meetingUrl     String?       @map("meeting_url") @db.Text
+  recurrenceRule String?       @map("recurrence_rule") @db.Text
+  reminderMinutes Int          @default(1440) @map("reminder_minutes")
+  xpReward       Int           @default(30) @map("xp_reward")
+  trainerId      String        @map("trainer_id") @db.Uuid
+  courseId       String?       @map("course_id") @db.Uuid
+  programId      String?       @map("program_id") @db.Uuid
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  trainer     User                @relation("TrainerSessions", fields: [trainerId], references: [id], onDelete: Cascade)
+  course      Course?             @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  program     TrainingProgram?    @relation(fields: [programId], references: [id], onDelete: SetNull)
+  enrollments SessionEnrollment[]
+  attendances SessionAttendance[]
+
+  @@index([trainerId], map: "idx_training_session_trainer_id")
+  @@index([courseId], map: "idx_training_session_course_id")
+  @@index([programId], map: "idx_training_session_program_id")
+  @@index([status], map: "idx_training_session_status")
+  @@index([startsAt], map: "idx_training_session_starts_at")
+  @@map("training_session")
+}
+
+model SessionEnrollment {
+  id         String                  @id @default(uuid()) @db.Uuid
+  userId     String                  @map("user_id") @db.Uuid
+  sessionId  String                  @map("session_id") @db.Uuid
+  status     SessionEnrollmentStatus @default(PENDING)
+  createdAt  DateTime                @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt  DateTime                @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sessionId], map: "uq_session_enrollment_user_session")
+  @@index([userId], map: "idx_session_enrollment_user_id")
+  @@index([sessionId], map: "idx_session_enrollment_session_id")
+  @@index([status], map: "idx_session_enrollment_status")
+  @@map("session_enrollment")
+}
+
+model SessionAttendance {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  sessionId  String           @map("session_id") @db.Uuid
+  status     AttendanceStatus
+  markedAt   DateTime         @default(now()) @map("marked_at") @db.Timestamp(6)
+  markedBy   String?          @map("marked_by") @db.Uuid
+
+  user         User            @relation("LearnerSessionAttendances", fields: [userId], references: [id], onDelete: Cascade)
+  session      TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  markedByUser User?           @relation("AttendanceMarkedBy", fields: [markedBy], references: [id], onDelete: SetNull)
+
+  @@unique([userId, sessionId], map: "uq_session_attendance_user_session")
+  @@index([userId], map: "idx_session_attendance_user_id")
+  @@index([sessionId], map: "idx_session_attendance_session_id")
+  @@index([markedBy], map: "idx_session_attendance_marked_by")
+  @@map("session_attendance")
+}
+
+// Notifications
+model Notification {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  type       NotificationType
+  title      String           @db.VarChar(255)
+  message    String           @db.Text
+  relatedUrl String?          @map("related_url") @db.Text
+  isRead     Boolean          @default(false) @map("is_read")
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_notification_user_id")
+  @@index([isRead], map: "idx_notification_is_read")
+  @@index([createdAt(sort: Desc)], map: "idx_notification_created_at_desc")
+  @@map("notification")
 }

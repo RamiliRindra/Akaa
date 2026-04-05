@@ -978,12 +978,38 @@ Résultat attendu :
 - moins de latence perçue
 - loaders réservés aux zones où ils apportent vraiment de la clarté
 
+### Extension formateur validée après la phase 7
+Une fois la phase 7 stabilisée, un manque restait visible côté formateur :
+- le dashboard formateur était encore un placeholder
+- la relation concrète entre une formation et ses apprenants n’était pas exposée dans l’UI
+
+Décision retenue :
+- ne pas repousser cela à la phase 8
+- traiter immédiatement ce besoin comme une extension légère du périmètre formateur déjà existant
+
+Travail intégré :
+- remplacement du placeholder du dashboard formateur par une vraie surface métier
+- ajout d’un aperçu d’apprenants sur chaque formation dans `/trainer/courses`
+- ajout d’un bouton `Voir tous les apprenants`
+- ajout d’une page dédiée par formation avec la liste des inscrits et leur progression
+
+Sur le plan UI :
+- intégration d’un composant `Avatar` compatible style shadcn, ajouté manuellement
+- raison : le repo ne contient pas de `components.json` initialisé, donc la CLI shadcn n’était pas exploitable telle quelle
+
+Résultat :
+- le formateur voit enfin un tableau de bord utile
+- il peut relier immédiatement ses formations à des inscrits concrets
+- la navigation vers les apprenants de chaque formation est maintenant directe
+
 ### Validation
 - ✅ Refonte visuelle des surfaces principales validée
 - ✅ Navigation mobile validée
 - ✅ Quiz validé après correction du redirect
 - ✅ États de chargement visibles sur les actions lentes
 - ✅ Passe performance intégrée
+- ✅ Dashboard formateur réel validé
+- ✅ Vue apprenants par formation validée
 - ✅ `npm run lint`
 - ✅ `npx tsc --noEmit`
 - ✅ `npm run build`

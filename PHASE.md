@@ -905,6 +905,26 @@ Points livrés:
 - Déconnexion repositionnée en bas du menu latéral.
 - Hover states et curseurs interactifs harmonisés sur les CTA et éléments cliquables.
 
+#### 6) Extension formateur — dashboard et apprenants par formation
+Fichiers principaux:
+- `src/app/(trainer)/trainer/dashboard/page.tsx`
+- `src/app/(trainer)/trainer/courses/page.tsx`
+- `src/app/(trainer)/trainer/courses/[courseId]/learners/page.tsx`
+- `src/components/course/course-card.tsx`
+- `src/components/ui/avatar.tsx`
+- `src/components/shadcn-studio/avatar/avatar-14.tsx`
+
+Points livrés:
+- Remplacement du placeholder du dashboard formateur par une vraie vue métier:
+  - volume de cours
+  - cours publiés
+  - volume d’inscriptions
+  - dernières inscriptions
+- Ajout d’un aperçu d’apprenants directement sur chaque carte de formation formateur.
+- Ajout d’un bouton `Voir tous les apprenants` sur chaque formation.
+- Ajout d’une page dédiée par cours listant les apprenants inscrits, la date d’inscription et leur progression.
+- Intégration manuelle d’un composant `Avatar` compatible avec la structure actuelle du projet, en l’absence de `components.json` initialisé pour la CLI shadcn.
+
 ### Validation fonctionnelle exécutée (Phase 7)
 Tests validés:
 - ✅ Landing et shell principal validés visuellement.
@@ -913,6 +933,9 @@ Tests validés:
 - ✅ Validation de quiz corrigée et validée en production.
 - ✅ États de chargement visibles sur les actions lentes principales.
 - ✅ Ajustements admin / trainer conservés sans régression fonctionnelle.
+- ✅ Dashboard formateur réel validé.
+- ✅ Aperçu des apprenants par formation validé.
+- ✅ Page `Voir tous les apprenants` validée.
 
 ### Validation technique exécutée (Phase 7)
 - `npm run lint`
@@ -929,4 +952,5 @@ Résultat:
 - ✅ Le design system est appliqué sur les parcours clés du MVP.
 - ✅ Les états de chargement critiques sont visibles et cohérents.
 - ✅ Une passe de performance applicative a été intégrée sans modifier les règles métier.
+- ✅ Le périmètre formateur est désormais mieux outillé pour le suivi des inscriptions apprenantes.
 - 📝 Quelques ajustements UI ciblés peuvent encore être faits écran par écran, mais ils relèvent désormais du polish post-phase plutôt que d’un blocage de livraison.

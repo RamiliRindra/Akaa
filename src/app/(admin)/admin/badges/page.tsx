@@ -18,6 +18,7 @@ type AdminBadgesPageProps = {
 const badgeConditionLabels: Record<BadgeConditionType, string> = {
   XP_THRESHOLD: "Seuil d’XP",
   COURSES_COMPLETED: "Cours terminés",
+  SESSIONS_ATTENDED: "Sessions suivies",
   STREAK: "Streak",
   QUIZ_PERFECT: "Quiz parfaits",
   MANUAL: "Manuel",

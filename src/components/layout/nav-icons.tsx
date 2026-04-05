@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Award,
   BookOpen,
+  CalendarDays,
   ChartNoAxesColumn,
   Compass,
   Gauge,
@@ -18,6 +19,7 @@ import type { NavIconName } from "@/components/layout/nav-config";
 const navIcons: Record<NavIconName, LucideIcon> = {
   award: Award,
   "book-open": BookOpen,
+  "calendar-days": CalendarDays,
   "chart-no-axes-column": ChartNoAxesColumn,
   compass: Compass,
   gauge: Gauge,
