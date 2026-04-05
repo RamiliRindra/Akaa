@@ -4,34 +4,58 @@ ALTER TYPE "XpSource" ADD VALUE IF NOT EXISTS 'SESSION';
 -- AlterEnum
 ALTER TYPE "BadgeConditionType" ADD VALUE IF NOT EXISTS 'SESSIONS_ATTENDED';
 
--- CreateEnum
-CREATE TYPE "ProgramStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+DO $$
+BEGIN
+  CREATE TYPE "ProgramStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateEnum
-CREATE TYPE "SessionStatus" AS ENUM ('SCHEDULED', 'COMPLETED', 'CANCELLED');
+DO $$
+BEGIN
+  CREATE TYPE "SessionStatus" AS ENUM ('SCHEDULED', 'COMPLETED', 'CANCELLED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateEnum
-CREATE TYPE "SessionAccessPolicy" AS ENUM ('OPEN', 'SESSION_ONLY');
+DO $$
+BEGIN
+  CREATE TYPE "SessionAccessPolicy" AS ENUM ('OPEN', 'SESSION_ONLY');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateEnum
-CREATE TYPE "SessionEnrollmentStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
+DO $$
+BEGIN
+  CREATE TYPE "SessionEnrollmentStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateEnum
-CREATE TYPE "AttendanceStatus" AS ENUM ('PRESENT', 'ABSENT', 'LATE', 'EXCUSED');
+DO $$
+BEGIN
+  CREATE TYPE "AttendanceStatus" AS ENUM ('PRESENT', 'ABSENT', 'LATE', 'EXCUSED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM (
-  'SESSION_REQUEST',
-  'SESSION_APPROVED',
-  'SESSION_REJECTED',
-  'SESSION_CANCELLED',
-  'SESSION_REMINDER',
-  'XP_GAINED',
-  'BADGE_UNLOCKED'
-);
+DO $$
+BEGIN
+  CREATE TYPE "NotificationType" AS ENUM (
+    'SESSION_REQUEST',
+    'SESSION_APPROVED',
+    'SESSION_REJECTED',
+    'SESSION_CANCELLED',
+    'SESSION_REMINDER',
+    'XP_GAINED',
+    'BADGE_UNLOCKED'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateTable
-CREATE TABLE "training_program" (
+CREATE TABLE IF NOT EXISTS "training_program" (
   "id" UUID NOT NULL,
   "title" VARCHAR(255) NOT NULL,
   "slug" VARCHAR(255) NOT NULL,
@@ -47,7 +71,7 @@ CREATE TABLE "training_program" (
 );
 
 -- CreateTable
-CREATE TABLE "program_course" (
+CREATE TABLE IF NOT EXISTS "program_course" (
   "id" UUID NOT NULL,
   "program_id" UUID NOT NULL,
   "course_id" UUID NOT NULL,
@@ -63,7 +87,7 @@ CREATE TABLE "program_course" (
 );
 
 -- CreateTable
-CREATE TABLE "training_session" (
+CREATE TABLE IF NOT EXISTS "training_session" (
   "id" UUID NOT NULL,
   "title" VARCHAR(255) NOT NULL,
   "description" TEXT,
@@ -98,7 +122,7 @@ CREATE TABLE "training_session" (
 );
 
 -- CreateTable
-CREATE TABLE "session_enrollment" (
+CREATE TABLE IF NOT EXISTS "session_enrollment" (
   "id" UUID NOT NULL,
   "user_id" UUID NOT NULL,
   "session_id" UUID NOT NULL,
@@ -115,7 +139,7 @@ CREATE TABLE "session_enrollment" (
 );
 
 -- CreateTable
-CREATE TABLE "session_attendance" (
+CREATE TABLE IF NOT EXISTS "session_attendance" (
   "id" UUID NOT NULL,
   "user_id" UUID NOT NULL,
   "session_id" UUID NOT NULL,
@@ -134,7 +158,7 @@ CREATE TABLE "session_attendance" (
 );
 
 -- CreateTable
-CREATE TABLE "notification" (
+CREATE TABLE IF NOT EXISTS "notification" (
   "id" UUID NOT NULL,
   "user_id" UUID NOT NULL,
   "type" "NotificationType" NOT NULL,
@@ -150,61 +174,61 @@ CREATE TABLE "notification" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "training_program_slug_key" ON "training_program"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "training_program_slug_key" ON "training_program"("slug");
 
 -- CreateIndex
-CREATE INDEX "idx_training_program_trainer_id" ON "training_program"("trainer_id");
+CREATE INDEX IF NOT EXISTS "idx_training_program_trainer_id" ON "training_program"("trainer_id");
 
 -- CreateIndex
-CREATE INDEX "idx_training_program_status" ON "training_program"("status");
+CREATE INDEX IF NOT EXISTS "idx_training_program_status" ON "training_program"("status");
 
 -- CreateIndex
-CREATE INDEX "idx_program_course_program_id" ON "program_course"("program_id");
+CREATE INDEX IF NOT EXISTS "idx_program_course_program_id" ON "program_course"("program_id");
 
 -- CreateIndex
-CREATE INDEX "idx_program_course_course_id" ON "program_course"("course_id");
+CREATE INDEX IF NOT EXISTS "idx_program_course_course_id" ON "program_course"("course_id");
 
 -- CreateIndex
-CREATE INDEX "idx_program_course_program_order" ON "program_course"("program_id", "order");
+CREATE INDEX IF NOT EXISTS "idx_program_course_program_order" ON "program_course"("program_id", "order");
 
 -- CreateIndex
-CREATE INDEX "idx_training_session_trainer_id" ON "training_session"("trainer_id");
+CREATE INDEX IF NOT EXISTS "idx_training_session_trainer_id" ON "training_session"("trainer_id");
 
 -- CreateIndex
-CREATE INDEX "idx_training_session_course_id" ON "training_session"("course_id");
+CREATE INDEX IF NOT EXISTS "idx_training_session_course_id" ON "training_session"("course_id");
 
 -- CreateIndex
-CREATE INDEX "idx_training_session_program_id" ON "training_session"("program_id");
+CREATE INDEX IF NOT EXISTS "idx_training_session_program_id" ON "training_session"("program_id");
 
 -- CreateIndex
-CREATE INDEX "idx_training_session_status" ON "training_session"("status");
+CREATE INDEX IF NOT EXISTS "idx_training_session_status" ON "training_session"("status");
 
 -- CreateIndex
-CREATE INDEX "idx_training_session_starts_at" ON "training_session"("starts_at");
+CREATE INDEX IF NOT EXISTS "idx_training_session_starts_at" ON "training_session"("starts_at");
 
 -- CreateIndex
-CREATE INDEX "idx_session_enrollment_user_id" ON "session_enrollment"("user_id");
+CREATE INDEX IF NOT EXISTS "idx_session_enrollment_user_id" ON "session_enrollment"("user_id");
 
 -- CreateIndex
-CREATE INDEX "idx_session_enrollment_session_id" ON "session_enrollment"("session_id");
+CREATE INDEX IF NOT EXISTS "idx_session_enrollment_session_id" ON "session_enrollment"("session_id");
 
 -- CreateIndex
-CREATE INDEX "idx_session_enrollment_status" ON "session_enrollment"("status");
+CREATE INDEX IF NOT EXISTS "idx_session_enrollment_status" ON "session_enrollment"("status");
 
 -- CreateIndex
-CREATE INDEX "idx_session_attendance_user_id" ON "session_attendance"("user_id");
+CREATE INDEX IF NOT EXISTS "idx_session_attendance_user_id" ON "session_attendance"("user_id");
 
 -- CreateIndex
-CREATE INDEX "idx_session_attendance_session_id" ON "session_attendance"("session_id");
+CREATE INDEX IF NOT EXISTS "idx_session_attendance_session_id" ON "session_attendance"("session_id");
 
 -- CreateIndex
-CREATE INDEX "idx_session_attendance_marked_by" ON "session_attendance"("marked_by");
+CREATE INDEX IF NOT EXISTS "idx_session_attendance_marked_by" ON "session_attendance"("marked_by");
 
 -- CreateIndex
-CREATE INDEX "idx_notification_user_id" ON "notification"("user_id");
+CREATE INDEX IF NOT EXISTS "idx_notification_user_id" ON "notification"("user_id");
 
 -- CreateIndex
-CREATE INDEX "idx_notification_is_read" ON "notification"("is_read");
+CREATE INDEX IF NOT EXISTS "idx_notification_is_read" ON "notification"("is_read");
 
 -- CreateIndex
-CREATE INDEX "idx_notification_created_at_desc" ON "notification"("created_at" DESC);
+CREATE INDEX IF NOT EXISTS "idx_notification_created_at_desc" ON "notification"("created_at" DESC);
