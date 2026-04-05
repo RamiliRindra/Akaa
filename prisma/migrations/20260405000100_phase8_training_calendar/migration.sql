@@ -121,6 +121,26 @@ CREATE TABLE IF NOT EXISTS "training_session" (
     )
 );
 
+ALTER TABLE "training_session"
+  ADD COLUMN IF NOT EXISTS "access_policy" "SessionAccessPolicy" NOT NULL DEFAULT 'OPEN';
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'chk_training_session_single_target'
+      AND conrelid = 'training_session'::regclass
+  ) THEN
+    ALTER TABLE "training_session"
+      ADD CONSTRAINT "chk_training_session_single_target"
+      CHECK (
+        (CASE WHEN "course_id" IS NULL THEN 0 ELSE 1 END) +
+        (CASE WHEN "program_id" IS NULL THEN 0 ELSE 1 END) = 1
+      ) NOT VALID;
+  END IF;
+END $$;
+
 -- CreateTable
 CREATE TABLE IF NOT EXISTS "session_enrollment" (
   "id" UUID NOT NULL,
