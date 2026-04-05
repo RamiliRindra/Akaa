@@ -1020,3 +1020,64 @@ Résultat :
 - ✅ Les parcours critiques ont un feedback d’action plus fiable
 - ✅ La lenteur perçue a fait l’objet d’une vraie optimisation technique, pas seulement cosmétique
 - 📝 Les retouches restantes sont désormais du polish ciblé écran par écran
+
+---
+
+## Phase 8 — Calendrier / Sessions / Parcours
+
+### Recadrage métier validé
+Le premier jet de phase 8 traitait encore trop `TrainingProgram` comme un conteneur de sessions.
+
+Décision retenue :
+- `Course` = contenu pédagogique
+- `TrainingProgram` = ensemble ordonné de cours
+- `TrainingSession` = occurrence planifiée liée soit à un cours, soit à un parcours
+- une session ne doit pas cibler les deux à la fois
+- une session peut restreindre l’accès au contenu lié avec `OPEN` ou `SESSION_ONLY`
+
+Conséquence :
+- passage de `parcours -> sessions` à `parcours -> cours`
+- ajout d’une table pivot `ProgramCourse`
+- ajout d’une contrainte métier `course xor program` sur `training_session`
+
+### Migration Neon — base partiellement migrée
+Comme pour les premières phases, le réseau local TGN impose un workflow manuel via Neon SQL Editor.
+
+Problème rencontré :
+- la migration phase 8 a été exécutée sur une base déjà partiellement modifiée
+- certains enums existaient déjà
+- certaines tables existaient dans un ancien format
+- cas concret :
+  - `training_session` existait sans la colonne `access_policy`
+  - l’ajout brut de la contrainte `chk_training_session_single_target` échouait à cause d’anciennes lignes non conformes
+
+Correctifs retenus dans `prisma/migrations/20260405000100_phase8_training_calendar/migration.sql` :
+- `DO $$ ... EXCEPTION WHEN duplicate_object THEN NULL` pour les enums
+- `CREATE TABLE IF NOT EXISTS`
+- `CREATE INDEX IF NOT EXISTS`
+- `ALTER TABLE "training_session" ADD COLUMN IF NOT EXISTS "access_policy"...`
+- ajout de `chk_training_session_single_target` en `NOT VALID`
+
+Résultat :
+- migration relançable sur Neon
+- convergence progressive possible même sur base intermédiaire
+- protection des nouvelles écritures sans bloquer l’historique existant
+
+### Surfaces livrées
+- apprenant :
+  - `/calendar`
+  - `/programs`
+  - résumé `sessions + parcours` ajouté au dashboard apprenant
+- formateur :
+  - `/trainer/calendar`
+  - `/trainer/programs`
+- admin :
+  - `/admin/calendar`
+  - `/admin/programs`
+
+### Point métier encore ouvert
+Le modèle `SESSION_ONLY` est maintenant posé en base, validé en UI et manipulable par les formulaires.
+
+Il reste à brancher ensuite le contrôle d’accès transverse sur les pages de contenu :
+- empêcher l’accès à certains cours / parcours si la session liée exige une inscription `APPROVED`
+- sans rouvrir les logiques des phases précédentes inutilement

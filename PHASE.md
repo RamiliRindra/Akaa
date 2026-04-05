@@ -954,3 +954,122 @@ Résultat:
 - ✅ Une passe de performance applicative a été intégrée sans modifier les règles métier.
 - ✅ Le périmètre formateur est désormais mieux outillé pour le suivi des inscriptions apprenantes.
 - 📝 Quelques ajustements UI ciblés peuvent encore être faits écran par écran, mais ils relèvent désormais du polish post-phase plutôt que d’un blocage de livraison.
+
+---
+
+## Phase 8 — Calendrier, sessions et parcours
+Date: 2026-04-05
+
+### Objectif
+Ajouter la couche de formation planifiée post-MVP :
+- parcours structurés
+- sessions calendaires
+- inscriptions apprenant
+- présence
+- notifications in-app
+
+### Recadrage produit validé
+- `Course` reste l’unité de contenu pédagogique.
+- `TrainingProgram` devient un ensemble ordonné de cours.
+- `TrainingSession` devient une occurrence planifiée rattachée soit à un cours, soit à un parcours.
+- Une session porte désormais une politique d’accès :
+  - `OPEN`
+  - `SESSION_ONLY`
+
+### Implémentation réalisée
+
+#### 1) Modèle et logique métier
+Fichiers principaux :
+- `prisma/schema.prisma`
+- `prisma/migrations/20260405000100_phase8_training_calendar/migration.sql`
+- `src/lib/validations/training.ts`
+- `src/lib/training.ts`
+- `src/actions/training.ts`
+
+Points livrés :
+- Ajout des modèles :
+  - `TrainingProgram`
+  - `ProgramCourse`
+  - `TrainingSession`
+  - `SessionEnrollment`
+  - `SessionAttendance`
+  - `Notification`
+- Extension des enums :
+  - `XpSource += SESSION`
+  - `BadgeConditionType += SESSIONS_ATTENDED`
+  - `SessionAccessPolicy`
+  - `NotificationType`
+- Recadrage Prisma :
+  - `parcours -> cours` via table pivot `ProgramCourse`
+  - `session -> cours | parcours`
+- Validation métier côté formulaire :
+  - exactement une cible pour chaque session (`courseId` xor `programId`)
+- Migration SQL rendue relançable pour Neon sur base partiellement migrée :
+  - créations idempotentes
+  - `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`
+  - contrainte `chk_training_session_single_target` ajoutée en `NOT VALID`
+
+#### 2) Surfaces apprenant
+Fichiers principaux :
+- `src/app/(platform)/calendar/page.tsx`
+- `src/app/(platform)/programs/page.tsx`
+- `src/app/(platform)/dashboard/page.tsx`
+
+Points livrés :
+- Vue calendrier apprenant :
+  - sessions déjà demandées / approuvées
+  - sessions disponibles à l’inscription
+  - annulation d’inscription
+- Vue parcours apprenant :
+  - parcours publiés
+  - cours inclus
+  - sessions liées au parcours
+- Dashboard apprenant enrichi :
+  - résumé des sessions ouvertes à l’inscription
+  - résumé des parcours publiés
+  - liens rapides vers `/calendar` et `/programs`
+
+#### 3) Surfaces formateur
+Fichiers principaux :
+- `src/app/(trainer)/trainer/calendar/page.tsx`
+- `src/app/(trainer)/trainer/programs/page.tsx`
+
+Points livrés :
+- CRUD sessions avec :
+  - cible cours ou parcours
+  - politique d’accès `OPEN | SESSION_ONLY`
+  - inscription / approbation / refus
+  - pointage de présence
+- CRUD parcours avec :
+  - ajout de cours
+  - réordonnancement
+  - sessions liées visibles
+
+#### 4) Surfaces admin
+Fichiers principaux :
+- `src/app/(admin)/admin/calendar/page.tsx`
+- `src/app/(admin)/admin/programs/page.tsx`
+
+Points livrés :
+- Vue globale sessions
+- Vue globale parcours
+- Affectation explicite d’un responsable `TRAINER|ADMIN`
+- Supervision cross-espace depuis l’admin
+
+### Validation technique exécutée (Phase 8)
+- `npx prisma generate`
+- `npm run lint`
+- `npx tsc --noEmit`
+- `npm run build`
+
+Résultat :
+- ✅ Prisma generate OK
+- ✅ Lint OK
+- ✅ TypeScript OK
+- ✅ Build production OK
+
+### Statut global Phase 8
+- ✅ Socle métier calendrier / parcours en place
+- ✅ Recadrage domaine validé et branché dans le code
+- ✅ Surfaces apprenant, formateur et admin opérationnelles
+- ⚠️ Le verrouillage applicatif complet des contenus `SESSION_ONLY` reste à brancher comme prochaine étape métier transverse

@@ -1,5 +1,5 @@
-import { ChapterProgressStatus, CourseStatus } from "@prisma/client";
-import { ArrowRight, BookOpenCheck, Flame, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
+import { ChapterProgressStatus, CourseStatus, ProgramStatus, SessionEnrollmentStatus, SessionStatus } from "@prisma/client";
+import { ArrowRight, BookOpenCheck, CalendarDays, Flame, Layers3, Sparkles, TrendingUp, Trophy, Zap } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -25,7 +25,17 @@ export default async function LearnerDashboardPage() {
 
   const userId = session.user.id;
 
-  const [user, enrollments, totalCompletedChapters, totalPublishedChapters, recentBadges, recentTransactions] =
+  const [
+    user,
+    enrollments,
+    totalCompletedChapters,
+    totalPublishedChapters,
+    recentBadges,
+    recentTransactions,
+    availableSessions,
+    publishedPrograms,
+    upcomingApprovedSessionsCount,
+  ] =
     await Promise.all([
       db.user.findUniqueOrThrow({
         where: { id: userId },
@@ -131,6 +141,72 @@ export default async function LearnerDashboardPage() {
           amount: true,
           description: true,
           createdAt: true,
+        },
+      }),
+      db.trainingSession.findMany({
+        where: {
+          status: SessionStatus.SCHEDULED,
+          startsAt: { gt: new Date() },
+          enrollments: {
+            none: {
+              userId,
+              status: {
+                in: [SessionEnrollmentStatus.PENDING, SessionEnrollmentStatus.APPROVED],
+              },
+            },
+          },
+        },
+        orderBy: { startsAt: "asc" },
+        take: 3,
+        select: {
+          id: true,
+          title: true,
+          startsAt: true,
+          course: {
+            select: {
+              title: true,
+            },
+          },
+          program: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      }),
+      db.trainingProgram.findMany({
+        where: {
+          status: ProgramStatus.PUBLISHED,
+        },
+        orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
+        take: 3,
+        select: {
+          id: true,
+          title: true,
+          courses: {
+            select: {
+              id: true,
+            },
+          },
+          sessions: {
+            where: {
+              status: SessionStatus.SCHEDULED,
+              startsAt: { gt: new Date() },
+            },
+            select: {
+              id: true,
+            },
+          },
+        },
+      }),
+      db.sessionEnrollment.count({
+        where: {
+          userId,
+          status: SessionEnrollmentStatus.APPROVED,
+          session: {
+            status: SessionStatus.SCHEDULED,
+            startsAt: { gt: new Date() },
+          },
         },
       }),
     ]);
@@ -271,6 +347,108 @@ export default async function LearnerDashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">
+          <div className="surface-section p-5 sm:p-6">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-2">
+                <h2 className="font-display text-2xl font-black text-[#2c2f31]">
+                  Sessions et parcours à explorer
+                </h2>
+                <p className="max-w-2xl text-sm text-[#2c2f31]/68">
+                  Repérez rapidement les prochaines sessions auxquelles vous pouvez vous inscrire et les
+                  parcours publiés à suivre ensuite.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/calendar" className="secondary-button px-4 py-2 text-sm font-semibold">
+                  Voir le calendrier
+                </Link>
+                <Link href="/programs" className="primary-button px-4 py-2 text-sm font-semibold">
+                  Explorer les parcours
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              <article className="panel-card p-5">
+                <div className="flex items-start gap-4">
+                  <div className="grid h-12 w-12 place-items-center rounded-full bg-[#0F63FF]/12 text-[#0F63FF]">
+                    <CalendarDays className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[#2c2f31]">
+                        {availableSessions.length} session{availableSessions.length > 1 ? "s" : ""} ouverte
+                        {availableSessions.length > 1 ? "s" : ""}
+                      </p>
+                      <p className="text-xs text-[#2c2f31]/62">
+                        {upcomingApprovedSessionsCount} inscription
+                        {upcomingApprovedSessionsCount > 1 ? "s" : ""} déjà approuvée
+                        {upcomingApprovedSessionsCount > 1 ? "s" : ""} à venir.
+                      </p>
+                    </div>
+
+                    {availableSessions.length ? (
+                      <div className="space-y-2">
+                        {availableSessions.map((trainingSession) => (
+                          <div key={trainingSession.id} className="rounded-2xl bg-[#f7f9ff] px-4 py-3">
+                            <p className="text-sm font-semibold text-[#2c2f31]">{trainingSession.title}</p>
+                            <p className="text-xs text-[#2c2f31]/62">
+                              {formatDate(trainingSession.startsAt)}
+                              {trainingSession.course ? ` • ${trainingSession.course.title}` : ""}
+                              {trainingSession.program ? ` • ${trainingSession.program.title}` : ""}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[#2c2f31]/62">
+                        Aucune nouvelle session ouverte pour le moment.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </article>
+
+              <article className="panel-card p-5">
+                <div className="flex items-start gap-4">
+                  <div className="grid h-12 w-12 place-items-center rounded-full bg-[#655670]/12 text-[#655670]">
+                    <Layers3 className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[#2c2f31]">
+                        {publishedPrograms.length} parcours publié{publishedPrograms.length > 1 ? "s" : ""}
+                      </p>
+                      <p className="text-xs text-[#2c2f31]/62">
+                        Parcours structurés pour aller plus loin que le simple catalogue.
+                      </p>
+                    </div>
+
+                    {publishedPrograms.length ? (
+                      <div className="space-y-2">
+                        {publishedPrograms.map((program) => (
+                          <div key={program.id} className="rounded-2xl bg-[#fcfbff] px-4 py-3">
+                            <p className="text-sm font-semibold text-[#2c2f31]">{program.title}</p>
+                            <p className="text-xs text-[#2c2f31]/62">
+                              {program.courses.length} cours
+                              {program.sessions.length
+                                ? ` • ${program.sessions.length} session${program.sessions.length > 1 ? "s" : ""} à venir`
+                                : " • aucune session planifiée"}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[#2c2f31]/62">
+                        Aucun parcours publié pour le moment.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="editorial-eyebrow">Active Courses</p>
