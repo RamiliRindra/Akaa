@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 
 import { getMarkdownFromStoredContent } from "@/lib/content";
@@ -22,7 +23,7 @@ export function RichContentRenderer({ content }: RichContentRendererProps) {
     <div className="panel-card px-5 py-6 sm:px-8 sm:py-8">
       <div className="course-markdown">
         <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
+          remarkPlugins={[remarkGfm, remarkBreaks]}
           components={{
             h1: ({ children }) => <h1 className="course-markdown-h1">{children}</h1>,
             h2: ({ children }) => <h2 className="course-markdown-h2">{children}</h2>,
