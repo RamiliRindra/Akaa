@@ -896,6 +896,11 @@ export async function markSessionAttendanceAction(formData: FormData) {
 }
 
 export async function markNotificationReadAction(notificationId: string, returnTo = "/calendar") {
+  await markNotificationReadInlineAction(notificationId);
+  redirect(buildRedirectUrl(returnTo, "success", "Notification marquée comme lue."));
+}
+
+export async function markNotificationReadInlineAction(notificationId: string) {
   const user = await requireAuthenticatedUser();
 
   await db.notification.updateMany({
@@ -909,7 +914,9 @@ export async function markNotificationReadAction(notificationId: string, returnT
   });
 
   revalidateTrainingSurfaces();
-  redirect(buildRedirectUrl(returnTo, "success", "Notification marquée comme lue."));
+  revalidatePath("/dashboard");
+  revalidatePath("/courses");
+  revalidatePath("/profile");
 }
 
 export async function deleteTrainingProgramAsAdminAction(formData: FormData) {

@@ -1,7 +1,10 @@
 "use client";
 
+import type { NotificationType } from "@prisma/client";
 import { motion } from "framer-motion";
 import { Flame, Sparkles, Zap } from "lucide-react";
+
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 type HeaderProps = {
   title: string;
@@ -9,9 +12,27 @@ type HeaderProps = {
   level: number;
   currentStreak: number;
   showGamification: boolean;
+  notifications: Array<{
+    id: string;
+    type: NotificationType;
+    title: string;
+    message: string;
+    relatedUrl: string | null;
+    isRead: boolean;
+    createdAt: string;
+  }>;
+  unreadNotificationCount: number;
 };
 
-export function Header({ title, totalXp, level, currentStreak, showGamification }: HeaderProps) {
+export function Header({
+  title,
+  totalXp,
+  level,
+  currentStreak,
+  showGamification,
+  notifications,
+  unreadNotificationCount,
+}: HeaderProps) {
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6 sm:pt-5">
       <div className="glass-panel ambient-ring flex min-h-[4.75rem] items-center justify-between gap-4 px-4 py-3 sm:px-6">
@@ -21,6 +42,11 @@ export function Header({ title, totalXp, level, currentStreak, showGamification 
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <NotificationBell
+            initialNotifications={notifications}
+            initialUnreadCount={unreadNotificationCount}
+          />
+
           {showGamification ? (
             <>
               <motion.div

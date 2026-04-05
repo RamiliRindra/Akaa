@@ -32,20 +32,42 @@ export async function ProtectedShell({
   }
 
   const showGamification = session.user.role === "LEARNER";
-  const userGamification = showGamification
-    ? await db.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-          totalXp: true,
-          level: true,
-          streak: {
-            select: {
-              currentStreak: true,
+  const [userGamification, notifications, unreadNotificationCount] = await Promise.all([
+    showGamification
+      ? db.user.findUnique({
+          where: { id: session.user.id },
+          select: {
+            totalXp: true,
+            level: true,
+            streak: {
+              select: {
+                currentStreak: true,
+              },
             },
           },
-        },
-      })
-    : null;
+        })
+      : Promise.resolve(null),
+    db.notification.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        message: true,
+        relatedUrl: true,
+        isRead: true,
+        createdAt: true,
+      },
+    }),
+    db.notification.count({
+      where: {
+        userId: session.user.id,
+        isRead: false,
+      },
+    }),
+  ]);
 
   if (showGamification && !userGamification) {
     redirect("/login");
@@ -65,11 +87,16 @@ export async function ProtectedShell({
         <div className="relative">
           <Header
             title={headerTitle}
-            totalXp={userGamification?.totalXp ?? 0}
-            level={userGamification?.level ?? 1}
-            currentStreak={userGamification?.streak?.currentStreak ?? 0}
-            showGamification={showGamification}
-          />
+          totalXp={userGamification?.totalXp ?? 0}
+          level={userGamification?.level ?? 1}
+          currentStreak={userGamification?.streak?.currentStreak ?? 0}
+          showGamification={showGamification}
+          notifications={notifications.map((notification) => ({
+            ...notification,
+            createdAt: notification.createdAt.toISOString(),
+          }))}
+          unreadNotificationCount={unreadNotificationCount}
+        />
           <div className="absolute left-4 top-4 z-30 lg:hidden">
             <MobileNav
               title={navTitle}

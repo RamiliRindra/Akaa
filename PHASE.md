@@ -1075,4 +1075,18 @@ Résultat :
 - ✅ Surfaces apprenant, formateur et admin opérationnelles
 - ✅ Migration Neon stabilisée sur base partiellement migrée via script SQL relançable
 - ✅ Pages `programs` et `calendar` validées après alignement code/base
-- ⚠️ Le verrouillage applicatif complet des contenus `SESSION_ONLY` reste à brancher comme prochaine étape métier transverse
+- ✅ Verrouillage applicatif `SESSION_ONLY` branché sur les catalogues et la lecture des contenus
+- ✅ Lecture des chapitres montée en qualité :
+  - headings en Manrope
+  - corps en Inter
+  - meilleure hiérarchie visuelle des paragraphes, listes, tableaux et code
+  - `h1` réduit spécifiquement pour les contenus de cours
+- ✅ Éditeur formateur enrichi :
+  - insertion d’image par URL
+  - aperçu direct du rendu apprenant
+  - règle de lisibilité recentrée sur les espacements du renderer plutôt que sur les retours ligne manuels
+- ✅ Notifications in-app branchées au header :
+  - compteur non lu
+  - dernières notifications
+  - action “marquer comme lu”
+- ⚠️ Les rappels automatiques, la cloche étendue et la page dédiée de notifications restent à compléter si l’on veut aller au-delà du MVP de phase 8

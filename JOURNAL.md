@@ -1096,3 +1096,32 @@ Résultat :
 - page `programs` stabilisée
 - page `calendar` stabilisée
 - phase 8 utilisable sur la base réelle sans reset complet
+
+### Suite — contrôle d’accès `SESSION_ONLY`
+Le verrouillage applicatif a ensuite été branché côté lecture :
+- filtrage des catalogues cours et parcours pour masquer les contenus privés aux apprenants non approuvés
+- garde serveur sur les pages cours et chapitres pour rediriger vers `/calendar` si l’utilisateur n’a pas d’inscription `APPROVED`
+- conservation du comportement normal pour les contenus `OPEN`
+
+### Suite — rendu pédagogique et éditeur chapitre
+Le rendu de lecture a été retravaillé pour sortir du simple texte brut :
+- headings en Manrope, corps en Inter
+- meilleure respiration des paragraphes, listes, tableaux, citations et blocs de code
+- `h1` réduit spécifiquement dans les contenus de cours
+- support d’images externes dans le renderer
+
+L’éditeur formateur a été étendu dans la même foulée :
+- bouton d’insertion d’image par URL
+- aperçu direct avec le même renderer que côté apprenant
+- le choix produit retenu est de ne pas faire reposer la lisibilité sur des `Entrée` répétées, mais sur des règles d’espacement stables entre blocs et paragraphes
+
+### Suite — notifications in-app
+Une première cloche exploitable a été branchée dans le header des espaces protégés :
+- compteur de notifications non lues
+- liste des dernières notifications
+- marquage “lu” directement depuis le header
+- navigation rapide vers la surface liée via `relatedUrl`
+
+Portée retenue :
+- on livre un MVP utile immédiatement
+- sans introduire encore une page dédiée ni des rappels automatiques complets
