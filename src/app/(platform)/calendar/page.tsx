@@ -13,7 +13,9 @@ import { db } from "@/lib/db";
 import {
   formatDateTime,
   getEnrollmentStatusClassName,
+  getSessionAccessPolicyClassName,
   getSessionStatusClassName,
+  sessionAccessPolicyLabels,
   sessionEnrollmentStatusLabels,
   sessionStatusLabels,
 } from "@/lib/training";
@@ -111,6 +113,9 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionStatusClassName(enrollment.session.status)}`}>
                           {sessionStatusLabels[enrollment.session.status]}
                         </span>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionAccessPolicyClassName(enrollment.session.accessPolicy)}`}>
+                          {sessionAccessPolicyLabels[enrollment.session.accessPolicy]}
+                        </span>
                         {enrollment.session.course ? (
                           <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
                             {enrollment.session.course.title}
@@ -169,6 +174,9 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionStatusClassName(trainingSession.status)}`}>
                         {sessionStatusLabels[trainingSession.status]}
+                      </span>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionAccessPolicyClassName(trainingSession.accessPolicy)}`}>
+                        {sessionAccessPolicyLabels[trainingSession.accessPolicy]}
                       </span>
                       {trainingSession.program ? (
                         <span className="rounded-full bg-[#655670]/12 px-2.5 py-1 text-xs font-semibold text-[#655670]">

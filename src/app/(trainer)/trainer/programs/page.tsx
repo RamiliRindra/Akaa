@@ -32,11 +32,21 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
     where: session.user.role === UserRole.ADMIN ? undefined : { trainerId: session.user.id },
     orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
     include: {
-      sessions: {
-        orderBy: { startsAt: "asc" },
-        select: { id: true, title: true },
+      courses: {
+        orderBy: { order: "asc" },
+        include: {
+          course: {
+            select: { id: true, title: true, level: true },
+          },
+        },
       },
     },
+  });
+
+  const availableCourses = await db.course.findMany({
+    where: session.user.role === UserRole.ADMIN ? undefined : { trainerId: session.user.id },
+    orderBy: { title: "asc" },
+    select: { id: true, title: true, level: true },
   });
 
   return (
@@ -53,7 +63,7 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
       <div className="panel-card p-6">
         <div className="mb-5 space-y-1">
           <h3 className="text-lg font-semibold text-[#0c0910]">Créer un parcours</h3>
-          <p className="text-sm text-[#0c0910]/60">Un parcours peut ensuite regrouper plusieurs sessions.</p>
+          <p className="text-sm text-[#0c0910]/60">Un parcours est un ensemble ordonné de cours.</p>
         </div>
 
         <form action={createTrainingProgramAction} className="grid gap-4 md:grid-cols-2">
@@ -66,6 +76,20 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
             Description
             <textarea name="description" rows={3} className="form-textarea text-sm" placeholder="Décrivez le programme..." />
           </label>
+          <fieldset className="space-y-3 md:col-span-2">
+            <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
+            <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-[#f7f9ff] p-4 sm:grid-cols-2">
+              {availableCourses.map((course) => (
+                <label key={course.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm text-[#0c0910]">
+                  <input type="checkbox" name="courseIds" value={course.id} className="mt-1 size-4 accent-[#0F63FF]" />
+                  <span>
+                    <span className="block font-medium">{course.title}</span>
+                    <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
             Statut
             <select name="status" defaultValue={ProgramStatus.DRAFT} className="form-select text-sm">
@@ -95,13 +119,23 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
                       {programStatusLabels[program.status]}
                     </span>
                     <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
-                      {program.sessions.length} session{program.sessions.length > 1 ? "s" : ""}
+                      {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
                     </span>
                   </div>
                   <h3 className="text-lg font-semibold text-[#0c0910]">{program.title}</h3>
                   {program.description ? (
                     <p className="text-sm text-[#0c0910]/70">{program.description}</p>
                   ) : null}
+                  <div className="flex flex-wrap gap-2">
+                    {program.courses.map((programCourse) => (
+                      <span
+                        key={programCourse.id}
+                        className="rounded-full bg-[#655670]/10 px-2.5 py-1 text-xs font-semibold text-[#655670]"
+                      >
+                        {programCourse.order}. {programCourse.course.title}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 <form action={deleteTrainingProgramAction}>
@@ -111,7 +145,7 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
                     triggerLabel="Supprimer"
                     triggerClassName="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                     title="Supprimer ce parcours ?"
-                    description="Les sessions liées resteront intactes mais seront détachées du parcours."
+                    description="Les cours associés seront détachés du parcours. Les sessions liées au parcours resteront intactes."
                     requireText="delete"
                     requireTextPlaceholder="delete"
                     confirmLabel="Supprimer définitivement"
@@ -131,6 +165,30 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
                   Description
                   <textarea name="description" rows={3} defaultValue={program.description ?? ""} className="form-textarea text-sm" />
                 </label>
+                <fieldset className="space-y-3 md:col-span-2">
+                  <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
+                  <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-white p-4 sm:grid-cols-2">
+                    {availableCourses.map((course) => {
+                      const isSelected = program.courses.some((programCourse) => programCourse.course.id === course.id);
+
+                      return (
+                        <label key={course.id} className="flex items-start gap-3 rounded-xl bg-[#f7f9ff] px-3 py-3 text-sm text-[#0c0910]">
+                          <input
+                            type="checkbox"
+                            name="courseIds"
+                            value={course.id}
+                            defaultChecked={isSelected}
+                            className="mt-1 size-4 accent-[#0F63FF]"
+                          />
+                          <span>
+                            <span className="block font-medium">{course.title}</span>
+                            <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
                 <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                   Statut
                   <select name="status" defaultValue={program.status} className="form-select text-sm">
@@ -153,7 +211,7 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
           <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
             <h3 className="text-lg font-semibold text-[#0c0910]">Aucun parcours pour le moment</h3>
             <p className="mt-2 text-sm text-[#0c0910]/70">
-              Créez un premier parcours pour structurer vos futures sessions.
+              Créez un premier parcours pour regrouper vos cours en itinéraire pédagogique.
             </p>
           </div>
         )}

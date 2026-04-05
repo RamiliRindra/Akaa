@@ -1,4 +1,4 @@
-import { AttendanceStatus, ProgramStatus, SessionEnrollmentStatus, SessionStatus, UserRole } from "@prisma/client";
+import { AttendanceStatus, SessionAccessPolicy, SessionEnrollmentStatus, SessionStatus, UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import {
@@ -18,7 +18,9 @@ import {
   formatDateTime,
   getAttendanceStatusClassName,
   getEnrollmentStatusClassName,
+  getSessionAccessPolicyClassName,
   getSessionStatusClassName,
+  sessionAccessPolicyLabels,
   sessionEnrollmentStatusLabels,
   sessionStatusLabels,
   toDateTimeLocalValue,
@@ -50,7 +52,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
     db.trainingProgram.findMany({
       where: session.user.role === UserRole.ADMIN ? undefined : { trainerId: session.user.id },
       orderBy: { title: "asc" },
-      select: { id: true, title: true, status: true },
+      select: { id: true, title: true },
     }),
     db.trainingSession.findMany({
       where,
@@ -112,7 +114,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
         <div className="mb-5 space-y-1">
           <h3 className="text-lg font-semibold text-[#0c0910]">Créer une session</h3>
           <p className="text-sm text-[#0c0910]/60">
-            Une session peut être liée à un cours existant ou rester totalement autonome.
+            Une session doit être liée soit à un cours, soit à un parcours.
           </p>
         </div>
 
@@ -140,6 +142,16 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
               {Object.values(SessionStatus).map((status) => (
                 <option key={status} value={status}>
                   {sessionStatusLabels[status]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+            Politique d’accès
+            <select name="accessPolicy" defaultValue={SessionAccessPolicy.OPEN} className="form-select text-sm">
+              {Object.values(SessionAccessPolicy).map((policy) => (
+                <option key={policy} value={policy}>
+                  {sessionAccessPolicyLabels[policy]}
                 </option>
               ))}
             </select>
@@ -177,6 +189,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                 </option>
               ))}
             </select>
+            <p className="text-xs font-normal text-[#0c0910]/55">Renseignez ce champ uniquement si la session cible un cours.</p>
           </label>
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
             Parcours lié
@@ -184,10 +197,11 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
               <option value="">Aucun parcours lié</option>
               {programs.map((program) => (
                 <option key={program.id} value={program.id}>
-                  {program.title} · {program.status === ProgramStatus.PUBLISHED ? "Publié" : "Brouillon"}
+                  {program.title}
                 </option>
               ))}
             </select>
+            <p className="text-xs font-normal text-[#0c0910]/55">Renseignez ce champ uniquement si la session cible un parcours.</p>
           </label>
           <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
             Récurrence (RRULE optionnelle)
@@ -226,6 +240,9 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionStatusClassName(trainingSession.status)}`}>
                           {sessionStatusLabels[trainingSession.status]}
+                        </span>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionAccessPolicyClassName(trainingSession.accessPolicy)}`}>
+                          {sessionAccessPolicyLabels[trainingSession.accessPolicy]}
                         </span>
                         {trainingSession.course ? (
                           <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
@@ -302,6 +319,16 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       </select>
                     </label>
                     <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                      Politique d’accès
+                      <select name="accessPolicy" defaultValue={trainingSession.accessPolicy} className="form-select text-sm">
+                        {Object.values(SessionAccessPolicy).map((policy) => (
+                          <option key={policy} value={policy}>
+                            {sessionAccessPolicyLabels[policy]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                       XP
                       <input name="xpReward" type="number" min="0" defaultValue={trainingSession.xpReward} className="form-input text-sm" />
                     </label>
@@ -328,24 +355,26 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       Cours lié
                       <select name="courseId" defaultValue={trainingSession.courseId ?? ""} className="form-select text-sm">
                         <option value="">Aucun cours lié</option>
-                        {courses.map((course) => (
-                          <option key={course.id} value={course.id}>
-                            {course.title}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="space-y-2 text-sm font-medium text-[#0c0910]">
-                      Parcours lié
+                      {courses.map((course) => (
+                        <option key={course.id} value={course.id}>
+                          {course.title}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs font-normal text-[#0c0910]/55">Renseignez un seul rattachement.</p>
+                  </label>
+                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                    Parcours lié
                       <select name="programId" defaultValue={trainingSession.programId ?? ""} className="form-select text-sm">
                         <option value="">Aucun parcours lié</option>
-                        {programs.map((program) => (
-                          <option key={program.id} value={program.id}>
-                            {program.title}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                      {programs.map((program) => (
+                        <option key={program.id} value={program.id}>
+                          {program.title}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs font-normal text-[#0c0910]/55">Laissez vide si la session cible un cours.</p>
+                  </label>
                     <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
                       Description
                       <textarea name="description" rows={3} defaultValue={trainingSession.description ?? ""} className="form-textarea text-sm" />
@@ -470,6 +499,9 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionStatusClassName(trainingSession.status)}`}>
                         {sessionStatusLabels[trainingSession.status]}
+                      </span>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionAccessPolicyClassName(trainingSession.accessPolicy)}`}>
+                        {sessionAccessPolicyLabels[trainingSession.accessPolicy]}
                       </span>
                       <span className="rounded-full bg-[#655670]/12 px-2.5 py-1 text-xs font-semibold text-[#655670]">
                         {trainingSession.trainer.name}

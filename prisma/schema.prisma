@@ -71,6 +71,11 @@ enum SessionStatus {
   CANCELLED
 }
 
+enum SessionAccessPolicy {
+  OPEN
+  SESSION_ONLY
+}
+
 enum SessionEnrollmentStatus {
   PENDING
   APPROVED
@@ -212,6 +217,7 @@ model Course {
   modules     Module[]
   enrollments Enrollment[]
   sessions    TrainingSession[]
+  programCourses ProgramCourse[]
 
   @@index([trainerId], map: "idx_course_trainer_id")
   @@index([categoryId], map: "idx_course_category_id")
@@ -434,6 +440,7 @@ model TrainingProgram {
   updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamp(6)
 
   trainer  User              @relation("TrainerPrograms", fields: [trainerId], references: [id], onDelete: Cascade)
+  courses  ProgramCourse[]
   sessions TrainingSession[]
 
   @@index([trainerId], map: "idx_training_program_trainer_id")
@@ -441,11 +448,29 @@ model TrainingProgram {
   @@map("training_program")
 }
 
+model ProgramCourse {
+  id        String   @id @default(uuid()) @db.Uuid
+  programId String   @map("program_id") @db.Uuid
+  courseId  String   @map("course_id") @db.Uuid
+  order     Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  program TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  course  Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, courseId], map: "uq_program_course_program_course")
+  @@index([programId], map: "idx_program_course_program_id")
+  @@index([courseId], map: "idx_program_course_course_id")
+  @@index([programId, order], map: "idx_program_course_program_order")
+  @@map("program_course")
+}
+
 model TrainingSession {
   id             String        @id @default(uuid()) @db.Uuid
   title          String        @db.VarChar(255)
   description    String?       @db.Text
   status         SessionStatus @default(SCHEDULED)
+  accessPolicy   SessionAccessPolicy @default(OPEN) @map("access_policy")
   startsAt       DateTime      @map("starts_at") @db.Timestamp(6)
   endsAt         DateTime      @map("ends_at") @db.Timestamp(6)
   isAllDay       Boolean       @default(false) @map("is_all_day")

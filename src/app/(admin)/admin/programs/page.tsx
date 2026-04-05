@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { ProgramStatus, UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import {
@@ -28,7 +28,7 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
     redirect("/dashboard");
   }
 
-  const [responsibleUsers, programs] = await Promise.all([
+  const [responsibleUsers, availableCourses, programs] = await Promise.all([
     db.user.findMany({
       where: {
         isActive: true,
@@ -39,11 +39,22 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
       orderBy: [{ role: "asc" }, { name: "asc" }],
       select: { id: true, name: true, role: true },
     }),
+    db.course.findMany({
+      orderBy: { title: "asc" },
+      select: { id: true, title: true, level: true },
+    }),
     db.trainingProgram.findMany({
       orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
       include: {
         trainer: { select: { name: true } },
-        _count: { select: { sessions: true } },
+        courses: {
+          orderBy: { order: "asc" },
+          include: {
+            course: {
+              select: { id: true, title: true, level: true },
+            },
+          },
+        },
       },
     }),
   ]);
@@ -60,7 +71,7 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
       <div className="panel-card p-6">
         <div className="mb-5 space-y-1">
           <h3 className="text-lg font-semibold text-[#0c0910]">Créer un parcours</h3>
-          <p className="text-sm text-[#0c0910]/60">L’admin peut gérer l’ensemble du catalogue de parcours.</p>
+          <p className="text-sm text-[#0c0910]/60">L’admin gère l’ensemble du catalogue de parcours, chacun composé de plusieurs cours.</p>
         </div>
         <form action={createTrainingProgramAction} className="grid gap-4 md:grid-cols-2">
           <input type="hidden" name="returnTo" value="/admin/programs" />
@@ -72,6 +83,20 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
             Description
             <textarea name="description" rows={3} className="form-textarea text-sm" />
           </label>
+          <fieldset className="space-y-3 md:col-span-2">
+            <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
+            <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-[#f7f9ff] p-4 sm:grid-cols-2">
+              {availableCourses.map((course) => (
+                <label key={course.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm text-[#0c0910]">
+                  <input type="checkbox" name="courseIds" value={course.id} className="mt-1 size-4 accent-[#0F63FF]" />
+                  <span>
+                    <span className="block font-medium">{course.title}</span>
+                    <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
             Responsable
             <select name="trainerId" className="form-select text-sm" defaultValue={session.user.id}>
@@ -85,9 +110,9 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
             Statut
             <select name="status" className="form-select text-sm">
-              {Object.entries(programStatusLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
+              {Object.values(ProgramStatus).map((status) => (
+                <option key={status} value={status}>
+                  {programStatusLabels[status]}
                 </option>
               ))}
             </select>
@@ -113,11 +138,21 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
                     {program.trainer.name}
                   </span>
                   <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
-                    {program._count.sessions} session{program._count.sessions > 1 ? "s" : ""}
+                    {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
                   </span>
                 </div>
                 <h3 className="text-lg font-semibold text-[#0c0910]">{program.title}</h3>
                 {program.description ? <p className="text-sm text-[#0c0910]/70">{program.description}</p> : null}
+                <div className="flex flex-wrap gap-2">
+                  {program.courses.map((programCourse) => (
+                    <span
+                      key={programCourse.id}
+                      className="rounded-full bg-[#655670]/10 px-2.5 py-1 text-xs font-semibold text-[#655670]"
+                    >
+                      {programCourse.order}. {programCourse.course.title}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <form action={deleteTrainingProgramAction}>
@@ -127,7 +162,7 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
                   triggerLabel="Supprimer"
                   triggerClassName="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                   title="Supprimer ce parcours ?"
-                  description="Les sessions liées resteront présentes mais ne seront plus rattachées au parcours."
+                  description="Les cours associés seront détachés du parcours. Les sessions ciblant ce parcours resteront présentes."
                   requireText="delete"
                   requireTextPlaceholder="delete"
                   confirmLabel="Supprimer définitivement"
@@ -147,6 +182,30 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
                 Description
                 <textarea name="description" rows={3} defaultValue={program.description ?? ""} className="form-textarea text-sm" />
               </label>
+              <fieldset className="space-y-3 md:col-span-2">
+                <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
+                <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-white p-4 sm:grid-cols-2">
+                  {availableCourses.map((course) => {
+                    const isSelected = program.courses.some((programCourse) => programCourse.course.id === course.id);
+
+                    return (
+                      <label key={course.id} className="flex items-start gap-3 rounded-xl bg-[#f7f9ff] px-3 py-3 text-sm text-[#0c0910]">
+                        <input
+                          type="checkbox"
+                          name="courseIds"
+                          value={course.id}
+                          defaultChecked={isSelected}
+                          className="mt-1 size-4 accent-[#0F63FF]"
+                        />
+                        <span>
+                          <span className="block font-medium">{course.title}</span>
+                          <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
               <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                 Responsable
                 <select name="trainerId" defaultValue={program.trainerId} className="form-select text-sm">
@@ -160,9 +219,9 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
               <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                 Statut
                 <select name="status" defaultValue={program.status} className="form-select text-sm">
-                  {Object.entries(programStatusLabels).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
+                  {Object.values(ProgramStatus).map((status) => (
+                    <option key={status} value={status}>
+                      {programStatusLabels[status]}
                     </option>
                   ))}
                 </select>

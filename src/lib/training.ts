@@ -1,6 +1,7 @@
 import {
   AttendanceStatus,
   ProgramStatus,
+  SessionAccessPolicy,
   SessionEnrollmentStatus,
   SessionStatus,
 } from "@prisma/client";
@@ -15,6 +16,11 @@ export const sessionStatusLabels: Record<SessionStatus, string> = {
   SCHEDULED: "Planifiée",
   COMPLETED: "Terminée",
   CANCELLED: "Annulée",
+};
+
+export const sessionAccessPolicyLabels: Record<SessionAccessPolicy, string> = {
+  OPEN: "Accès ouvert",
+  SESSION_ONLY: "Réservé aux inscrits",
 };
 
 export const sessionEnrollmentStatusLabels: Record<SessionEnrollmentStatus, string> = {
@@ -62,6 +68,11 @@ export function getSessionStatusClassName(status: SessionStatus) {
   if (status === "COMPLETED") return "bg-[#119da4]/10 text-[#119da4]";
   if (status === "CANCELLED") return "bg-[#c2410c]/10 text-[#c2410c]";
   return "bg-[#0F63FF]/10 text-[#0F63FF]";
+}
+
+export function getSessionAccessPolicyClassName(policy: SessionAccessPolicy) {
+  if (policy === "SESSION_ONLY") return "bg-[#453750]/12 text-[#453750]";
+  return "bg-[#119da4]/10 text-[#119da4]";
 }
 
 export function getEnrollmentStatusClassName(status: SessionEnrollmentStatus) {

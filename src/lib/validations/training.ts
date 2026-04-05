@@ -1,6 +1,7 @@
 import {
   AttendanceStatus,
   ProgramStatus,
+  SessionAccessPolicy,
   SessionEnrollmentStatus,
   SessionStatus,
 } from "@prisma/client";
@@ -63,6 +64,7 @@ export const trainingProgramFormSchema = z.object({
     .max(255, "Le titre du parcours est trop long."),
   description: optionalText,
   trainerId: optionalUuid,
+  courseIds: z.array(z.uuid("Cours invalide.")).min(1, "Sélectionnez au moins un cours pour le parcours."),
   status: z.nativeEnum(ProgramStatus, {
     message: "Le statut du parcours est invalide.",
   }),
@@ -79,6 +81,9 @@ export const trainingSessionFormSchema = z
     description: optionalText,
     status: z.nativeEnum(SessionStatus, {
       message: "Le statut de la session est invalide.",
+    }),
+    accessPolicy: z.nativeEnum(SessionAccessPolicy, {
+      message: "La politique d'accès de la session est invalide.",
     }),
     startsAt: dateTimeField,
     endsAt: dateTimeField,
@@ -98,6 +103,17 @@ export const trainingSessionFormSchema = z
         code: z.ZodIssueCode.custom,
         path: ["endsAt"],
         message: "La fin de session doit être postérieure au début.",
+      });
+    }
+
+    const hasCourse = Boolean(value.courseId);
+    const hasProgram = Boolean(value.programId);
+
+    if (hasCourse === hasProgram) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["courseId"],
+        message: "Une session doit être rattachée soit à un cours, soit à un parcours.",
       });
     }
   });

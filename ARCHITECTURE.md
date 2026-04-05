@@ -397,11 +397,11 @@ Le schéma est organisé en **7 domaines** :
 #### DOMAINE : Planification (Calendrier de formation)
 
 > Ce domaine gère les sessions de formation planifiées (présentiel et/ou distanciel),
-> les parcours de formation (programmes regroupant plusieurs sessions), l'inscription
+> les parcours de formation (programmes regroupant plusieurs cours), l'inscription
 > avec workflow d'approbation par le formateur, et l'émargement (feuille de présence).
 > L'UX s'inspire de Google Calendar / Apple Calendar pour la vue agenda.
 
-**TrainingProgram** - Parcours de formation (série de sessions planifiées)
+**TrainingProgram** - Parcours de formation (ensemble structuré de cours)
 
 | Colonne | Type | Contraintes | Notes |
 |---------|------|-------------|-------|
@@ -409,13 +409,25 @@ Le schéma est organisé en **7 domaines** :
 | title | VARCHAR(255) | NOT NULL | |
 | slug | VARCHAR(255) | UNIQUE, NOT NULL | Généré depuis title |
 | description | TEXT | nullable | |
-| trainer_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Formateur créateur |
+| trainer_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Formateur responsable |
 | status | ENUM('DRAFT','PUBLISHED','ARCHIVED') | NOT NULL, default 'DRAFT' | |
 | created_at | TIMESTAMP | NOT NULL, default now() | |
 | updated_at | TIMESTAMP | NOT NULL, default now() | |
 
-> Un parcours regroupe plusieurs TrainingSessions dans un ordre logique.
+> Un parcours regroupe plusieurs cours dans un ordre logique.
 > Similaire aux "Learning Paths" de LinkedIn Learning.
+
+**ProgramCourse** - Pivot entre parcours et cours
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| program_id | UUID | FK -> TrainingProgram(id) ON DELETE CASCADE | **INDEX** |
+| course_id | UUID | FK -> Course(id) ON DELETE CASCADE | **INDEX** |
+| order | INTEGER | NOT NULL | Ordre du cours dans le parcours |
+| created_at | TIMESTAMP | NOT NULL, default now() | |
+
+> **UNIQUE(program_id, course_id)** - Un cours ne peut apparaître qu'une seule fois dans un parcours.
 
 **TrainingSession** - Session de formation (événement calendrier)
 
@@ -424,30 +436,28 @@ Le schéma est organisé en **7 domaines** :
 | id | UUID | PK | |
 | title | VARCHAR(255) | NOT NULL | |
 | description | TEXT | nullable | |
+| access_policy | ENUM('OPEN','SESSION_ONLY') | NOT NULL, default 'OPEN' | `SESSION_ONLY` = contenu lié réservé aux inscrits APPROVED |
 | start_at | TIMESTAMP | NOT NULL | Début de la session |
 | end_at | TIMESTAMP | NOT NULL | Fin de la session |
 | is_all_day | BOOLEAN | NOT NULL, default false | Événement "toute la journée" |
 | location | TEXT | nullable | Adresse physique ou lien de visio |
-| max_participants | INTEGER | nullable | null = illimité |
-| xp_reward | INTEGER | NOT NULL, default 0 | XP attribués sur présence confirmée (configurable par formateur) |
+| xp_reward | INTEGER | NOT NULL, default 30 | XP attribués sur présence confirmée (configurable par formateur) |
 | trainer_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Formateur organisateur |
-| course_id | UUID | FK -> Course(id) ON DELETE SET NULL, nullable | **INDEX** - Lien optionnel vers un cours en ligne |
-| program_id | UUID | FK -> TrainingProgram(id) ON DELETE SET NULL, nullable | **INDEX** - Rattachement optionnel à un parcours |
-| program_order | INTEGER | nullable | Ordre dans le parcours (si rattaché) |
+| course_id | UUID | FK -> Course(id) ON DELETE SET NULL, nullable | **INDEX** - Session ciblant un cours |
+| program_id | UUID | FK -> TrainingProgram(id) ON DELETE SET NULL, nullable | **INDEX** - Session ciblant un parcours |
 | status | ENUM('SCHEDULED','CANCELLED','COMPLETED') | NOT NULL, default 'SCHEDULED' | |
 | recurrence_rule | VARCHAR(255) | nullable | Format RRULE (RFC 5545) pour les sessions récurrentes |
-| recurrence_parent_id | UUID | FK -> TrainingSession(id) ON DELETE SET NULL, nullable | Réf. vers la session parente récurrente |
-| reminder_minutes | JSONB | NOT NULL, default '[1440, 60]' | Minutes avant la session pour rappels (ex: [1440, 60] = 24h et 1h avant) |
+| reminder_minutes | INTEGER | NOT NULL, default 1440 | Minutes avant la session pour le rappel principal |
 | created_at | TIMESTAMP | NOT NULL, default now() | |
 | updated_at | TIMESTAMP | NOT NULL, default now() | |
 
-> **Récurrence** : le formateur définit une règle RRULE (ex: "tous les mardis pendant 4 semaines").
-> À la création, le système génère les instances individuelles. Chaque instance référence
-> la session parente via `recurrence_parent_id`. Modifier la parente peut propager aux enfants.
+> **Cible unique obligatoire** : une session doit cibler **soit** un cours **soit** un parcours, jamais les deux.
 >
-> **Lien cours** : `course_id` est optionnel. Le formateur peut créer une session standalone
-> ou la rattacher à un cours en ligne existant. L'inscription à la session (`SessionEnrollment`)
-> est indépendante de l'inscription au cours (`Enrollment`).
+> **Politique d'accès** :
+> - `OPEN` : le cours/parcours suit les règles d'accès normales de la plateforme
+> - `SESSION_ONLY` : le contenu lié est destiné en priorité aux inscrits `APPROVED` à la session
+>
+> L'inscription à la session (`SessionEnrollment`) reste indépendante de l'inscription au cours (`Enrollment`).
 
 **SessionEnrollment** - Inscription à une session avec workflow d'approbation
 
@@ -457,9 +467,8 @@ Le schéma est organisé en **7 domaines** :
 | user_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Apprenant demandeur |
 | session_id | UUID | FK -> TrainingSession(id) ON DELETE CASCADE | **INDEX** - Session ciblée |
 | status | ENUM('PENDING','APPROVED','REJECTED','CANCELLED') | NOT NULL, default 'PENDING' | |
-| requested_at | TIMESTAMP | NOT NULL, default now() | Date de la demande |
-| responded_at | TIMESTAMP | nullable | Date de réponse du formateur |
-| responded_by | UUID | FK -> User(id) ON DELETE SET NULL, nullable | Formateur/admin ayant répondu |
+| created_at | TIMESTAMP | NOT NULL, default now() | Date de la demande |
+| updated_at | TIMESTAMP | NOT NULL, default now() | Dernière évolution du statut |
 
 > **UNIQUE(user_id, session_id)** - Un apprenant ne peut faire qu'une demande par session.
 > INDEX composite sur (user_id, session_id).
@@ -470,9 +479,6 @@ Le schéma est organisé en **7 domaines** :
 > 3. L'apprenant reçoit une notification du résultat
 > 4. L'apprenant peut annuler (CANCELLED) tant que la session n'a pas eu lieu
 >
-> **Capacité** : avant de créer un SessionEnrollment, vérifier que le nombre d'inscrits APPROVED
-> n'a pas atteint `session.max_participants` (si non null).
-
 **SessionAttendance** - Feuille de présence / Émargement
 
 | Colonne | Type | Contraintes | Notes |
@@ -480,10 +486,9 @@ Le schéma est organisé en **7 domaines** :
 | id | UUID | PK | |
 | user_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Participant |
 | session_id | UUID | FK -> TrainingSession(id) ON DELETE CASCADE | **INDEX** - Session |
-| status | ENUM('PRESENT','ABSENT','LATE','EXCUSED') | NOT NULL, default 'ABSENT' | |
-| marked_at | TIMESTAMP | nullable | Horodatage du pointage |
+| status | ENUM('PRESENT','ABSENT','LATE','EXCUSED') | NOT NULL | |
+| marked_at | TIMESTAMP | NOT NULL, default now() | Horodatage du pointage |
 | marked_by | UUID | FK -> User(id) ON DELETE SET NULL, nullable | Formateur/admin ayant pointé |
-| notes | TEXT | nullable | Commentaire optionnel |
 
 > **UNIQUE(user_id, session_id)** - Une seule entrée de présence par participant par session.
 > Seuls les participants APPROVED dans SessionEnrollment peuvent avoir une entrée ici.
@@ -504,12 +509,11 @@ Le schéma est organisé en **7 domaines** :
 |---------|------|-------------|-------|
 | id | UUID | PK | |
 | user_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** - Destinataire |
-| type | ENUM('ENROLLMENT_APPROVED','ENROLLMENT_REJECTED','SESSION_REMINDER','SESSION_CANCELLED','SESSION_UPDATED','XP_EARNED','BADGE_UNLOCKED') | NOT NULL | |
+| type | ENUM('SESSION_REQUEST','SESSION_APPROVED','SESSION_REJECTED','SESSION_CANCELLED','SESSION_REMINDER','XP_GAINED','BADGE_UNLOCKED') | NOT NULL | |
 | title | VARCHAR(255) | NOT NULL | Titre court (ex: "Inscription acceptée") |
 | message | TEXT | NOT NULL | Corps du message |
+| related_url | TEXT | nullable | URL de navigation liée |
 | is_read | BOOLEAN | NOT NULL, default false | |
-| link | TEXT | nullable | URL de navigation (ex: /calendar/sessions/[id]) |
-| related_session_id | UUID | FK -> TrainingSession(id) ON DELETE SET NULL, nullable | Session liée (si applicable) |
 | created_at | TIMESTAMP | NOT NULL, default now() | |
 
 > **INDEX** sur (user_id, is_read) pour les requêtes "notifications non lues".
@@ -641,7 +645,7 @@ akaa/
 │   │   │   │       └── [sessionId]/page.tsx  # Détail session + inscription
 │   │   │   ├── programs/
 │   │   │   │   ├── page.tsx                # Parcours de formation disponibles
-│   │   │   │   └── [programId]/page.tsx    # Détail parcours (liste sessions)
+│   │   │   │   └── [programId]/page.tsx    # Détail parcours (liste des cours + sessions liées)
 │   │   │   ├── leaderboard/page.tsx
 │   │   │   ├── profile/page.tsx
 │   │   │   └── layout.tsx         # Sidebar + header gamifié (XP pill, avatar, streak, notif bell)
@@ -666,7 +670,7 @@ akaa/
 │   │   │   │   │   ├── page.tsx            # Liste de ses parcours
 │   │   │   │   │   ├── new/page.tsx        # Création de parcours
 │   │   │   │   │   └── [programId]/
-│   │   │   │   │       └── edit/page.tsx   # Édition parcours (ajout/réordonnancement sessions)
+│   │   │   │   │       └── edit/page.tsx   # Édition parcours (ajout/réordonnancement cours)
 │   │   │   │   └── layout.tsx
 │   │   │
 │   │   ├── (admin)/               # Route group : espace admin
@@ -901,17 +905,24 @@ akaa/
 > avec un système de calendrier inspiré de Google Calendar et des parcours de formation
 > inspirés de LinkedIn Learning.
 
+> **Recadrage produit validé** :
+> - `Course` = unité de contenu pédagogique
+> - `TrainingProgram` = ensemble structuré de plusieurs cours
+> - `TrainingSession` = occurrence planifiée rattachée soit à un cours, soit à un parcours
+> - une session peut appliquer une politique d'accès `OPEN` ou `SESSION_ONLY`
+
 #### 8.1 — Modèles et migrations
 
-- Ajouter les modèles Prisma : `TrainingProgram`, `TrainingSession`, `SessionEnrollment`, `SessionAttendance`, `Notification`
-- Étendre les enums : `XpSource` += `SESSION`, `BadgeConditionType` += `SESSIONS_ATTENDED`, `NotificationType`
+- Ajouter les modèles Prisma : `TrainingProgram`, `ProgramCourse`, `TrainingSession`, `SessionEnrollment`, `SessionAttendance`, `Notification`
+- Étendre les enums : `XpSource` += `SESSION`, `BadgeConditionType` += `SESSIONS_ATTENDED`, `NotificationType`, `SessionAccessPolicy`
 - Créer la migration Prisma et l'appliquer
 - Seed : parcours de démonstration, sessions exemple, badges "Présent" et "Régulier"
 
 #### 8.2 — Sessions de formation (formateur)
 
 - **CRUD sessions** : création avec date/heure/durée, événement toute la journée, lieu/lien, description
-- **Lien cours optionnel** : le formateur peut rattacher une session à un cours en ligne existant ou créer une session standalone
+- **Cible obligatoire** : chaque session cible soit un cours, soit un parcours
+- **Politique d'accès** : choix `OPEN` ou `SESSION_ONLY` pour réserver le contenu lié aux inscrits approuvés
 - **Récurrence** : création de sessions récurrentes (RRULE RFC 5545), génération des instances individuelles
 - **Gestion des inscriptions** : vue des demandes PENDING, boutons approuver/refuser, notification automatique à l'apprenant
 - **Feuille de présence** : interface d'émargement (liste des participants APPROVED, pointage PRESENT/ABSENT/LATE/EXCUSED)
@@ -921,8 +932,8 @@ akaa/
 #### 8.3 — Parcours de formation (formateur)
 
 - **CRUD parcours** : titre, description, statut (DRAFT/PUBLISHED/ARCHIVED)
-- **Gestion des sessions** : ajout/retrait de sessions dans un parcours, réordonnancement
-- **Vue parcours** : liste ordonnée des sessions avec statuts et dates
+- **Gestion des cours** : ajout/retrait de cours dans un parcours, réordonnancement
+- **Vue parcours** : liste ordonnée des cours inclus + sessions liées au parcours
 
 #### 8.4 — Calendrier apprenant
 
@@ -931,7 +942,7 @@ akaa/
 - **Parcourir les sessions** : catalogue des sessions disponibles (SCHEDULED) avec inscription
 - **Demande d'inscription** : bouton "S'inscrire" → status PENDING → notification au formateur
 - **Annulation** : possibilité de se désinscrire tant que la session n'a pas eu lieu
-- **Parcours** : consultation des parcours publiés, vue du programme complet
+- **Parcours** : consultation des parcours publiés, vue du programme complet (cours inclus + sessions liées)
 
 #### 8.5 — Notifications in-app
 

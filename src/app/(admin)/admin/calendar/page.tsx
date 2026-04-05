@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { SessionAccessPolicy, SessionStatus, UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import {
@@ -13,7 +13,9 @@ import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
 import {
   formatDateTime,
+  getSessionAccessPolicyClassName,
   getSessionStatusClassName,
+  sessionAccessPolicyLabels,
   sessionStatusLabels,
   toDateTimeLocalValue,
 } from "@/lib/training";
@@ -110,9 +112,19 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
             Statut
             <select name="status" className="form-select text-sm">
-              {Object.entries(sessionStatusLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
+              {Object.values(SessionStatus).map((status) => (
+                <option key={status} value={status}>
+                  {sessionStatusLabels[status]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+            Politique d’accès
+            <select name="accessPolicy" defaultValue={SessionAccessPolicy.OPEN} className="form-select text-sm">
+              {Object.values(SessionAccessPolicy).map((policy) => (
+                <option key={policy} value={policy}>
+                  {sessionAccessPolicyLabels[policy]}
                 </option>
               ))}
             </select>
@@ -150,6 +162,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                 </option>
               ))}
             </select>
+            <p className="text-xs font-normal text-[#0c0910]/55">Renseignez un seul rattachement : cours ou parcours.</p>
           </label>
           <label className="space-y-2 text-sm font-medium text-[#0c0910]">
             Parcours
@@ -161,6 +174,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                 </option>
               ))}
             </select>
+            <p className="text-xs font-normal text-[#0c0910]/55">Laissez vide si cette session cible un cours.</p>
           </label>
           <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
             Récurrence
@@ -182,6 +196,9 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionStatusClassName(trainingSession.status)}`}>
                     {sessionStatusLabels[trainingSession.status]}
+                  </span>
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionAccessPolicyClassName(trainingSession.accessPolicy)}`}>
+                    {sessionAccessPolicyLabels[trainingSession.accessPolicy]}
                   </span>
                   <span className="rounded-full bg-[#655670]/12 px-2.5 py-1 text-xs font-semibold text-[#655670]">
                     {trainingSession.trainer.name}
@@ -239,9 +256,19 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
               <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                 Statut
                 <select name="status" defaultValue={trainingSession.status} className="form-select text-sm">
-                  {Object.entries(sessionStatusLabels).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
+                  {Object.values(SessionStatus).map((status) => (
+                    <option key={status} value={status}>
+                      {sessionStatusLabels[status]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                Politique d’accès
+                <select name="accessPolicy" defaultValue={trainingSession.accessPolicy} className="form-select text-sm">
+                  {Object.values(SessionAccessPolicy).map((policy) => (
+                    <option key={policy} value={policy}>
+                      {sessionAccessPolicyLabels[policy]}
                     </option>
                   ))}
                 </select>
@@ -279,6 +306,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                     </option>
                   ))}
                 </select>
+                <p className="text-xs font-normal text-[#0c0910]/55">Renseignez un seul rattachement : cours ou parcours.</p>
               </label>
               <label className="space-y-2 text-sm font-medium text-[#0c0910]">
                 Parcours
@@ -290,6 +318,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                     </option>
                   ))}
                 </select>
+                <p className="text-xs font-normal text-[#0c0910]/55">Laissez vide si cette session cible un cours.</p>
               </label>
               <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
                 Description

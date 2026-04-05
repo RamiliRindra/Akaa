@@ -11,6 +11,9 @@ CREATE TYPE "ProgramStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
 CREATE TYPE "SessionStatus" AS ENUM ('SCHEDULED', 'COMPLETED', 'CANCELLED');
 
 -- CreateEnum
+CREATE TYPE "SessionAccessPolicy" AS ENUM ('OPEN', 'SESSION_ONLY');
+
+-- CreateEnum
 CREATE TYPE "SessionEnrollmentStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
 
 -- CreateEnum
@@ -44,11 +47,28 @@ CREATE TABLE "training_program" (
 );
 
 -- CreateTable
+CREATE TABLE "program_course" (
+  "id" UUID NOT NULL,
+  "program_id" UUID NOT NULL,
+  "course_id" UUID NOT NULL,
+  "order" INTEGER NOT NULL,
+  "created_at" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT "program_course_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "program_course_program_id_fkey"
+    FOREIGN KEY ("program_id") REFERENCES "training_program"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "program_course_course_id_fkey"
+    FOREIGN KEY ("course_id") REFERENCES "course"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "uq_program_course_program_course" UNIQUE ("program_id", "course_id")
+);
+
+-- CreateTable
 CREATE TABLE "training_session" (
   "id" UUID NOT NULL,
   "title" VARCHAR(255) NOT NULL,
   "description" TEXT,
   "status" "SessionStatus" NOT NULL DEFAULT 'SCHEDULED',
+  "access_policy" "SessionAccessPolicy" NOT NULL DEFAULT 'OPEN',
   "starts_at" TIMESTAMP(6) NOT NULL,
   "ends_at" TIMESTAMP(6) NOT NULL,
   "is_all_day" BOOLEAN NOT NULL DEFAULT false,
@@ -69,7 +89,12 @@ CREATE TABLE "training_session" (
   CONSTRAINT "training_session_course_id_fkey"
     FOREIGN KEY ("course_id") REFERENCES "course"("id") ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT "training_session_program_id_fkey"
-    FOREIGN KEY ("program_id") REFERENCES "training_program"("id") ON DELETE SET NULL ON UPDATE CASCADE
+    FOREIGN KEY ("program_id") REFERENCES "training_program"("id") ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT "chk_training_session_single_target"
+    CHECK (
+      (CASE WHEN "course_id" IS NULL THEN 0 ELSE 1 END) +
+      (CASE WHEN "program_id" IS NULL THEN 0 ELSE 1 END) = 1
+    )
 );
 
 -- CreateTable
@@ -132,6 +157,15 @@ CREATE INDEX "idx_training_program_trainer_id" ON "training_program"("trainer_id
 
 -- CreateIndex
 CREATE INDEX "idx_training_program_status" ON "training_program"("status");
+
+-- CreateIndex
+CREATE INDEX "idx_program_course_program_id" ON "program_course"("program_id");
+
+-- CreateIndex
+CREATE INDEX "idx_program_course_course_id" ON "program_course"("course_id");
+
+-- CreateIndex
+CREATE INDEX "idx_program_course_program_order" ON "program_course"("program_id", "order");
 
 -- CreateIndex
 CREATE INDEX "idx_training_session_trainer_id" ON "training_session"("trainer_id");

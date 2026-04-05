@@ -4,6 +4,7 @@ import {
   AttendanceStatus,
   NotificationType,
   ProgramStatus,
+  SessionAccessPolicy,
   SessionEnrollmentStatus,
   SessionStatus,
   UserRole,
@@ -37,6 +38,14 @@ function buildRedirectUrl(path: string, type: "success" | "error", message: stri
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+function getStringArray(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter(Boolean);
 }
 
 function getSafeReturnTo(formData: FormData, fallback: string) {
@@ -192,6 +201,71 @@ async function resolveAssignableOwnerId({
   return assignableUser.id;
 }
 
+async function assertAccessibleCourseIds({
+  actorId,
+  actorRole,
+  courseIds,
+}: {
+  actorId: string;
+  actorRole: UserRole;
+  courseIds: string[];
+}) {
+  if (!courseIds.length) {
+    return;
+  }
+
+  const count = await db.course.count({
+    where: {
+      id: { in: courseIds },
+      ...(actorRole === UserRole.ADMIN ? undefined : { trainerId: actorId }),
+    },
+  });
+
+  if (count !== courseIds.length) {
+    throw new Error("La sélection de cours contient des éléments non accessibles.");
+  }
+}
+
+async function assertAccessibleSessionTargets({
+  actorId,
+  actorRole,
+  courseId,
+  programId,
+}: {
+  actorId: string;
+  actorRole: UserRole;
+  courseId?: string;
+  programId?: string;
+}) {
+  if (courseId) {
+    const course = await db.course.findFirst({
+      where: {
+        id: courseId,
+        ...(actorRole === UserRole.ADMIN ? undefined : { trainerId: actorId }),
+      },
+      select: { id: true },
+    });
+
+    if (!course) {
+      throw new Error("Le cours sélectionné est invalide.");
+    }
+  }
+
+  if (programId) {
+    const program = await db.trainingProgram.findFirst({
+      where: {
+        id: programId,
+        ...(actorRole === UserRole.ADMIN ? undefined : { trainerId: actorId }),
+      },
+      select: { id: true },
+    });
+
+    if (!program) {
+      throw new Error("Le parcours sélectionné est invalide.");
+    }
+  }
+}
+
 export async function createTrainingProgramAction(formData: FormData) {
   const user = await requireTrainerOrAdmin();
   const returnTo = getSafeReturnTo(formData, user.role === UserRole.ADMIN ? "/admin/programs" : "/trainer/programs");
@@ -200,6 +274,7 @@ export async function createTrainingProgramAction(formData: FormData) {
     title: getString(formData, "title"),
     description: getString(formData, "description"),
     trainerId: getString(formData, "trainerId"),
+    courseIds: getStringArray(formData, "courseIds"),
     status: getString(formData, "status") || ProgramStatus.DRAFT,
   });
 
@@ -216,8 +291,13 @@ export async function createTrainingProgramAction(formData: FormData) {
       actorId: user.id,
       actorRole: user.role,
     });
+    await assertAccessibleCourseIds({
+      actorId: user.id,
+      actorRole: user.role,
+      courseIds: parsed.data.courseIds,
+    });
   } catch (error) {
-    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Responsable invalide."));
+    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Parcours invalide."));
   }
 
   await db.trainingProgram.create({
@@ -227,6 +307,12 @@ export async function createTrainingProgramAction(formData: FormData) {
       description: parsed.data.description,
       status: parsed.data.status,
       trainerId,
+      courses: {
+        create: parsed.data.courseIds.map((courseId, index) => ({
+          courseId,
+          order: index + 1,
+        })),
+      },
     },
   });
 
@@ -244,6 +330,7 @@ export async function updateTrainingProgramAction(formData: FormData) {
     title: getString(formData, "title"),
     description: getString(formData, "description"),
     trainerId: getString(formData, "trainerId"),
+    courseIds: getStringArray(formData, "courseIds"),
     status: getString(formData, "status"),
   });
 
@@ -273,8 +360,13 @@ export async function updateTrainingProgramAction(formData: FormData) {
       actorId: user.id,
       actorRole: user.role,
     });
+    await assertAccessibleCourseIds({
+      actorId: user.id,
+      actorRole: user.role,
+      courseIds: parsed.data.courseIds,
+    });
   } catch (error) {
-    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Responsable invalide."));
+    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Parcours invalide."));
   }
 
   await db.trainingProgram.update({
@@ -285,6 +377,13 @@ export async function updateTrainingProgramAction(formData: FormData) {
       description: parsed.data.description,
       status: parsed.data.status,
       trainerId,
+      courses: {
+        deleteMany: {},
+        create: parsed.data.courseIds.map((courseId, index) => ({
+          courseId,
+          order: index + 1,
+        })),
+      },
     },
   });
 
@@ -333,6 +432,7 @@ export async function createTrainingSessionAction(formData: FormData) {
     title: getString(formData, "title"),
     description: getString(formData, "description"),
     status: getString(formData, "status") || SessionStatus.SCHEDULED,
+    accessPolicy: getString(formData, "accessPolicy") || SessionAccessPolicy.OPEN,
     startsAt: getString(formData, "startsAt"),
     endsAt: getString(formData, "endsAt"),
     isAllDay: getString(formData, "isAllDay"),
@@ -357,8 +457,14 @@ export async function createTrainingSessionAction(formData: FormData) {
       actorId: user.id,
       actorRole: user.role,
     });
+    await assertAccessibleSessionTargets({
+      actorId: user.id,
+      actorRole: user.role,
+      courseId: parsed.data.courseId,
+      programId: parsed.data.programId,
+    });
   } catch (error) {
-    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Responsable invalide."));
+    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Session invalide."));
   }
 
   await db.trainingSession.create({
@@ -366,6 +472,7 @@ export async function createTrainingSessionAction(formData: FormData) {
       title: parsed.data.title,
       description: parsed.data.description,
       status: parsed.data.status,
+      accessPolicy: parsed.data.accessPolicy,
       startsAt: parsed.data.startsAt,
       endsAt: parsed.data.endsAt,
       isAllDay: parsed.data.isAllDay,
@@ -393,6 +500,7 @@ export async function updateTrainingSessionAction(formData: FormData) {
     title: getString(formData, "title"),
     description: getString(formData, "description"),
     status: getString(formData, "status"),
+    accessPolicy: getString(formData, "accessPolicy"),
     startsAt: getString(formData, "startsAt"),
     endsAt: getString(formData, "endsAt"),
     isAllDay: getString(formData, "isAllDay"),
@@ -423,8 +531,14 @@ export async function updateTrainingSessionAction(formData: FormData) {
       actorId: user.id,
       actorRole: user.role,
     });
+    await assertAccessibleSessionTargets({
+      actorId: user.id,
+      actorRole: user.role,
+      courseId: parsed.data.courseId,
+      programId: parsed.data.programId,
+    });
   } catch (error) {
-    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Responsable invalide."));
+    redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Session invalide."));
   }
 
   await db.trainingSession.update({
@@ -433,6 +547,7 @@ export async function updateTrainingSessionAction(formData: FormData) {
       title: parsed.data.title,
       description: parsed.data.description,
       status: parsed.data.status,
+      accessPolicy: parsed.data.accessPolicy,
       startsAt: parsed.data.startsAt,
       endsAt: parsed.data.endsAt,
       isAllDay: parsed.data.isAllDay,

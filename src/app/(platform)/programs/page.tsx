@@ -20,6 +20,14 @@ export default async function PlatformProgramsPage() {
     orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
     include: {
       trainer: { select: { name: true } },
+      courses: {
+        orderBy: { order: "asc" },
+        include: {
+          course: {
+            select: { id: true, title: true, slug: true, level: true, estimatedHours: true },
+          },
+        },
+      },
       sessions: {
         orderBy: { startsAt: "asc" },
         select: {
@@ -38,7 +46,7 @@ export default async function PlatformProgramsPage() {
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-[#0c0910]">Parcours de formation</h2>
         <p className="text-sm text-[#0c0910]/70">
-          Consultez les programmes publiés et les sessions qui les composent.
+          Consultez les parcours publiés, leurs cours inclus et les sessions qui leur sont rattachées.
         </p>
       </div>
 
@@ -52,7 +60,7 @@ export default async function PlatformProgramsPage() {
                     {programStatusLabels[program.status]}
                   </span>
                   <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
-                    {program.sessions.length} session{program.sessions.length > 1 ? "s" : ""}
+                    {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
                   </span>
                 </div>
                 <div>
@@ -65,10 +73,38 @@ export default async function PlatformProgramsPage() {
               </div>
 
               <div className="mt-5 space-y-3 rounded-2xl bg-[#f7f9ff] p-4">
-                <p className="text-sm font-semibold text-[#0c0910]">Sessions du parcours</p>
+                <p className="text-sm font-semibold text-[#0c0910]">Cours inclus</p>
+                {program.courses.length ? (
+                  program.courses.map((programCourse) => (
+                    <div key={programCourse.id} className="rounded-xl bg-white p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-medium text-[#0c0910]">
+                          {programCourse.order}. {programCourse.course.title}
+                        </p>
+                        <span className="rounded-full bg-[#655670]/10 px-2 py-1 text-xs font-semibold text-[#655670]">
+                          {programCourse.course.level}
+                        </span>
+                      </div>
+                      {programCourse.course.estimatedHours ? (
+                        <p className="text-xs text-[#0c0910]/60">
+                          {programCourse.course.estimatedHours} h estimées
+                        </p>
+                      ) : null}
+                      <Link href={`/courses/${programCourse.course.slug}`} className="mt-2 inline-flex text-xs font-semibold text-[#0F63FF]">
+                        Voir le cours
+                      </Link>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-[#0c0910]/55">Ce parcours n’a pas encore de cours associés.</p>
+                )}
+              </div>
+
+              <div className="mt-4 space-y-3 rounded-2xl bg-white/80 p-4">
+                <p className="text-sm font-semibold text-[#0c0910]">Sessions liées au parcours</p>
                 {program.sessions.length ? (
                   program.sessions.map((trainingSession) => (
-                    <div key={trainingSession.id} className="rounded-xl bg-white p-3">
+                    <div key={trainingSession.id} className="rounded-xl border border-[#0c0910]/8 bg-white p-3">
                       <p className="font-medium text-[#0c0910]">{trainingSession.title}</p>
                       <p className="text-xs text-[#0c0910]/60">
                         {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
@@ -76,7 +112,7 @@ export default async function PlatformProgramsPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-[#0c0910]/55">Ce parcours n’a pas encore de session planifiée.</p>
+                  <p className="text-sm text-[#0c0910]/55">Aucune session planifiée pour ce parcours pour le moment.</p>
                 )}
               </div>
 
