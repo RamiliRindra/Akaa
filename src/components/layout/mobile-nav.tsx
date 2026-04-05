@@ -14,9 +14,13 @@ import { UserMenu } from "@/components/layout/user-menu";
 type MobileNavProps = {
   title: string;
   items: NavItem[];
+  workspace: "platform" | "trainer" | "admin";
+  userName: string;
+  userEmail?: string | null;
+  userRole: "LEARNER" | "TRAINER" | "ADMIN";
 };
 
-export function MobileNav({ title, items }: MobileNavProps) {
+export function MobileNav({ title, items, workspace, userName, userEmail, userRole }: MobileNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -61,11 +65,10 @@ export function MobileNav({ title, items }: MobileNavProps) {
               </div>
 
               <div className="mt-5 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,80,214,0.08),rgba(101,86,112,0.06))] px-4 py-4">
-                <p className="editorial-eyebrow">Navigation</p>
-                <p className="mt-2 font-display text-lg font-bold text-[#0c0910]">{title}</p>
+                <p className="font-display text-lg font-bold text-[#0c0910]">{title}</p>
               </div>
 
-              <nav className="mt-5 space-y-2">
+              <nav className="mt-5 flex-1 space-y-2 overflow-y-auto pr-1">
                 {items.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const Icon = getNavIcon(item.icon);
@@ -90,8 +93,15 @@ export function MobileNav({ title, items }: MobileNavProps) {
                 })}
               </nav>
 
-              <div className="mt-auto pt-5">
-                <UserMenu className="w-full justify-start rounded-[1.2rem] px-4 py-3 text-sm font-semibold" />
+              <div className="mt-5 border-t border-[#0c0910]/8 pt-5">
+                <UserMenu
+                  name={userName}
+                  email={userEmail}
+                  role={userRole}
+                  workspace={workspace}
+                  onNavigate={() => setOpen(false)}
+                  className="w-full"
+                />
               </div>
             </motion.div>
           </>

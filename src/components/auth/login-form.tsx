@@ -47,14 +47,14 @@ export function LoginForm() {
             Email
           </label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+            <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
             <input
               id="email"
               name="email"
               type="email"
               autoComplete="email"
               required
-              className="form-input pl-10 pr-3 text-sm"
+              className="form-input pl-12 pr-4 text-sm"
               placeholder="vous@akaa.fr"
             />
           </div>
@@ -65,21 +65,21 @@ export function LoginForm() {
             Mot de passe
           </label>
           <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+            <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
             <input
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               required
-              className="form-input pl-10 pr-11 text-sm"
+              className="form-input pl-12 pr-12 text-sm"
               placeholder="Minimum 8 caractères"
             />
             <button
               type="button"
               data-interactive="true"
               onClick={() => setShowPassword((value) => !value)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
+              className="absolute right-4 top-1/2 z-10 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>

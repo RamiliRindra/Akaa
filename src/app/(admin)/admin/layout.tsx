@@ -7,7 +7,12 @@ type AdminLayoutProps = {
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <ProtectedShell navTitle="Administration" headerTitle="Admin" navItems={adminNav}>
+    <ProtectedShell
+      navTitle="Administration"
+      headerTitle="Admin"
+      navItems={adminNav}
+      workspace="admin"
+    >
       {children}
     </ProtectedShell>
   );

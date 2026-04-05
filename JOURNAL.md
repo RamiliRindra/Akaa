@@ -874,3 +874,123 @@ Une piste d’évolution a été retenue pour une itération ultérieure du shel
 - conserver la sidebar custom actuelle en phase 7
 - reprendre seulement les idées structurelles utiles plus tard
 - ne pas migrer maintenant vers un composant sidebar externe tant que le shell visuel reste en stabilisation
+
+---
+
+## Phase 7 — Design system appliqué, états de chargement et passe performance
+
+**Date :** 05 Avril 2026
+
+### Objectif
+Finaliser la phase visuelle majeure du MVP sans casser les parcours fonctionnels stabilisés en phases 1 à 6.
+
+L’objectif réel n’était pas seulement “rendre plus beau”, mais aussi :
+- rendre l’interface plus lisible
+- rendre les transitions plus compréhensibles
+- réduire la sensation de lenteur perçue
+- sécuriser les derniers flux critiques en production
+
+### Refonte visuelle principale
+La première partie de la phase 7 a consisté à appliquer réellement `DESIGN.md` sur les surfaces les plus importantes :
+- landing page
+- shell principal
+- dashboard apprenant
+- catalogue
+- fiche cours
+- lecteur de chapitre
+
+Décisions visuelles retenues :
+- conserver le logo en image seule dans les zones de navigation
+- renforcer la hiérarchie éditoriale
+- garder une UI premium mais lisible, sans casser les patterns déjà validés
+- conserver le light mode uniquement
+
+### Navigation et responsive
+La navigation mobile était encore incomplète.
+
+Correctifs intégrés :
+- ajout d’un vrai menu hamburger mobile
+- repositionnement de la déconnexion en bas de la sidebar
+- amélioration des états hover / cursor sur les éléments interactifs
+
+Décision retenue :
+- ne pas migrer la sidebar actuelle vers un composant externe
+- conserver la sidebar custom, tout en gardant des pistes structurelles notées pour plus tard
+
+### Quiz — correction du faux échec en production
+Une régression de production est apparue sur la validation d’un quiz réussi.
+
+Symptôme :
+- côté utilisateur, message d’erreur de validation
+- côté logs Railway, la tentative était pourtant validée et la redirection de succès était déjà calculée
+
+Cause réelle :
+- le flux attrapait à tort `NEXT_REDIRECT` dans le `catch`
+- un redirect Next.js normal était traité comme une erreur métier
+
+Correctif retenu :
+- rethrow explicite des redirect errors Next.js
+- journalisation des vraies erreurs seulement
+
+Résultat :
+- le quiz réussi redirige normalement vers le chapitre suivant
+- les faux messages d’erreur ont disparu
+
+### États de chargement et feedback d’action
+Une faiblesse UX claire persistait :
+- sur beaucoup de boutons, rien n’indiquait si l’action travaillait réellement
+- l’utilisateur pouvait douter, recliquer, ou penser que la plateforme était figée
+
+Améliorations intégrées :
+- composant `Spinner` réutilisable
+- composant `SubmitButton` basé sur `useFormStatus`
+- intégration sur les actions lentes principales :
+  - validation quiz
+  - fin de chapitre
+  - login / register / Google login
+  - logout
+  - édition de chapitre
+  - builder quiz
+  - création / import de cours
+  - principales actions admin
+
+En complément :
+- ajout de surfaces `loading.tsx` spécifiques aux zones `platform`, `trainer` et `admin`
+
+Décision retenue :
+- pas de changement de style global des CTA
+- ajouter uniquement un feedback `pending` intégré et discret
+
+### Passe performance
+Une lenteur perçue d’environ une seconde sur de nombreuses transitions a été remontée.
+
+Le travail effectué a ciblé le vrai coût applicatif avant d’ajouter des loaders partout.
+
+Optimisations retenues :
+- session dédupliquée par requête avec cache serveur
+- allègement du shell global
+- suppression des initialisations de badges inutiles sur les simples pages de consultation
+- réduction du travail exécuté à l’ouverture d’un chapitre
+- parallélisation de certaines lectures de données sur le lecteur de chapitre
+
+Résultat attendu :
+- moins de travail serveur sur chaque navigation
+- moins de latence perçue
+- loaders réservés aux zones où ils apportent vraiment de la clarté
+
+### Validation
+- ✅ Refonte visuelle des surfaces principales validée
+- ✅ Navigation mobile validée
+- ✅ Quiz validé après correction du redirect
+- ✅ États de chargement visibles sur les actions lentes
+- ✅ Passe performance intégrée
+- ✅ `npm run lint`
+- ✅ `npx tsc --noEmit`
+- ✅ `npm run build`
+
+### Statut
+- ✅ Phase 7 livrée sur le périmètre MVP
+- ✅ Le design system est désormais réellement incarné dans l’app
+- ✅ Les parcours critiques ont un feedback d’action plus fiable
+- ✅ La lenteur perçue a fait l’objet d’une vraie optimisation technique, pas seulement cosmétique
+- 📝 Les retouches restantes sont désormais du polish ciblé écran par écran

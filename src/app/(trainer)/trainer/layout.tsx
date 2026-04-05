@@ -7,7 +7,12 @@ type TrainerLayoutProps = {
 
 export default async function TrainerLayout({ children }: TrainerLayoutProps) {
   return (
-    <ProtectedShell navTitle="Espace formateur" headerTitle="Formateur" navItems={trainerNav}>
+    <ProtectedShell
+      navTitle="Espace formateur"
+      headerTitle="Formateur"
+      navItems={trainerNav}
+      workspace="trainer"
+    >
       {children}
     </ProtectedShell>
   );

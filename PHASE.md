@@ -805,3 +805,128 @@ Résultat :
 - ✅ La gouvernance utilisateurs / catégories / badges / XP est opérationnelle.
 - ✅ Le dashboard admin et la supervision des cours sont disponibles.
 - 📝 Les raffinements visuels globaux restent volontairement reportés à la phase 7.
+
+---
+
+## Phase 7 — UI, Polish et Production
+Date: 2026-04-05
+
+### Objectif
+Appliquer réellement `DESIGN.md` sur les surfaces clés du produit, améliorer la perception de fluidité et sécuriser les derniers parcours utilisateur avant stabilisation MVP.
+
+### Implémentation réalisée
+
+#### 1) Refonte visuelle des surfaces principales
+Fichiers principaux:
+- `src/app/globals.css`
+- `src/app/layout.tsx`
+- `src/app/page.tsx`
+- `src/components/layout/header.tsx`
+- `src/components/layout/sidebar.tsx`
+- `src/components/layout/mobile-nav.tsx`
+- `src/components/layout/protected-shell.tsx`
+- `src/app/(platform)/dashboard/page.tsx`
+- `src/app/(platform)/courses/page.tsx`
+- `src/app/(platform)/courses/[slug]/page.tsx`
+
+Points livrés:
+- Application du langage visuel “Digital Atheneum”.
+- Landing page publique refondue.
+- Shell principal harmonisé sur desktop et mobile.
+- Cards, filtres, badges et progressions mis au niveau du design system.
+- Logo maintenu en image seule dans la navigation, sans duplication textuelle forcée.
+
+#### 2) Parcours d’apprentissage et quiz
+Fichiers principaux:
+- `src/app/(platform)/courses/[slug]/learn/[chapterId]/page.tsx`
+- `src/components/course/rich-content-renderer.tsx`
+- `src/components/course/video-embed.tsx`
+- `src/components/quiz/quiz-player.tsx`
+- `src/components/quiz/quiz-manager.tsx`
+
+Points livrés:
+- Page de lecture de chapitre renforcée visuellement.
+- Meilleure lisibilité du contenu Markdown et des embeds vidéo.
+- Quiz apprenant plus clair et plus cohérent visuellement.
+- Builder quiz formateur conservé en mode édition locale + sauvegarde unique.
+- Correction du flux de validation de quiz en production:
+  - les redirects Next.js de succès ne sont plus interceptés comme de fausses erreurs
+  - les erreurs réelles sont journalisées côté serveur
+
+#### 3) États de chargement et affordance interactive
+Fichiers principaux:
+- `src/components/ui/spinner.tsx`
+- `src/components/ui/submit-button.tsx`
+- `src/app/(platform)/loading.tsx`
+- `src/app/(trainer)/trainer/loading.tsx`
+- `src/app/(admin)/admin/loading.tsx`
+- `src/components/feedback/section-loading.tsx`
+
+Points livrés:
+- Spinner réutilisable pour les actions longues.
+- Boutons submit avec état `pending` sur les parcours critiques:
+  - quiz
+  - auth
+  - logout
+  - édition de chapitre
+  - builder quiz
+  - création / import de cours
+  - principales actions admin
+- Loading surfaces segmentées par zone (`platform`, `trainer`, `admin`) pour les transitions lentes.
+- Feedback visuel cohérent sans changer l’apparence globale des composants.
+
+#### 4) Optimisations de performance sans régression produit
+Fichiers principaux:
+- `src/lib/auth-session.ts`
+- `src/components/layout/protected-shell.tsx`
+- `src/actions/quiz.ts`
+- `src/lib/gamification.ts`
+- `src/app/(platform)/dashboard/page.tsx`
+- `src/app/(platform)/profile/page.tsx`
+- `src/app/(platform)/leaderboard/page.tsx`
+
+Points livrés:
+- Déduplication de la session par requête via cache serveur.
+- Allègement du shell global:
+  - moins de lectures DB systématiques
+  - récupération ciblée des données gamifiées apprenant
+- Suppression des initialisations de badges inutiles sur les simples pages de consultation.
+- Réduction du travail exécuté à l’ouverture d’un chapitre.
+- Parallélisation des lectures cours / chapitre sur le lecteur apprenant.
+
+#### 5) UX mobile et navigation
+Fichiers principaux:
+- `src/components/layout/mobile-nav.tsx`
+- `src/components/layout/sidebar.tsx`
+- `src/components/layout/user-menu.tsx`
+
+Points livrés:
+- Navigation mobile type hamburger opérationnelle.
+- Déconnexion repositionnée en bas du menu latéral.
+- Hover states et curseurs interactifs harmonisés sur les CTA et éléments cliquables.
+
+### Validation fonctionnelle exécutée (Phase 7)
+Tests validés:
+- ✅ Landing et shell principal validés visuellement.
+- ✅ Navigation mobile et logout validés.
+- ✅ Catalogue, fiche cours et lecture de chapitre validés visuellement.
+- ✅ Validation de quiz corrigée et validée en production.
+- ✅ États de chargement visibles sur les actions lentes principales.
+- ✅ Ajustements admin / trainer conservés sans régression fonctionnelle.
+
+### Validation technique exécutée (Phase 7)
+- `npm run lint`
+- `npx tsc --noEmit`
+- `npm run build`
+
+Résultat:
+- ✅ Lint OK
+- ✅ TypeScript OK
+- ✅ Build production OK
+
+### Statut global Phase 7
+- ✅ Phase 7 fonctionnelle et visuelle livrée.
+- ✅ Le design system est appliqué sur les parcours clés du MVP.
+- ✅ Les états de chargement critiques sont visibles et cohérents.
+- ✅ Une passe de performance applicative a été intégrée sans modifier les règles métier.
+- 📝 Quelques ajustements UI ciblés peuvent encore être faits écran par écran, mais ils relèvent désormais du polish post-phase plutôt que d’un blocage de livraison.

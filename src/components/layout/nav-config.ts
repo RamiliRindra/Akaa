@@ -24,6 +24,10 @@ export const platformNav: NavItem[] = [
   { href: "/profile", label: "Profil", icon: "user-round" },
 ];
 
+export const platformViewerNav: NavItem[] = [
+  { href: "/courses", label: "Cours", icon: "book-open" },
+];
+
 export const trainerNav: NavItem[] = [
   { href: "/trainer/dashboard", label: "Dashboard", icon: "chart-no-axes-column" },
   { href: "/trainer/courses", label: "Mes cours", icon: "graduation-cap" },

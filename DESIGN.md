@@ -94,12 +94,27 @@ We eschew traditional "drop shadows" in favor of **Tonal Layering** and **Ambien
 - **Do** use the `lg` (2rem) and `xl` (3rem) corner radii for main layout containers to maintain the "Modern & Friendly" aesthetic.
 - **Do** use the Warm Gold (`tertiary`) only for moments of genuine celebration.
 - **Do** overlap images or illustrations across background color shifts to create a sense of depth.
+- **Do** preserve clear interactive affordances: pointer cursor, subtle hover lift, and visible pending state on long-running actions.
+- **Do** keep the brand logo image-led in navigation surfaces instead of retyping the product name beside it by default.
 
 ### Don't
 - **Don't** use black (#000000) for text. Use `on-surface` (#2c2f31) for a softer, premium reading experience.
 - **Don't** use 1px dividers. If you feel the need for a line, use a 24px gap of white space instead.
 - **Don't** use standard "box-shadows" from CSS frameworks. Always use the Ambient Shadow spec defined in Section 4.
 - **Don't** use sharp corners. Every interactive element must have a minimum radius of `sm` (0.5rem), favoring `lg` (2rem) for major containers.
+- **Don't** hide loading behind silent buttons. Any action that triggers a server round-trip should communicate pending state inside the CTA or the destination section.
+
+---
+
+## 7. Implementation Notes — Avril 2026
+
+These notes capture concrete decisions already applied in the product so the design direction remains stable across future iterations.
+
+- **Navigation logo:** image-first treatment, no forced adjacent wordmark in sidebars and compact shells.
+- **Hover feedback:** interactive elements must expose pointer intent through cursor change plus a subtle visual reaction.
+- **Pending feedback:** long-running buttons use an inline spinner and disabled state instead of changing component family or layout.
+- **Route feedback:** learner, trainer and admin zones provide localized loading surfaces during navigation instead of blocking the whole app with a single global loader.
+- **Sidebar evolution (later):** `SidebarFooter`, `SidebarTrigger`, `SidebarRail` and collapsible groups remain valid structural candidates, but the current custom sidebar stays the baseline until a later refactor.
 
 ---
 *This design system is a living document intended to evolve with the Akaa platform. Always prioritize the "Illuminated Focus" of the learner over decorative complexity.*

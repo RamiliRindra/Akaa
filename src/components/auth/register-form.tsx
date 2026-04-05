@@ -62,14 +62,14 @@ export function RegisterForm() {
           Nom complet
         </label>
         <div className="relative">
-          <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <UserRound className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
           <input
             id="name"
             type="text"
             autoComplete="name"
             value={form.name}
             onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-            className="form-input pl-10 pr-3 text-sm"
+            className="form-input pl-12 pr-4 text-sm"
             placeholder="Votre nom"
           />
         </div>
@@ -80,14 +80,14 @@ export function RegisterForm() {
           Email
         </label>
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
           <input
             id="email"
             type="email"
             autoComplete="email"
             value={form.email}
             onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-            className="form-input pl-10 pr-3 text-sm"
+            className="form-input pl-12 pr-4 text-sm"
             placeholder="vous@akaa.fr"
           />
         </div>
@@ -98,21 +98,21 @@ export function RegisterForm() {
           Mot de passe
         </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
           <input
             id="password"
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             value={form.password}
             onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-            className="form-input pl-10 pr-11 text-sm"
+            className="form-input pl-12 pr-12 text-sm"
             placeholder="Minimum 8 caractères"
           />
           <button
             type="button"
             data-interactive="true"
             onClick={() => setShowPassword((value) => !value)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -124,7 +124,7 @@ export function RegisterForm() {
           Confirmer le mot de passe
         </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
           <input
             id="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
@@ -133,14 +133,14 @@ export function RegisterForm() {
             onChange={(event) =>
               setForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
             }
-            className="form-input pl-10 pr-11 text-sm"
+            className="form-input pl-12 pr-12 text-sm"
             placeholder="Retapez votre mot de passe"
           />
           <button
             type="button"
             data-interactive="true"
             onClick={() => setShowConfirmPassword((value) => !value)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
           >
             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>

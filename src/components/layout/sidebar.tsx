@@ -12,20 +12,23 @@ import { UserMenu } from "@/components/layout/user-menu";
 type SidebarProps = {
   title: string;
   items: NavItem[];
+  workspace: "platform" | "trainer" | "admin";
+  userName: string;
+  userEmail?: string | null;
+  userRole: "LEARNER" | "TRAINER" | "ADMIN";
 };
 
-export function Sidebar({ title, items }: SidebarProps) {
+export function Sidebar({ title, items, workspace, userName, userEmail, userRole }: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside className="hidden w-[19rem] shrink-0 px-4 py-5 lg:block">
-      <div className="glass-panel ambient-ring flex h-full flex-col px-5 py-6">
+      <div className="glass-panel ambient-ring flex h-full flex-col overflow-hidden px-5 py-6">
         <AppLogo />
         <div className="mt-6 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,80,214,0.08),rgba(101,86,112,0.06))] px-4 py-4">
-          <p className="editorial-eyebrow">Navigation</p>
-          <p className="mt-2 font-display text-lg font-bold text-[#0c0910]">{title}</p>
+          <p className="font-display text-lg font-bold text-[#0c0910]">{title}</p>
         </div>
-        <nav className="mt-6 space-y-2">
+        <nav className="mt-6 flex-1 space-y-2 overflow-y-auto pr-1">
           {items.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             const Icon = getNavIcon(item.icon);
@@ -58,8 +61,14 @@ export function Sidebar({ title, items }: SidebarProps) {
             );
           })}
         </nav>
-        <div className="mt-auto pt-6">
-          <UserMenu className="w-full justify-start rounded-[1.35rem] px-4 py-3 text-sm font-semibold" />
+        <div className="mt-6 border-t border-[#0c0910]/8 pt-5">
+          <UserMenu
+            name={userName}
+            email={userEmail}
+            role={userRole}
+            workspace={workspace}
+            className="w-full"
+          />
         </div>
       </div>
     </aside>

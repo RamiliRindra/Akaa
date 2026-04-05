@@ -324,11 +324,7 @@ select:disabled {
 }
 
 .editorial-eyebrow {
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(101, 86, 112, 0.88);
+  display: none;
 }
 
 .mdxeditor-shell {

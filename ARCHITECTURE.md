@@ -1,7 +1,7 @@
 # Akaa - Architecture Plateforme E-Learning Gamifiée
 
 > Document de référence pour l'architecture technique du projet Akaa.
-> Dernière mise à jour : 4 avril 2026
+> Dernière mise à jour : 5 avril 2026
 
 ---
 
@@ -21,6 +21,7 @@ Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, ave
 ### Identité visuelle
 
 - **Logo** : `src/img/logo_akaa.png` (bleu sur fond noir/transparent)
+- **Règle d’intégration logo** : affichage en image seule, sans duplication textuelle imposée à côté du logo dans les zones de navigation
 - **Couleur primaire** : `#0F63FF` (bleu Akaa)
 - **Couleurs secondaires** :
   - `#453750` — Violet sombre (XP, gamification)
@@ -882,6 +883,8 @@ akaa/
 - Landing page publique engageante
 - Responsive mobile complet
 - Animations Framer Motion sur l'ensemble de l'app
+- États de chargement explicites sur les actions longues (submit buttons, transitions de zones)
+- Optimisations de performance applicative sans changer les parcours métier (session dédupliquée, shell allégé, suppression des requêtes inutiles)
 - SEO (metadata, Open Graph)
 - Seed data : admin, catégories, badges, cours démo
 - Tests de performance avec Neon (cold start, requêtes)

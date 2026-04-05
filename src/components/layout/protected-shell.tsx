@@ -12,6 +12,7 @@ type ProtectedShellProps = {
   navTitle: string;
   headerTitle: string;
   navItems: NavItem[];
+  workspace: "platform" | "trainer" | "admin";
 };
 
 export async function ProtectedShell({
@@ -19,6 +20,7 @@ export async function ProtectedShell({
   navTitle,
   headerTitle,
   navItems,
+  workspace,
 }: ProtectedShellProps) {
   const session = await getCachedSession();
   if (!session?.user?.id) {
@@ -51,7 +53,14 @@ export async function ProtectedShell({
 
   return (
     <div className="app-shell-bg flex min-h-screen">
-      <Sidebar title={navTitle} items={navItems} />
+      <Sidebar
+        title={navTitle}
+        items={navItems}
+        workspace={workspace}
+        userName={session.user.name ?? "Utilisateur Akaa"}
+        userEmail={session.user.email}
+        userRole={session.user.role}
+      />
       <div className="flex min-h-screen flex-1 flex-col">
         <div className="relative">
           <Header
@@ -64,7 +73,14 @@ export async function ProtectedShell({
             showGamification={showGamification}
           />
           <div className="absolute left-4 top-4 z-30 lg:hidden">
-            <MobileNav title={navTitle} items={navItems} />
+            <MobileNav
+              title={navTitle}
+              items={navItems}
+              workspace={workspace}
+              userName={session.user.name ?? "Utilisateur Akaa"}
+              userEmail={session.user.email}
+              userRole={session.user.role}
+            />
           </div>
         </div>
         <main className="flex-1 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5">{children}</main>
