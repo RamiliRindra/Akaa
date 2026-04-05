@@ -5,6 +5,7 @@ import { CategoryFilter } from "@/components/course/category-filter";
 import { CourseCard } from "@/components/course/course-card";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
+import { buildAccessibleCourseWhere } from "@/lib/session-access";
 
 type LearnerCoursesPageProps = {
   searchParams: Promise<{
@@ -30,6 +31,7 @@ export default async function LearnerCoursesPage({ searchParams }: LearnerCourse
     db.course.findMany({
       where: {
         status: CourseStatus.PUBLISHED,
+        ...buildAccessibleCourseWhere(userId),
         ...(categorySlug ? { category: { slug: categorySlug } } : {}),
       },
       orderBy: { createdAt: "desc" },

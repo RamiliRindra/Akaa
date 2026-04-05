@@ -1028,6 +1028,7 @@ Points livrés :
   - résumé des sessions ouvertes à l’inscription
   - résumé des parcours publiés
   - liens rapides vers `/calendar` et `/programs`
+  - visibilité immédiate des inscriptions approuvées à venir
 
 #### 3) Surfaces formateur
 Fichiers principaux :
@@ -1072,4 +1073,6 @@ Résultat :
 - ✅ Socle métier calendrier / parcours en place
 - ✅ Recadrage domaine validé et branché dans le code
 - ✅ Surfaces apprenant, formateur et admin opérationnelles
+- ✅ Migration Neon stabilisée sur base partiellement migrée via script SQL relançable
+- ✅ Pages `programs` et `calendar` validées après alignement code/base
 - ⚠️ Le verrouillage applicatif complet des contenus `SESSION_ONLY` reste à brancher comme prochaine étape métier transverse

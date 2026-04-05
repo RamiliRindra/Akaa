@@ -13,6 +13,7 @@ import { QuizPlayer } from "@/components/quiz/quiz-player";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
+import { assertCourseAccessOrRedirect } from "@/lib/session-access";
 
 type LearnChapterPageProps = {
   params: Promise<{ slug: string; chapterId: string }>;
@@ -33,6 +34,7 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
         status: CourseStatus.PUBLISHED,
       },
       select: {
+        id: true,
         title: true,
         slug: true,
         enrollments: {
@@ -137,6 +139,8 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
   if (!course) {
     notFound();
   }
+
+  await assertCourseAccessOrRedirect(course.id, session.user.id);
 
   if (!chapter) {
     notFound();

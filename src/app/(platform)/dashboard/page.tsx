@@ -10,6 +10,7 @@ import { XpLineChart } from "@/components/gamification/xp-line-chart";
 import { getHomePathForRole } from "@/lib/auth-config";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
+import { buildAccessibleCourseWhere, buildAccessibleProgramWhere } from "@/lib/session-access";
 import { formatDate } from "@/lib/utils";
 
 export default async function LearnerDashboardPage() {
@@ -51,7 +52,10 @@ export default async function LearnerDashboardPage() {
         },
       }),
       db.enrollment.findMany({
-        where: { userId },
+        where: {
+          userId,
+          course: buildAccessibleCourseWhere(userId),
+        },
         orderBy: [{ progressPercent: "desc" }, { enrolledAt: "desc" }],
         select: {
           id: true,
@@ -93,6 +97,7 @@ export default async function LearnerDashboardPage() {
             module: {
               course: {
                 status: CourseStatus.PUBLISHED,
+                ...buildAccessibleCourseWhere(userId),
                 enrollments: {
                   some: {
                     userId,
@@ -108,6 +113,7 @@ export default async function LearnerDashboardPage() {
           module: {
             course: {
               status: CourseStatus.PUBLISHED,
+              ...buildAccessibleCourseWhere(userId),
               enrollments: {
                 some: {
                   userId,
@@ -177,6 +183,7 @@ export default async function LearnerDashboardPage() {
       db.trainingProgram.findMany({
         where: {
           status: ProgramStatus.PUBLISHED,
+          ...buildAccessibleProgramWhere(userId),
         },
         orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
         take: 3,
@@ -211,9 +218,7 @@ export default async function LearnerDashboardPage() {
       }),
     ]);
 
-  const publishedEnrollments = enrollments.filter(
-    (enrollment) => enrollment.course.status === CourseStatus.PUBLISHED,
-  );
+  const publishedEnrollments = enrollments.filter((enrollment) => enrollment.course.status === CourseStatus.PUBLISHED);
   const overallProgress = totalPublishedChapters
     ? Math.round((totalCompletedChapters / totalPublishedChapters) * 100)
     : 0;

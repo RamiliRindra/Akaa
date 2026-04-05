@@ -1081,3 +1081,18 @@ Le modèle `SESSION_ONLY` est maintenant posé en base, validé en UI et manipul
 Il reste à brancher ensuite le contrôle d’accès transverse sur les pages de contenu :
 - empêcher l’accès à certains cours / parcours si la session liée exige une inscription `APPROVED`
 - sans rouvrir les logiques des phases précédentes inutilement
+
+### Validation de stabilisation
+Après le recadrage, deux écarts code/base sont apparus en production :
+- `training_program` / `program_course` absents ou incomplets sur la page `programs`
+- colonne `training_session.access_policy` absente sur la page `calendar`
+
+Traitement retenu :
+- reprise du script SQL phase 8 pour qu’il soit relançable sans casser sur Neon
+- ajout des `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` nécessaires
+- ajout de la contrainte `chk_training_session_single_target` en `NOT VALID` pour tolérer l’historique existant
+
+Résultat :
+- page `programs` stabilisée
+- page `calendar` stabilisée
+- phase 8 utilisable sur la base réelle sans reset complet

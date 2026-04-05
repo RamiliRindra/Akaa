@@ -8,7 +8,7 @@ type RichContentRendererProps = {
 };
 
 export function RichContentRenderer({ content }: RichContentRendererProps) {
-  const markdown = getMarkdownFromStoredContent(content).trim();
+  const markdown = normalizeMarkdownForDisplay(getMarkdownFromStoredContent(content).trim());
 
   if (!markdown) {
     return (
@@ -20,21 +20,59 @@ export function RichContentRenderer({ content }: RichContentRendererProps) {
 
   return (
     <div className="panel-card px-5 py-6 sm:px-8 sm:py-8">
-      <div className="prose prose-slate max-w-none space-y-4 prose-headings:font-display prose-headings:font-black prose-headings:tracking-tight prose-headings:text-[#2c2f31] prose-p:text-[#2c2f31]/85 prose-strong:text-[#2c2f31] prose-code:rounded prose-code:bg-[#0c0910]/6 prose-code:px-1 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm prose-code:text-[#0c0910] prose-pre:overflow-x-auto prose-pre:rounded-[1.6rem] prose-pre:bg-[#0c0910] prose-pre:p-5 prose-pre:text-white prose-a:text-[#0F63FF] prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-[#0F63FF]/30 prose-blockquote:text-[#2c2f31]/75 prose-li:text-[#2c2f31]/85">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          a: (props) => <a {...props} target="_blank" rel="noreferrer" />,
-          code: ({ className, children, ...props }) => (
-            <code {...props} className={className}>
-              {children}
-            </code>
-          ),
-        }}
-      >
-        {markdown}
-      </ReactMarkdown>
+      <div className="course-markdown">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            h1: ({ children }) => <h1 className="course-markdown-h1">{children}</h1>,
+            h2: ({ children }) => <h2 className="course-markdown-h2">{children}</h2>,
+            h3: ({ children }) => <h3 className="course-markdown-h3">{children}</h3>,
+            h4: ({ children }) => <h4 className="course-markdown-h4">{children}</h4>,
+            p: ({ children }) => <p className="course-markdown-p">{children}</p>,
+            ul: ({ children }) => <ul className="course-markdown-ul">{children}</ul>,
+            ol: ({ children }) => <ol className="course-markdown-ol">{children}</ol>,
+            li: ({ children }) => <li className="course-markdown-li">{children}</li>,
+            blockquote: ({ children }) => <blockquote className="course-markdown-blockquote">{children}</blockquote>,
+            hr: () => <hr className="course-markdown-hr" />,
+            table: ({ children }) => (
+              <div className="course-markdown-table-wrap">
+                <table className="course-markdown-table">{children}</table>
+              </div>
+            ),
+            thead: ({ children }) => <thead className="course-markdown-thead">{children}</thead>,
+            th: ({ children }) => <th className="course-markdown-th">{children}</th>,
+            td: ({ children }) => <td className="course-markdown-td">{children}</td>,
+            a: ({ children, ...props }) => (
+              <a {...props} className="course-markdown-link" target="_blank" rel="noreferrer">
+                {children}
+              </a>
+            ),
+            strong: ({ children }) => <strong className="course-markdown-strong">{children}</strong>,
+            code: ({ className, children, ...props }) => (
+              <code {...props} className={className ? `course-markdown-code ${className}` : "course-markdown-code"}>
+                {children}
+              </code>
+            ),
+            pre: ({ children }) => <pre className="course-markdown-pre">{children}</pre>,
+            img: ({ src, alt }) =>
+              src ? (
+                <figure className="course-markdown-figure">
+                  <img src={src} alt={alt ?? ""} className="course-markdown-image" loading="lazy" />
+                  {alt ? <figcaption className="course-markdown-caption">{alt}</figcaption> : null}
+                </figure>
+              ) : null,
+          }}
+        >
+          {markdown}
+        </ReactMarkdown>
       </div>
     </div>
+  );
+}
+
+function normalizeMarkdownForDisplay(markdown: string) {
+  return markdown.replace(
+    /(^|\n)(https?:\/\/[^\s]+?\.(?:png|jpe?g|gif|webp|svg)(?:\?[^\s]*)?)(?=\n|$)/gi,
+    "$1![]($2)",
   );
 }

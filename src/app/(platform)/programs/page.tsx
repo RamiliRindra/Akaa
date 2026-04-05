@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
+import { buildAccessibleProgramWhere } from "@/lib/session-access";
 import { formatDateTime, getProgramStatusClassName, programStatusLabels } from "@/lib/training";
 
 export default async function PlatformProgramsPage() {
@@ -16,6 +17,7 @@ export default async function PlatformProgramsPage() {
   const programs = await db.trainingProgram.findMany({
     where: {
       status: ProgramStatus.PUBLISHED,
+      ...buildAccessibleProgramWhere(session.user.id),
     },
     orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
     include: {

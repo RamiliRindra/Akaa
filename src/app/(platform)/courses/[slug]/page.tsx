@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/course/progress-bar";
 import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelBadgeStyles, getCourseLevelLabel } from "@/lib/course-level";
 import { db } from "@/lib/db";
+import { assertCourseAccessOrRedirect } from "@/lib/session-access";
 
 type CourseDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -79,6 +80,10 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
 
   if (!course) {
     notFound();
+  }
+
+  if (session?.user?.id) {
+    await assertCourseAccessOrRedirect(course.id, session.user.id);
   }
 
   const flatChapters = course.modules.flatMap((module) => module.chapters);
