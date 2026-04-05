@@ -134,6 +134,10 @@ export function QuizManager({ courseId, chapterId, quiz }: QuizManagerProps) {
   }
 
   function removeQuestion(questionId: string) {
+    if (!window.confirm("Supprimer cette question du quiz ?")) {
+      return;
+    }
+
     setQuestions((current) => current.filter((question) => question.id !== questionId));
   }
 
@@ -160,6 +164,10 @@ export function QuizManager({ courseId, chapterId, quiz }: QuizManagerProps) {
   }
 
   function removeOption(questionId: string, optionId: string) {
+    if (!window.confirm("Supprimer cette réponse ?")) {
+      return;
+    }
+
     updateQuestion(questionId, (question) => {
       const nextOptions = question.options.filter((option) => option.id !== optionId);
 

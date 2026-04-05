@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { createBadgeAction, deleteBadgeAction, updateBadgeAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
@@ -280,12 +281,15 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
               </form>
 
               <form action={deleteBadgeAction.bind(null, badge.id)} className="xl:self-start">
-                <SubmitButton
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#c2410c] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c2410c]/90"
+                <ConfirmSubmitButton
+                  triggerClassName="inline-flex items-center justify-center gap-2 rounded-xl bg-[#c2410c] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#c2410c]/90"
+                  triggerLabel="Supprimer"
+                  title="Supprimer ce badge ?"
+                  description="Cette action retirera le badge du catalogue admin. Les attributions existantes seront aussi affectées."
+                  confirmLabel="Supprimer le badge"
                   pendingLabel="Suppression..."
-                >
-                  Supprimer
-                </SubmitButton>
+                  confirmClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                />
               </form>
             </div>
           </article>

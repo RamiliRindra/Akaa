@@ -8,6 +8,7 @@ import {
 import { CategoryFormFields } from "@/components/admin/category-form-fields";
 import { CategoryIcon } from "@/components/admin/category-icon";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
@@ -219,12 +220,15 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
               </form>
 
               <form action={deleteCategoryAction.bind(null, category.id)} className="xl:self-start">
-                <SubmitButton
-                  className="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                <ConfirmSubmitButton
+                  triggerClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                  triggerLabel="Supprimer"
+                  title="Supprimer cette catégorie ?"
+                  description="Les cours conserveront leurs données, mais perdront leur catégorie."
+                  confirmLabel="Supprimer la catégorie"
                   pendingLabel="Suppression..."
-                >
-                  Supprimer
-                </SubmitButton>
+                  confirmClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                />
               </form>
             </div>
           </article>

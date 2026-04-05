@@ -92,13 +92,13 @@ export function UserMenu({ name, email, role, workspace, className, onNavigate }
                       }}
                       className={`flex items-center justify-between rounded-[0.9rem] px-3 py-2.5 text-sm font-medium ${
                         isActive
-                          ? "bg-[#0F63FF] text-white"
+                          ? "bg-[#0F63FF] !text-white"
                           : "text-[#0c0910]/76 hover:bg-white hover:text-[#0050d6]"
                       }`}
                     >
                       <span>{workspaceLabels[item]}</span>
                       {isActive ? (
-                        <span className="rounded-full bg-white/18 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em]">
+                        <span className="rounded-full bg-white/18 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white">
                           Actif
                         </span>
                       ) : null}

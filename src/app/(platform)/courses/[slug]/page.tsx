@@ -3,6 +3,8 @@ import { ArrowRight, BookOpenCheck, Clock3, Layers3, PlayCircle, Sparkles, Troph
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SuccessConfetti } from "@/components/feedback/success-confetti";
+import { FormFeedback } from "@/components/feedback/form-feedback";
 import { ProgressBar } from "@/components/course/progress-bar";
 import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelBadgeStyles, getCourseLevelLabel } from "@/lib/course-level";
@@ -10,10 +12,11 @@ import { db } from "@/lib/db";
 
 type CourseDetailPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ type?: string; message?: string }>;
 };
 
-export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
-  const [{ slug }, session] = await Promise.all([params, getCachedSession()]);
+export default async function CourseDetailPage({ params, searchParams }: CourseDetailPageProps) {
+  const [{ slug }, feedback, session] = await Promise.all([params, searchParams, getCachedSession()]);
 
   const course = await db.course.findFirst({
     where: {
@@ -93,6 +96,12 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
 
   return (
     <section className="space-y-8">
+      <SuccessConfetti
+        active={feedback.type === "success" && feedback.message?.toLowerCase().includes("cours terminé") === true}
+        variant="completion"
+      />
+      <FormFeedback type={feedback.type} message={feedback.message} />
+
       <div className="surface-section overflow-hidden p-6 sm:p-8">
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_340px] xl:items-start">
           <div className="space-y-5">

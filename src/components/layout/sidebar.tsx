@@ -22,11 +22,13 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userRole
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-[19rem] shrink-0 px-4 py-5 lg:block">
-      <div className="glass-panel ambient-ring flex h-full flex-col overflow-hidden px-5 py-6">
-        <AppLogo />
-        <div className="mt-6 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,80,214,0.08),rgba(101,86,112,0.06))] px-4 py-4">
-          <p className="font-display text-lg font-bold text-[#0c0910]">{title}</p>
+    <aside className="sticky top-0 hidden h-screen w-[19rem] shrink-0 px-4 py-5 lg:block">
+      <div className="glass-panel ambient-ring flex h-[calc(100vh-2.5rem)] flex-col overflow-hidden px-5 py-6">
+        <div className="shrink-0">
+          <AppLogo />
+          <div className="mt-6 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,80,214,0.08),rgba(101,86,112,0.06))] px-4 py-4">
+            <p className="font-display text-lg font-bold text-[#0c0910]">{title}</p>
+          </div>
         </div>
         <nav className="mt-6 flex-1 space-y-2 overflow-y-auto pr-1">
           {items.map((item) => {
@@ -61,7 +63,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userRole
             );
           })}
         </nav>
-        <div className="mt-6 border-t border-[#0c0910]/8 pt-5">
+        <div className="mt-6 shrink-0 border-t border-[#0c0910]/8 pt-5">
           <UserMenu
             name={userName}
             email={userEmail}

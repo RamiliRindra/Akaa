@@ -16,6 +16,8 @@ import {
 } from "@/actions/courses";
 import { CourseStatusBadge } from "@/components/course/course-status-badge";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { SuccessConfetti } from "@/components/feedback/success-confetti";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelDescriptions, courseLevelLabels } from "@/lib/course-level";
@@ -93,6 +95,15 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
 
   return (
     <section className="space-y-6">
+      <SuccessConfetti
+        active={
+          feedback.type === "success" &&
+          Boolean(
+            feedback.message?.toLowerCase().includes("cours créé") ||
+              feedback.message?.toLowerCase().includes("cours importé"),
+          )
+        }
+      />
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div className="space-y-2">
           <Link href="/trainer/courses" className="text-sm font-medium text-[#0F63FF] hover:underline">
@@ -109,13 +120,22 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
 
         <form action={deleteCourseAction}>
           <input type="hidden" name="courseId" value={course.id} />
-          <SubmitButton
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+          <ConfirmSubmitButton
+            triggerClassName="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            triggerChildren={
+              <>
+                <Trash2 className="h-4 w-4" />
+                Supprimer le cours
+              </>
+            }
+            title="Supprimer ce cours ?"
+            description="Cette action supprimera définitivement le cours et tous ses contenus associés."
+            requireText="delete"
+            requireTextPlaceholder="delete"
+            confirmLabel="Supprimer définitivement"
             pendingLabel="Suppression..."
-          >
-            <Trash2 className="h-4 w-4" />
-            Supprimer le cours
-          </SubmitButton>
+            confirmClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+          />
         </form>
       </div>
 
@@ -326,14 +346,16 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                         <form action={deleteModuleAction}>
                           <input type="hidden" name="courseId" value={course.id} />
                           <input type="hidden" name="moduleId" value={module.id} />
-                          <SubmitButton
-                            className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50"
-                            showSpinner={false}
-                            pendingChildren={<span className="text-xs font-semibold">...</span>}
-                            aria-label="Supprimer le module"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </SubmitButton>
+                          <ConfirmSubmitButton
+                            triggerClassName="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50"
+                            triggerChildren={<Trash2 className="h-4 w-4" />}
+                            title="Supprimer ce module ?"
+                            description="Le module et tous ses chapitres seront supprimés."
+                            confirmLabel="Supprimer le module"
+                            pendingLabel="Suppression..."
+                            ariaLabel="Supprimer le module"
+                            confirmClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                          />
                         </form>
                       </div>
                     </div>
@@ -411,14 +433,16 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                                   <input type="hidden" name="courseId" value={course.id} />
                                   <input type="hidden" name="moduleId" value={module.id} />
                                   <input type="hidden" name="chapterId" value={chapter.id} />
-                                  <SubmitButton
-                                    className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50"
-                                    showSpinner={false}
-                                    pendingChildren={<span className="text-xs font-semibold">...</span>}
-                                    aria-label="Supprimer le chapitre"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </SubmitButton>
+                                  <ConfirmSubmitButton
+                                    triggerClassName="inline-flex items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-red-600 hover:bg-red-50"
+                                    triggerChildren={<Trash2 className="h-4 w-4" />}
+                                    title="Supprimer ce chapitre ?"
+                                    description="Le chapitre sera supprimé définitivement."
+                                    confirmLabel="Supprimer le chapitre"
+                                    pendingLabel="Suppression..."
+                                    ariaLabel="Supprimer le chapitre"
+                                    confirmClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                                  />
                                 </form>
                               </div>
                             </div>

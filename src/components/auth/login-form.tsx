@@ -54,7 +54,7 @@ export function LoginForm() {
               type="email"
               autoComplete="email"
               required
-              className="form-input pl-12 pr-4 text-sm"
+              className="form-input text-sm [--field-padding-end:1rem] [--field-padding-start:3rem]"
               placeholder="vous@akaa.fr"
             />
           </div>
@@ -72,7 +72,7 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               required
-              className="form-input pl-12 pr-12 text-sm"
+              className="form-input text-sm [--field-padding-end:3rem] [--field-padding-start:3rem]"
               placeholder="Minimum 8 caractères"
             />
             <button

@@ -65,8 +65,6 @@ export async function ProtectedShell({
         <div className="relative">
           <Header
             title={headerTitle}
-            userName={session.user.name ?? "Utilisateur Akaa"}
-            userEmail={session.user.email}
             totalXp={userGamification?.totalXp ?? 0}
             level={userGamification?.level ?? 1}
             currentStreak={userGamification?.streak?.currentStreak ?? 0}

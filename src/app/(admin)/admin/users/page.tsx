@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { updateUserActiveStateAction, updateUserRoleAction } from "@/actions/admin";
 import { FormFeedback } from "@/components/feedback/form-feedback";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
@@ -225,7 +226,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
             })}
             className={`rounded-full px-3 py-1.5 text-sm font-medium ${
               currentView === "table"
-                ? "bg-[#0F63FF] text-white"
+                ? "bg-[#0F63FF] !text-white"
                 : "bg-white text-[#0c0910] ring-1 ring-[#0c0910]/10"
             }`}
           >
@@ -240,7 +241,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
             })}
             className={`rounded-full px-3 py-1.5 text-sm font-medium ${
               currentView === "cards"
-                ? "bg-[#0F63FF] text-white"
+                ? "bg-[#0F63FF] !text-white"
                 : "bg-white text-[#0c0910] ring-1 ring-[#0c0910]/10"
             }`}
           >
@@ -325,16 +326,26 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                     <td className="px-4 py-4">
                       <form action={updateUserActiveStateAction.bind(null, user.id)}>
                         <input type="hidden" name="isActive" value={String(!user.isActive)} />
-                        <SubmitButton
-                          className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg px-3 text-xs font-semibold text-white transition ${
-                            user.isActive
-                              ? "bg-[#c2410c] hover:bg-[#c2410c]/90"
-                              : "bg-[#119da4] hover:bg-[#119da4]/90"
-                          }`}
-                          pendingLabel={user.isActive ? "..." : "..."}
-                        >
-                          {user.isActive ? "Désactiver" : "Réactiver"}
-                        </SubmitButton>
+                        {user.isActive ? (
+                          <ConfirmSubmitButton
+                            triggerClassName="inline-flex h-10 items-center justify-center rounded-lg bg-[#c2410c] px-3 text-xs font-semibold text-white transition hover:bg-[#c2410c]/90"
+                            triggerLabel="Désactiver"
+                            title="Désactiver ce compte ?"
+                            description="Le compte sera bloqué à la connexion. Tapez delete pour confirmer."
+                            requireText="delete"
+                            requireTextPlaceholder="delete"
+                            confirmLabel="Désactiver le compte"
+                            pendingLabel="Désactivation..."
+                            confirmClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                          />
+                        ) : (
+                          <SubmitButton
+                            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#119da4] px-3 text-xs font-semibold text-white transition hover:bg-[#119da4]/90"
+                            pendingLabel="Réactivation..."
+                          >
+                            Réactiver
+                          </SubmitButton>
+                        )}
                       </form>
                     </td>
                   </tr>
@@ -420,16 +431,26 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                         ? "Bloquer les prochaines connexions de cet utilisateur."
                         : "Réautoriser l’accès à la plateforme."}
                     </p>
-                    <SubmitButton
-                      className={`inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-white transition ${
-                        user.isActive
-                          ? "bg-[#c2410c] hover:bg-[#c2410c]/90"
-                          : "bg-[#119da4] hover:bg-[#119da4]/90"
-                      }`}
-                      pendingLabel={user.isActive ? "Désactivation..." : "Réactivation..."}
-                    >
-                      {user.isActive ? "Désactiver le compte" : "Réactiver le compte"}
-                    </SubmitButton>
+                    {user.isActive ? (
+                      <ConfirmSubmitButton
+                        triggerClassName="inline-flex items-center justify-center rounded-lg bg-[#c2410c] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#c2410c]/90"
+                        triggerLabel="Désactiver le compte"
+                        title="Désactiver ce compte ?"
+                        description="Le compte sera bloqué à la connexion. Tapez delete pour confirmer."
+                        requireText="delete"
+                        requireTextPlaceholder="delete"
+                        confirmLabel="Désactiver le compte"
+                        pendingLabel="Désactivation..."
+                        confirmClassName="danger-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold"
+                      />
+                    ) : (
+                      <SubmitButton
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#119da4] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#119da4]/90"
+                        pendingLabel="Réactivation..."
+                      >
+                        Réactiver le compte
+                      </SubmitButton>
+                    )}
                   </form>
                 </div>
               </div>

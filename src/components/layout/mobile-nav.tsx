@@ -93,7 +93,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userRo
                 })}
               </nav>
 
-              <div className="mt-5 border-t border-[#0c0910]/8 pt-5">
+              <div className="mt-5 shrink-0 border-t border-[#0c0910]/8 pt-5">
                 <UserMenu
                   name={userName}
                   email={userEmail}

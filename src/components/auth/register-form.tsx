@@ -69,7 +69,7 @@ export function RegisterForm() {
             autoComplete="name"
             value={form.name}
             onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-            className="form-input pl-12 pr-4 text-sm"
+            className="form-input text-sm [--field-padding-end:1rem] [--field-padding-start:3rem]"
             placeholder="Votre nom"
           />
         </div>
@@ -87,7 +87,7 @@ export function RegisterForm() {
             autoComplete="email"
             value={form.email}
             onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-            className="form-input pl-12 pr-4 text-sm"
+            className="form-input text-sm [--field-padding-end:1rem] [--field-padding-start:3rem]"
             placeholder="vous@akaa.fr"
           />
         </div>
@@ -105,7 +105,7 @@ export function RegisterForm() {
             autoComplete="new-password"
             value={form.password}
             onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-            className="form-input pl-12 pr-12 text-sm"
+            className="form-input text-sm [--field-padding-end:3rem] [--field-padding-start:3rem]"
             placeholder="Minimum 8 caractères"
           />
           <button
@@ -133,7 +133,7 @@ export function RegisterForm() {
             onChange={(event) =>
               setForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
             }
-            className="form-input pl-12 pr-12 text-sm"
+            className="form-input text-sm [--field-padding-end:3rem] [--field-padding-start:3rem]"
             placeholder="Retapez votre mot de passe"
           />
           <button

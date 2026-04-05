@@ -804,7 +804,8 @@ export async function markChapterCompletedAction(formData: FormData) {
 
   revalidateQuizSurfaces(chapter.module.courseId, chapter.id, parsed.data.courseSlug);
   const nextPath = await getNextChapterPath(chapter.module.courseId, chapter.id, parsed.data.courseSlug);
-  const parts = ["Chapitre marqué comme terminé."];
+  const courseCompleted = nextPath === `/courses/${parsed.data.courseSlug}`;
+  const parts = [courseCompleted ? "Cours terminé avec succès." : "Chapitre marqué comme terminé."];
 
   if (summary.xpGained > 0) {
     parts.push(`+${summary.xpGained} XP`);
@@ -944,7 +945,8 @@ export async function submitQuizAttemptAction(formData: FormData) {
     const redirectPath = passed
       ? await getNextChapterPath(quiz.chapter.module.courseId, quiz.chapter.id, parsed.data.courseSlug)
       : `/courses/${parsed.data.courseSlug}/learn/${parsed.data.chapterId}`;
-    const successParts = [`Quiz réussi avec ${score}% de bonnes réponses.`];
+    const courseCompleted = redirectPath === `/courses/${parsed.data.courseSlug}`;
+    const successParts = [courseCompleted ? `Cours terminé avec succès après un quiz réussi à ${score}%.` : `Quiz réussi avec ${score}% de bonnes réponses.`];
 
     if (summary.xpGained > 0) {
       successParts.push(`+${summary.xpGained} XP`);
