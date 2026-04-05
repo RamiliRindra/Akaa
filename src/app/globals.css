@@ -394,7 +394,7 @@ select:disabled {
 }
 
 .course-markdown-h1 {
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(1.7rem, 3.3vw, 2.9rem);
 }
 
 .course-markdown-h2 {
@@ -419,6 +419,10 @@ select:disabled {
   font-size: clamp(1rem, 1.4vw, 1.125rem);
   line-height: 1.95;
   color: rgba(44, 47, 49, 0.88);
+}
+
+.course-markdown-p {
+  white-space: pre-line;
 }
 
 .course-markdown-ul,

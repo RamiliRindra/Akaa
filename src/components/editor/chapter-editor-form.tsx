@@ -79,8 +79,8 @@ export function ChapterEditorForm({
         <p className="text-sm font-medium text-[#0c0910]">Contenu du chapitre</p>
         <MarkdownEditor initialMarkdown={initialMarkdown} inputName="content" />
         <p className="text-xs text-[#0c0910]/55">
-          Syntaxe supportée v1 : titres, paragraphes, listes, citations, liens, séparateurs, code inline et blocs
-          de code.
+          Syntaxe supportée v1 : titres, paragraphes, listes, citations, liens, images par URL, séparateurs,
+          code inline et blocs de code.
         </p>
       </div>
 

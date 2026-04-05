@@ -10,6 +10,8 @@ import {
   ConditionalContents,
   CreateLink,
   headingsPlugin,
+  imagePlugin,
+  InsertImage,
   InsertCodeBlock,
   InsertThematicBreak,
   linkDialogPlugin,
@@ -61,6 +63,7 @@ export function MarkdownEditorClient({ initialMarkdown, inputName }: MarkdownEdi
           thematicBreakPlugin(),
           linkPlugin(),
           linkDialogPlugin(),
+          imagePlugin(),
           codeBlockPlugin({ defaultCodeBlockLanguage: "txt" }),
           codeMirrorPlugin({ codeBlockLanguages }),
           markdownShortcutPlugin(),
@@ -78,6 +81,7 @@ export function MarkdownEditorClient({ initialMarkdown, inputName }: MarkdownEdi
                 <ListsToggle />
                 <Separator />
                 <CreateLink />
+                <InsertImage />
                 <InsertThematicBreak />
                 <InsertCodeBlock />
                 <ConditionalContents
