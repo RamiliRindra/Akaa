@@ -273,7 +273,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
                 </div>
 
                 <SubmitButton
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
                   pendingLabel="Enregistrement..."
                 >
                   Enregistrer

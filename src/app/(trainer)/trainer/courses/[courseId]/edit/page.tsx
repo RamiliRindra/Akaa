@@ -249,7 +249,7 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs text-[#0c0910]/50">Slug public actuel : /courses/{course.slug}</p>
               <SubmitButton
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
                 pendingLabel="Enregistrement..."
               >
                 Enregistrer le cours
@@ -279,7 +279,7 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                 className="h-11 rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910] outline-none ring-[#0F63FF]/40 transition focus:ring-2"
               />
               <SubmitButton
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
                 pendingLabel="Ajout..."
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -370,7 +370,7 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                           <input type="hidden" name="courseId" value={course.id} />
                           <input type="hidden" name="moduleId" value={module.id} />
                           <SubmitButton
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-3 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
                             pendingLabel="Création..."
                           >
                             <Plus className="mr-2 h-4 w-4" />

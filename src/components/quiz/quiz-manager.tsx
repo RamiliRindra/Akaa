@@ -275,7 +275,7 @@ export function QuizManager({ courseId, chapterId, quiz }: QuizManagerProps) {
           <button
             type="button"
             onClick={enableQuizBuilder}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
           >
             <Plus className="h-4 w-4" />
             Ajouter un quiz
@@ -359,7 +359,7 @@ export function QuizManager({ courseId, chapterId, quiz }: QuizManagerProps) {
               <button
                 type="button"
                 onClick={addQuestion}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
               >
                 <Plus className="h-4 w-4" />
                 Ajouter une question
@@ -504,7 +504,7 @@ export function QuizManager({ courseId, chapterId, quiz }: QuizManagerProps) {
             <SubmitButton
               disabled={isPending}
               pendingLabel="Enregistrement..."
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0F63FF]/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Enregistrement..." : "Enregistrer le quiz"}
             </SubmitButton>
