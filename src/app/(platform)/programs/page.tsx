@@ -66,7 +66,11 @@ export default async function PlatformProgramsPage() {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-[#0c0910]">{program.title}</h3>
+                  <h3 className="text-xl font-semibold text-[#0c0910]">
+                    <Link href={`/programs/${program.id}`} className="hover:text-[#0F63FF]">
+                      {program.title}
+                    </Link>
+                  </h3>
                   <p className="mt-1 text-sm text-[#0c0910]/60">Formateur : {program.trainer.name}</p>
                 </div>
                 {program.description ? (
@@ -107,7 +111,11 @@ export default async function PlatformProgramsPage() {
                 {program.sessions.length ? (
                   program.sessions.map((trainingSession) => (
                     <div key={trainingSession.id} className="rounded-xl border border-[#0c0910]/8 bg-white p-3">
-                      <p className="font-medium text-[#0c0910]">{trainingSession.title}</p>
+                      <p className="font-medium text-[#0c0910]">
+                        <Link href={`/calendar/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                          {trainingSession.title}
+                        </Link>
+                      </p>
                       <p className="text-xs text-[#0c0910]/60">
                         {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                       </p>

@@ -691,7 +691,7 @@ akaa/
 
 > État réel du dépôt :
 > - les pages liste `calendar` et `programs` sont livrées ;
-> - les routes de détail dédiées (`sessions/[sessionId]`, `programs/[programId]`) restent un backlog et ne doivent pas être considérées comme déjà implémentées.
+> - les routes de détail sont exposées : `/calendar/sessions/[sessionId]`, `/programs/[programId]`, et équivalents `/trainer/...`, `/admin/...`.
 
 ---
 
@@ -743,7 +743,7 @@ akaa/
 
 > État actuel :
 > - phases 1 à 7 : livrées ;
-> - phase 8 : livrée au niveau MVP, avec un reliquat identifié sur la récurrence réelle, la page dédiée des notifications et les statistiques admin calendrier.
+> - phase 8 : livrée au niveau MVP ; récurrence matérialisée (occurrences multiples), stats admin calendrier, pages détail session/parcours et notifications pleine page.
 
 ### Phase 1 - Fondations (infrastructure et BDD)
 
@@ -852,7 +852,7 @@ akaa/
 - **CRUD sessions** : création avec date/heure/durée, événement toute la journée, lieu/lien, description
 - **Cible obligatoire** : chaque session cible soit un cours, soit un parcours
 - **Politique d'accès** : choix `OPEN` ou `SESSION_ONLY` pour réserver le contenu lié aux inscrits approuvés
-- **Récurrence** : stockage de `recurrence_rule` livré ; génération réelle des instances individuelles encore à implémenter
+- **Récurrence** : à la création, `recurrence_rule` (RFC 5545) est interprétée pour créer **une ligne par occurrence** (plafonné) ; `recurrence_series_id` regroupe la série ; la règle n’est pas conservée sur les lignes matérialisées
 - **Gestion des inscriptions** : vue des demandes PENDING, boutons approuver/refuser, notification automatique à l'apprenant
 - **Feuille de présence** : interface d'émargement (liste des participants APPROVED, pointage PRESENT/ABSENT/LATE/EXCUSED)
 - **Configuration XP** : champ `xp_reward` configurable par le formateur sur chaque session

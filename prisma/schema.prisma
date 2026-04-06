@@ -477,6 +477,7 @@ model TrainingSession {
   location       String?       @db.VarChar(255)
   meetingUrl     String?       @map("meeting_url") @db.Text
   recurrenceRule String?       @map("recurrence_rule") @db.Text
+  recurrenceSeriesId String?   @map("recurrence_series_id") @db.Uuid
   reminderMinutes Int          @default(1440) @map("reminder_minutes")
   xpReward       Int           @default(30) @map("xp_reward")
   trainerId      String        @map("trainer_id") @db.Uuid
@@ -496,6 +497,7 @@ model TrainingSession {
   @@index([programId], map: "idx_training_session_program_id")
   @@index([status], map: "idx_training_session_status")
   @@index([startsAt], map: "idx_training_session_starts_at")
+  @@index([recurrenceSeriesId], map: "idx_training_session_recurrence_series_id")
   @@map("training_session")
 }
 

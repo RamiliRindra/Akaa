@@ -299,6 +299,10 @@ Ajouter la dimension formation planifiée :
 - Socle **Vitest** : tests unitaires présents dans le dépôt (`npm test`).
 
 ### Étape fonctionnelle suivante
-- génération réelle des occurrences de récurrence à partir de `recurrenceRule`
-- statistiques admin calendrier
+- système d’avis / feedback (cours + plateforme) — prochain chantier produit
+
+### Compléments livrés (calendrier & parcours — 2026-04)
+- **Récurrence** : à la création, une `RRULE` (RFC 5545) génère **plusieurs lignes** `training_session` (plafond 52) ; `recurrence_series_id` regroupe la série ; texte d’aide sur les formulaires admin / formateur.
+- **Admin — calendrier** : cartes de stats (sessions par statut, inscriptions, présences, taux d’approbation, top formateurs par nombre de sessions).
+- **URLs détail** : `/calendar/sessions/[sessionId]`, `/trainer/sessions/[sessionId]`, `/admin/sessions/[sessionId]`, `/programs/[programId]`, `/trainer/programs/[programId]`, `/admin/programs/[programId]` avec liens depuis listes et calendriers.
 

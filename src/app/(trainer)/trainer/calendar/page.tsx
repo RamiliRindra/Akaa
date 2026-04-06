@@ -1,4 +1,5 @@
 import { AttendanceStatus, SessionAccessPolicy, SessionEnrollmentStatus, SessionStatus, UserRole } from "@prisma/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
@@ -206,6 +207,9 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
           <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
             Récurrence (RRULE optionnelle)
             <input name="recurrenceRule" className="form-input text-sm" placeholder="FREQ=WEEKLY;COUNT=6" />
+            <span className="block text-xs font-normal text-[#0c0910]/55">
+              Si renseigné, une session est créée par occurrence (plafonné à 52). Ex. FREQ=WEEKLY;BYDAY=MO;COUNT=10.
+            </span>
           </label>
           <div className="md:col-span-2">
             <SubmitButton className="primary-button px-5 py-3 text-sm font-semibold" pendingLabel="Création...">
@@ -255,7 +259,11 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                           </span>
                         ) : null}
                       </div>
-                      <h4 className="text-lg font-semibold text-[#0c0910]">{trainingSession.title}</h4>
+                      <h4 className="text-lg font-semibold text-[#0c0910]">
+                        <Link href={`/trainer/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                          {trainingSession.title}
+                        </Link>
+                      </h4>
                       <p className="text-sm text-[#0c0910]/70">
                         {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                       </p>
@@ -507,7 +515,11 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                         {trainingSession.trainer.name}
                       </span>
                     </div>
-                    <h4 className="font-semibold text-[#0c0910]">{trainingSession.title}</h4>
+                    <h4 className="font-semibold text-[#0c0910]">
+                      <Link href={`/trainer/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                        {trainingSession.title}
+                      </Link>
+                    </h4>
                     <p className="text-sm text-[#0c0910]/65">
                       {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                     </p>

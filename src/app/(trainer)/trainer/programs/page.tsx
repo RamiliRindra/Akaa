@@ -1,4 +1,5 @@
 import { ProgramStatus, UserRole } from "@prisma/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
@@ -122,7 +123,11 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
                       {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
                     </span>
                   </div>
-                  <h3 className="text-lg font-semibold text-[#0c0910]">{program.title}</h3>
+                  <h3 className="text-lg font-semibold text-[#0c0910]">
+                    <Link href={`/trainer/programs/${program.id}`} className="hover:text-[#0F63FF]">
+                      {program.title}
+                    </Link>
+                  </h3>
                   {program.description ? (
                     <p className="text-sm text-[#0c0910]/70">{program.description}</p>
                   ) : null}

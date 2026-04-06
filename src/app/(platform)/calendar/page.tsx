@@ -1,4 +1,5 @@
 import { SessionEnrollmentStatus, SessionStatus } from "@prisma/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
@@ -122,7 +123,11 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
                           </span>
                         ) : null}
                       </div>
-                      <h4 className="text-lg font-semibold text-[#0c0910]">{enrollment.session.title}</h4>
+                      <h4 className="text-lg font-semibold text-[#0c0910]">
+                        <Link href={`/calendar/sessions/${enrollment.session.id}`} className="hover:text-[#0F63FF]">
+                          {enrollment.session.title}
+                        </Link>
+                      </h4>
                       <p className="text-sm text-[#0c0910]/70">
                         {formatDateTime(enrollment.session.startsAt)} → {formatDateTime(enrollment.session.endsAt)}
                       </p>
@@ -184,7 +189,11 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
                         </span>
                       ) : null}
                     </div>
-                    <h4 className="text-lg font-semibold text-[#0c0910]">{trainingSession.title}</h4>
+                    <h4 className="text-lg font-semibold text-[#0c0910]">
+                      <Link href={`/calendar/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                        {trainingSession.title}
+                      </Link>
+                    </h4>
                     <p className="text-sm text-[#0c0910]/70">
                       {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                     </p>

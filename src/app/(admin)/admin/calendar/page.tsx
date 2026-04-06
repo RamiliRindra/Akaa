@@ -1,4 +1,5 @@
-import { SessionAccessPolicy, SessionStatus, UserRole } from "@prisma/client";
+import { AttendanceStatus, SessionAccessPolicy, SessionEnrollmentStatus, SessionStatus, UserRole } from "@prisma/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import {
@@ -35,7 +36,8 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
     redirect("/dashboard");
   }
 
-  const [responsibleUsers, courses, programs, sessions] = await Promise.all([
+  const [responsibleUsers, courses, programs, sessions, enrollmentByStatus, attendancePresent, attendanceTotal] =
+    await Promise.all([
     db.user.findMany({
       where: {
         isActive: true,
@@ -63,7 +65,52 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
         _count: { select: { enrollments: true } },
       },
     }),
+    db.sessionEnrollment.groupBy({
+      by: ["status"],
+      _count: true,
+    }),
+    db.sessionAttendance.count({
+      where: { status: AttendanceStatus.PRESENT },
+    }),
+    db.sessionAttendance.count(),
   ]);
+
+  const sessionStatusCounts = sessions.reduce(
+    (acc, s) => {
+      acc[s.status] += 1;
+      return acc;
+    },
+    { SCHEDULED: 0, COMPLETED: 0, CANCELLED: 0 } as Record<SessionStatus, number>,
+  );
+
+  const enrollmentTotals = enrollmentByStatus.reduce(
+    (acc, row) => {
+      acc[row.status] = row._count;
+      return acc;
+    },
+    {
+      PENDING: 0,
+      APPROVED: 0,
+      REJECTED: 0,
+      CANCELLED: 0,
+    } as Record<SessionEnrollmentStatus, number>,
+  );
+
+  const totalEnrollments = enrollmentByStatus.reduce((sum, row) => sum + row._count, 0);
+
+  const topTrainers = await db.user.findMany({
+    where: {
+      role: { in: [UserRole.TRAINER, UserRole.ADMIN] },
+      trainingSessions: { some: {} },
+    },
+    select: {
+      id: true,
+      name: true,
+      _count: { select: { trainingSessions: true } },
+    },
+    orderBy: { trainingSessions: { _count: "desc" } },
+    take: 6,
+  });
 
   return (
     <section className="space-y-8">
@@ -75,6 +122,59 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
       </div>
 
       <FormFeedback type={feedback.type} message={feedback.message} />
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="panel-card p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Sessions</p>
+          <p className="mt-2 font-display text-2xl font-bold text-[#0c0910]">{sessions.length}</p>
+          <p className="mt-1 text-xs text-[#0c0910]/60">
+            Planifiées {sessionStatusCounts.SCHEDULED} · Terminées {sessionStatusCounts.COMPLETED} · Annulées{" "}
+            {sessionStatusCounts.CANCELLED}
+          </p>
+        </div>
+        <div className="panel-card p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Inscriptions</p>
+          <p className="mt-2 font-display text-2xl font-bold text-[#0c0910]">{totalEnrollments}</p>
+          <p className="mt-1 text-xs text-[#0c0910]/60">
+            En attente {enrollmentTotals.PENDING} · Approuvées {enrollmentTotals.APPROVED} · Refusées{" "}
+            {enrollmentTotals.REJECTED}
+          </p>
+        </div>
+        <div className="panel-card p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Présences</p>
+          <p className="mt-2 font-display text-2xl font-bold text-[#119da4]">{attendancePresent}</p>
+          <p className="mt-1 text-xs text-[#0c0910]/60">
+            Pointages « présent » sur {attendanceTotal} enregistrement{attendanceTotal > 1 ? "s" : ""} total
+            {attendanceTotal > 0
+              ? ` (${Math.round((attendancePresent / attendanceTotal) * 100)} % présents)`
+              : ""}
+          </p>
+        </div>
+        <div className="panel-card p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Taux participation</p>
+          <p className="mt-2 font-display text-2xl font-bold text-[#0F63FF]">
+            {totalEnrollments > 0 ? `${Math.round((enrollmentTotals.APPROVED / totalEnrollments) * 100)} %` : "—"}
+          </p>
+          <p className="mt-1 text-xs text-[#0c0910]/60">Part des inscriptions approuvées sur le total des demandes</p>
+        </div>
+      </div>
+
+      {topTrainers.length ? (
+        <div className="panel-card p-5">
+          <h3 className="text-sm font-semibold text-[#0c0910]">Formateurs — sessions créées</h3>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {topTrainers.map((trainer) => (
+              <li
+                key={trainer.id}
+                className="flex items-center justify-between rounded-xl bg-[#f7f9ff] px-3 py-2 text-sm text-[#0c0910]"
+              >
+                <span className="font-medium">{trainer.name}</span>
+                <span className="font-mono text-[#655670]">{trainer._count.trainingSessions}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="panel-card p-6">
         <div className="mb-5 space-y-1">
@@ -177,8 +277,12 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
             <p className="text-xs font-normal text-[#0c0910]/55">Laissez vide si cette session cible un cours.</p>
           </label>
           <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
-            Récurrence
-            <input name="recurrenceRule" className="form-input text-sm" />
+            Récurrence (RRULE)
+            <input name="recurrenceRule" className="form-input text-sm" placeholder="FREQ=WEEKLY;COUNT=8" />
+            <span className="block text-xs font-normal text-[#0c0910]/55">
+              Si renseigné, une ligne de session est créée par occurrence (plafonné à 52). Ex. FREQ=DAILY;COUNT=5 ou
+              FREQ=WEEKLY;BYDAY=MO;COUNT=10 — format RFC 5545.
+            </span>
           </label>
           <div className="md:col-span-2">
             <SubmitButton className="primary-button px-5 py-3 text-sm font-semibold" pendingLabel="Création...">
@@ -207,7 +311,11 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                     {trainingSession._count.enrollments} inscription{trainingSession._count.enrollments > 1 ? "s" : ""}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-[#0c0910]">{trainingSession.title}</h3>
+                <h3 className="text-lg font-semibold text-[#0c0910]">
+                  <Link href={`/admin/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                    {trainingSession.title}
+                  </Link>
+                </h3>
                 <p className="text-sm text-[#0c0910]/70">
                   {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                 </p>

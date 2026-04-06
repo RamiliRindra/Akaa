@@ -8,12 +8,14 @@ import {
   SessionStatus,
   UserRole,
 } from "@prisma/client";
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { applySessionAttendanceGamification } from "@/lib/gamification";
+import { expandRecurrenceOccurrences } from "@/lib/recurrence";
 import { formatDateTime } from "@/lib/training";
 import { slugify } from "@/lib/utils";
 import {
@@ -123,6 +125,8 @@ function revalidateTrainingSurfaces() {
   revalidatePath("/admin/programs");
   revalidatePath("/admin/dashboard");
   revalidatePath("/admin/notifications");
+  revalidatePath("/calendar/sessions");
+  revalidatePath("/programs");
 }
 
 async function assertSessionOwnership(sessionId: string, actorId: string, role: UserRole) {
@@ -469,28 +473,56 @@ export async function createTrainingSessionAction(formData: FormData) {
     redirect(buildRedirectUrl(returnTo, "error", error instanceof Error ? error.message : "Session invalide."));
   }
 
-  await db.trainingSession.create({
-    data: {
-      title: parsed.data.title,
-      description: parsed.data.description,
-      status: parsed.data.status,
-      accessPolicy: parsed.data.accessPolicy,
-      startsAt: parsed.data.startsAt,
-      endsAt: parsed.data.endsAt,
-      isAllDay: parsed.data.isAllDay,
-      location: parsed.data.location,
-      meetingUrl: parsed.data.meetingUrl,
-      recurrenceRule: parsed.data.recurrenceRule,
-      reminderMinutes: parsed.data.reminderMinutes,
-      xpReward: parsed.data.xpReward,
-      courseId: parsed.data.courseId,
-      programId: parsed.data.programId,
-      trainerId,
-    },
-  });
+  let occurrences;
+  try {
+    occurrences = expandRecurrenceOccurrences(
+      parsed.data.startsAt,
+      parsed.data.endsAt,
+      parsed.data.recurrenceRule,
+    );
+  } catch (error) {
+    redirect(
+      buildRedirectUrl(
+        returnTo,
+        "error",
+        error instanceof Error ? error.message : "Règle de récurrence invalide.",
+      ),
+    );
+  }
+
+  const seriesId = occurrences.length > 1 ? randomUUID() : null;
+
+  await db.$transaction(
+    occurrences.map((occurrence) =>
+      db.trainingSession.create({
+        data: {
+          title: parsed.data.title,
+          description: parsed.data.description,
+          status: parsed.data.status,
+          accessPolicy: parsed.data.accessPolicy,
+          startsAt: occurrence.startsAt,
+          endsAt: occurrence.endsAt,
+          isAllDay: parsed.data.isAllDay,
+          location: parsed.data.location,
+          meetingUrl: parsed.data.meetingUrl,
+          recurrenceRule: null,
+          recurrenceSeriesId: seriesId,
+          reminderMinutes: parsed.data.reminderMinutes,
+          xpReward: parsed.data.xpReward,
+          courseId: parsed.data.courseId,
+          programId: parsed.data.programId,
+          trainerId,
+        },
+      }),
+    ),
+  );
 
   revalidateTrainingSurfaces();
-  redirect(buildRedirectUrl(returnTo, "success", "La session a été créée."));
+  const successMessage =
+    occurrences.length > 1
+      ? `${occurrences.length} sessions créées à partir de la récurrence.`
+      : "La session a été créée.";
+  redirect(buildRedirectUrl(returnTo, "success", successMessage));
 }
 
 export async function updateTrainingSessionAction(formData: FormData) {
