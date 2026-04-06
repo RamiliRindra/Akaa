@@ -102,14 +102,14 @@ GOOGLE_CLIENT_SECRET="xxx"
 
 ### 3.1 Vue d'ensemble
 
-Le schéma est organisé en **7 domaines** :
+Le schéma est organisé en **7 domaines** et compte aujourd'hui **23 modèles Prisma** :
 
 1. **Authentification** : User, Account, Session, VerificationToken (tables NextAuth)
 2. **Contenu pédagogique** : Category, Course, Module, Chapter
 3. **Évaluation** : Quiz, QuizQuestion, QuizOption, QuizAttempt
 4. **Progression** : Enrollment, ChapterProgress
-5. **Gamification** : XpTransaction, Badge, UserBadge, Streak
-6. **Planification** : TrainingProgram, TrainingSession, SessionEnrollment, SessionAttendance
+5. **Gamification** : XpTransaction, Badge, UserBadge, Streak, XpLevelSetting
+6. **Planification** : TrainingProgram, ProgramCourse, TrainingSession, SessionEnrollment, SessionAttendance
 7. **Notifications** : Notification
 
 ### 3.2 Schéma détaillé
@@ -620,129 +620,53 @@ CREATE INDEX idx_notification_session ON notification(related_session_id);
 ```
 akaa/
 ├── prisma/
-│   ├── schema.prisma              # Schéma complet Prisma (~23 modèles, 7 domaines)
-│   ├── seed.ts                    # Données de seed (admin, badges, catégories, cours démo)
+│   ├── schema.prisma              # Schéma complet Prisma (23 modèles, 7 domaines)
+│   ├── seed.ts                    # Seed Prisma idempotent (admin, catégories, badges, cours/parcours/session démo)
 │   └── migrations/                # Généré par prisma migrate
 │
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/                # Route group : authentification
-│   │   │   ├── login/page.tsx
-│   │   │   ├── register/page.tsx
-│   │   │   └── layout.tsx         # Layout minimal centré, sans sidebar
-│   │   │
-│   │   ├── (platform)/            # Route group : espace apprenant
-│   │   │   ├── dashboard/page.tsx          # Hub central : XP, streaks, cours en cours
-│   │   │   ├── courses/
-│   │   │   │   ├── page.tsx                # Catalogue filtrable par catégorie
-│   │   │   │   └── [slug]/
-│   │   │   │       ├── page.tsx            # Détail cours + inscription
-│   │   │   │       └── learn/
-│   │   │   │           └── [chapterId]/page.tsx  # Lecteur chapitre + quiz
-│   │   │   ├── calendar/
-│   │   │   │   ├── page.tsx                # Mon calendrier (sessions inscrites, vue agenda)
-│   │   │   │   └── sessions/
-│   │   │   │       └── [sessionId]/page.tsx  # Détail session + inscription
-│   │   │   ├── programs/
-│   │   │   │   ├── page.tsx                # Parcours de formation disponibles
-│   │   │   │   └── [programId]/page.tsx    # Détail parcours (liste des cours + sessions liées)
-│   │   │   ├── leaderboard/page.tsx
-│   │   │   ├── profile/page.tsx
-│   │   │   └── layout.tsx         # Sidebar + header gamifié (XP pill, avatar, streak, notif bell)
-│   │   │
-│   │   ├── (trainer)/             # Route group : espace formateur
-│   │   │   ├── trainer/
-│   │   │   │   ├── dashboard/page.tsx      # Stats de ses cours
-│   │   │   │   ├── courses/
-│   │   │   │   │   ├── page.tsx            # Liste de ses cours
-│   │   │   │   │   ├── new/page.tsx        # Création de cours
-│   │   │   │   │   └── [courseId]/
-│   │   │   │   │       └── edit/page.tsx   # Éditeur complet (modules, chapitres, quiz)
-│   │   │   │   ├── calendar/
-│   │   │   │   │   ├── page.tsx            # Vue calendrier formateur (ses sessions + autres formateurs en lecture)
-│   │   │   │   │   └── sessions/
-│   │   │   │   │       ├── new/page.tsx    # Création de session
-│   │   │   │   │       └── [sessionId]/
-│   │   │   │   │           ├── edit/page.tsx      # Édition session
-│   │   │   │   │           ├── enrollments/page.tsx  # Gérer demandes d'inscription (approuver/refuser)
-│   │   │   │   │           └── attendance/page.tsx   # Feuille de présence / émargement
-│   │   │   │   ├── programs/
-│   │   │   │   │   ├── page.tsx            # Liste de ses parcours
-│   │   │   │   │   ├── new/page.tsx        # Création de parcours
-│   │   │   │   │   └── [programId]/
-│   │   │   │   │       └── edit/page.tsx   # Édition parcours (ajout/réordonnancement cours)
-│   │   │   │   └── layout.tsx
-│   │   │
-│   │   ├── (admin)/               # Route group : espace admin
-│   │   │   ├── admin/
-│   │   │   │   ├── dashboard/page.tsx      # Stats globales plateforme
-│   │   │   │   ├── users/page.tsx          # Gestion utilisateurs + rôles, recherche, filtres, pagination
-│   │   │   │   ├── courses/page.tsx        # Gestion tous les cours + accès détail admin
-│   │   │   │   │   └── [courseId]/page.tsx # Consultation admin d’un cours sans sortir du périmètre admin
-│   │   │   │   ├── categories/page.tsx     # CRUD catégories + picker visuel icône/couleur
-│   │   │   │   ├── badges/page.tsx         # CRUD badges
-│   │   │   │   ├── xp/page.tsx             # Coefficients XP par niveau + ajustement manuel apprenant
-│   │   │   │   ├── calendar/
-│   │   │   │   │   ├── page.tsx            # Vue globale toutes les sessions (tous formateurs)
-│   │   │   │   │   └── sessions/
-│   │   │   │   │       └── [sessionId]/page.tsx  # Détail + édition session (accès total)
-│   │   │   │   ├── programs/page.tsx       # Vue globale tous les parcours
-│   │   │   │   └── layout.tsx
-│   │   │
-│   │   ├── api/
-│   │   │   └── auth/[...nextauth]/route.ts
+│   │   ├── (auth)/                # Login, register, layout centré
+│   │   ├── (platform)/            # Dashboard, courses, calendar, programs, leaderboard, profile
+│   │   ├── (trainer)/trainer/     # Dashboard, courses, calendar, programs
+│   │   ├── (admin)/admin/         # Dashboard, users, courses, categories, badges, xp, calendar, programs
+│   │   ├── api/auth/[...nextauth]/route.ts
 │   │   ├── layout.tsx             # Root layout (fonts, metadata, providers)
 │   │   ├── page.tsx               # Landing page publique
 │   │   └── globals.css            # Tailwind v4 + design tokens
-│   │
-│   ├── components/
-│   │   ├── ui/                    # Composants shadcn/ui (Button, Card, Dialog, etc.)
-│   │   ├── auth/                  # LoginForm, RegisterForm, GoogleButton
-│   │   ├── course/                # CourseCard, ChapterViewer, VideoEmbed, CategoryFilter
-│   │   ├── quiz/                  # QuizPlayer, QuestionCard, ResultScreen
-│   │   ├── dashboard/             # StatsCards, ProgressChart, Calendar
-│   │   ├── gamification/          # XPBar, BadgeCard, StreakCounter, LevelBadge, Leaderboard
-│   │   ├── calendar/              # CalendarView, SessionCard, SessionDetail, SessionForm
-│   │   ├── program/               # ProgramCard, ProgramDetail, ProgramForm
-│   │   ├── attendance/            # AttendanceSheet, AttendanceRow, AttendanceStatus
-│   │   ├── notifications/         # NotificationBell, NotificationList, NotificationItem
-│   │   ├── editor/                # MarkdownEditor (MDXEditor), CourseBuilder
-│   │   └── layout/                # Sidebar, Header, MobileNav
-│   │
-│   ├── lib/
-│   │   ├── auth.ts                # Configuration NextAuth v5
-│   │   ├── db.ts                  # Singleton PrismaClient
-│   │   ├── gamification.ts        # Logique XP, badges auto, streaks, niveaux
-│   │   ├── utils.ts               # cn(), formatDate(), slugify(), etc.
-│   │   └── validations/           # Schémas Zod par domaine
-│   │       ├── auth.ts
-│   │       ├── course.ts
-│   │       ├── category.ts
-│   │       ├── quiz.ts
-│   │       ├── session.ts          # createSessionSchema, updateSessionSchema
-│   │       └── program.ts          # createProgramSchema, updateProgramSchema
-│   │
-│   ├── hooks/                     # Hooks React personnalisés
-│   │   ├── use-current-user.ts
-│   │   ├── use-xp.ts
-│   │   ├── use-course-progress.ts
-│   │   ├── use-calendar.ts         # Sessions à venir, filtrage par date
-│   │   └── use-notifications.ts    # Notifications non lues, polling
-│   │
-│   ├── actions/                   # Server Actions Next.js
+│   ├── actions/
+│   │   ├── admin.ts
 │   │   ├── auth.ts
 │   │   ├── courses.ts
 │   │   ├── quiz.ts
+│   │   └── training.ts            # Sessions, parcours, inscriptions, présence, notifications
+│   ├── components/
+│   │   ├── auth/
+│   │   ├── course/
+│   │   ├── editor/
+│   │   ├── feedback/
+│   │   ├── gamification/
+│   │   ├── layout/
+│   │   ├── notifications/
+│   │   ├── quiz/
+│   │   └── ui/
+│   ├── lib/
+│   │   ├── auth.ts
+│   │   ├── auth-session.ts
+│   │   ├── content.ts
+│   │   ├── db.ts
 │   │   ├── gamification.ts
-│   │   ├── sessions.ts             # CRUD sessions, inscription, émargement
-│   │   ├── programs.ts             # CRUD parcours de formation
-│   │   ├── notifications.ts        # Fetch, mark read, delete notifications
-│   │   └── admin.ts
-│   │
-│   ├── middleware.ts              # Protection des routes par rôle
-│   │
+│   │   ├── progress.ts
+│   │   ├── session-access.ts
+│   │   ├── training.ts
+│   │   ├── utils.ts
+│   │   ├── validations/
+│   │   └── xp-settings.ts
+│   ├── proxy.ts                   # Protection des routes par rôle (Next.js 16)
+│   ├── img/
+│   │   └── logo_akaa.png
 │   └── types/
-│       └── index.ts               # Types TypeScript partagés
+│       └── index.ts
 │
 ├── public/
 │   ├── badges/                    # Icônes de badges (SVG)
@@ -765,8 +689,9 @@ akaa/
 └── package-lock.json
 ```
 
-> **Extension phase 3** : ajouter une page dédiée à l'import massif côté formateur,
-> typiquement `src/app/(trainer)/trainer/courses/import/page.tsx`, sans remplacer le CRUD manuel existant.
+> État réel du dépôt :
+> - les pages liste `calendar` et `programs` sont livrées ;
+> - les routes de détail dédiées (`sessions/[sessionId]`, `programs/[programId]`) restent un backlog et ne doivent pas être considérées comme déjà implémentées.
 
 ---
 
@@ -806,7 +731,7 @@ akaa/
 
 ### Implémentation technique
 
-- **middleware.ts** : vérifie le rôle via la session NextAuth et redirige si non autorisé
+- **proxy.ts** : vérifie le rôle via la session NextAuth et redirige si non autorisé
 - Routes `(platform)/*` : accessible à tous les rôles authentifiés (dont `/calendar`, `/programs`)
 - Routes `(trainer)/*` : TRAINER et ADMIN uniquement (dont `/trainer/calendar`, `/trainer/programs`)
 - Routes `(admin)/*` : ADMIN uniquement (dont `/admin/calendar`, `/admin/programs`)
@@ -816,14 +741,18 @@ akaa/
 
 ## 6. Plan d'implémentation
 
+> État actuel :
+> - phases 1 à 7 : livrées ;
+> - phase 8 : livrée au niveau MVP, avec un reliquat identifié sur la récurrence réelle, la page dédiée des notifications et les statistiques admin calendrier.
+
 ### Phase 1 - Fondations (infrastructure et BDD)
 
 - Créer le compte Neon et la base de données `akaa`
-- Configurer `prisma/schema.prisma` avec les 15 modèles
+- Configurer `prisma/schema.prisma` avec le schéma métier complet
 - Exécuter `prisma migrate dev` pour générer les tables
 - Configurer NextAuth v5 (Google + Credentials) dans `src/lib/auth.ts`
 - Créer le singleton PrismaClient dans `src/lib/db.ts`
-- Créer `src/middleware.ts` pour la protection des routes
+- Créer `src/proxy.ts` pour la protection des routes
 - Configurer `.env.local`
 
 ### Phase 2 - Authentification et Layouts
@@ -899,7 +828,7 @@ akaa/
 - Déploiement Railway
 - Préserver une séparation logique entre **site vitrine public** et **application authentifiée**, afin de permettre plus tard une bascule vers une topologie du type `www` / racine pour la landing et `app.` pour la plateforme
 
-### Phase 8 - Calendrier de formation (post-MVP)
+### Phase 8 - Calendrier de formation
 
 > Cette phase ajoute la dimension **formation planifiée** (présentiel/distanciel) à la plateforme,
 > avec un système de calendrier inspiré de Google Calendar et des parcours de formation
@@ -923,7 +852,7 @@ akaa/
 - **CRUD sessions** : création avec date/heure/durée, événement toute la journée, lieu/lien, description
 - **Cible obligatoire** : chaque session cible soit un cours, soit un parcours
 - **Politique d'accès** : choix `OPEN` ou `SESSION_ONLY` pour réserver le contenu lié aux inscrits approuvés
-- **Récurrence** : création de sessions récurrentes (RRULE RFC 5545), génération des instances individuelles
+- **Récurrence** : stockage de `recurrence_rule` livré ; génération réelle des instances individuelles encore à implémenter
 - **Gestion des inscriptions** : vue des demandes PENDING, boutons approuver/refuser, notification automatique à l'apprenant
 - **Feuille de présence** : interface d'émargement (liste des participants APPROVED, pointage PRESENT/ABSENT/LATE/EXCUSED)
 - **Configuration XP** : champ `xp_reward` configurable par le formateur sur chaque session
@@ -950,7 +879,7 @@ akaa/
 - **Types** : inscription approuvée/refusée, rappel de session, session annulée/modifiée, XP gagnés, badge débloqué
 - **Rappels** : notifications automatiques avant chaque session (configurable via `reminder_minutes` : 24h et 1h avant par défaut)
 - **Stratégie de rappels** : vérification côté serveur au chargement de page (acceptable pour ~300 utilisateurs) ou cron Railway
-- **Liste** : page/panel de notifications avec marquage lu/non lu, lien direct vers la session concernée
+- **Liste** : panel header livré avec marquage lu/non lu ; pages dédiées `/notifications`, `/trainer/notifications`, `/admin/notifications` (pagination, tout marquer comme lu)
 
 #### 8.5 bis — Emails transactionnels (post-MVP)
 
@@ -971,4 +900,4 @@ akaa/
 - **Vue globale** : l'admin voit toutes les sessions de tous les formateurs
 - **Édition** : l'admin peut créer/modifier/supprimer n'importe quelle session ou parcours
 - **XP** : l'admin peut modifier le `xp_reward` de n'importe quelle session
-- **Statistiques** : nombre de sessions, taux de participation, présences par formateur
+- **Statistiques** : nombre de sessions, taux de participation, présences par formateur (encore à implémenter)

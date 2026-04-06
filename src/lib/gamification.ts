@@ -138,6 +138,10 @@ export function getLevelFromXp(totalXp: number) {
   return Math.floor(totalXp / 100) + 1;
 }
 
+export function shouldRewardSessionAttendance(status: AttendanceStatus) {
+  return status === AttendanceStatus.PRESENT || status === AttendanceStatus.LATE;
+}
+
 export async function ensureDefaultBadges(db: GamificationDbClient) {
   const existingCount = await db.badge.count({
     where: {
@@ -613,7 +617,7 @@ export async function applySessionAttendanceGamification(
 
   let xpGained = 0;
 
-  if (input.attendanceStatus === AttendanceStatus.PRESENT || input.attendanceStatus === AttendanceStatus.LATE) {
+  if (shouldRewardSessionAttendance(input.attendanceStatus)) {
     const sessionXp = await awardXp(db, {
       userId: input.userId,
       amount: input.xpReward,

@@ -1,8 +1,6 @@
 import { Prisma, SessionAccessPolicy, SessionEnrollmentStatus, SessionStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 
-import { db } from "@/lib/db";
-
 const restrictedSessionWhere: Prisma.TrainingSessionWhereInput = {
   accessPolicy: SessionAccessPolicy.SESSION_ONLY,
   status: {
@@ -77,6 +75,7 @@ export function buildAccessibleProgramWhere(userId?: string): Prisma.TrainingPro
 }
 
 export async function assertCourseAccessOrRedirect(courseId: string, userId: string) {
+  const { db } = await import("@/lib/db");
   const count = await db.course.count({
     where: {
       id: courseId,

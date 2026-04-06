@@ -74,6 +74,13 @@ export async function ProtectedShell({
     redirect("/login");
   }
 
+  const shellNotificationLinks =
+    workspace === "platform"
+      ? { notificationsListHref: "/notifications", calendarHref: "/calendar" }
+      : workspace === "trainer"
+        ? { notificationsListHref: "/trainer/notifications", calendarHref: "/trainer/calendar" }
+        : { notificationsListHref: "/admin/notifications", calendarHref: "/admin/calendar" };
+
   return (
     <div className="app-shell-bg flex min-h-screen">
       <Sidebar
@@ -98,6 +105,8 @@ export async function ProtectedShell({
               createdAt: notification.createdAt.toISOString(),
             }))}
             unreadNotificationCount={unreadNotificationCount}
+            notificationsListHref={shellNotificationLinks.notificationsListHref}
+            calendarHref={shellNotificationLinks.calendarHref}
           />
           <div className="absolute left-4 top-4 z-30 lg:hidden">
             <MobileNav

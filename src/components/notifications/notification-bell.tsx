@@ -1,23 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Award,
-  Bell,
-  CalendarCheck2,
-  CalendarClock,
-  CalendarMinus2,
-  CheckCheck,
-  CircleDot,
-  Sparkles,
-  XCircle,
-} from "lucide-react";
+import { Bell, CheckCheck, CircleDot } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { NotificationType } from "@prisma/client";
 
 import { markNotificationReadInlineAction } from "@/actions/training";
+import { formatNotificationTimestamp, notificationTypeMeta } from "@/components/notifications/notification-shared";
 import { cn } from "@/lib/utils";
 
 type NotificationBellProps = {
@@ -31,65 +22,18 @@ type NotificationBellProps = {
     createdAt: string;
   }>;
   initialUnreadCount: number;
+  /** Liste complète des notifications (route par espace). */
+  notificationsListHref: string;
+  /** Calendrier de l’espace courant. */
+  calendarHref: string;
 };
 
-const notificationTypeMeta: Record<
-  NotificationType,
-  { icon: React.ComponentType<{ className?: string }>; accent: string; label: string }
-> = {
-  SESSION_REQUEST: {
-    icon: CalendarClock,
-    accent: "bg-[#0F63FF]/10 text-[#0050d6]",
-    label: "Demande",
-  },
-  SESSION_APPROVED: {
-    icon: CalendarCheck2,
-    accent: "bg-[#119da4]/12 text-[#0b7d83]",
-    label: "Approuvée",
-  },
-  SESSION_REJECTED: {
-    icon: XCircle,
-    accent: "bg-red-50 text-red-600",
-    label: "Refusée",
-  },
-  SESSION_CANCELLED: {
-    icon: CalendarMinus2,
-    accent: "bg-[#453750]/10 text-[#453750]",
-    label: "Annulée",
-  },
-  SESSION_REMINDER: {
-    icon: Bell,
-    accent: "bg-[#ffc857]/18 text-[#8a6200]",
-    label: "Rappel",
-  },
-  XP_GAINED: {
-    icon: Sparkles,
-    accent: "bg-[#655670]/10 text-[#655670]",
-    label: "XP",
-  },
-  BADGE_UNLOCKED: {
-    icon: Award,
-    accent: "bg-[#ffc857]/18 text-[#8a6200]",
-    label: "Badge",
-  },
-};
-
-function formatNotificationTimestamp(value: string) {
-  const date = new Date(value);
-  const now = new Date();
-  const isSameDay =
-    date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear();
-
-  return new Intl.DateTimeFormat("fr-FR", {
-    ...(isSameDay
-      ? { hour: "2-digit", minute: "2-digit" }
-      : { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }),
-  }).format(date);
-}
-
-export function NotificationBell({ initialNotifications, initialUnreadCount }: NotificationBellProps) {
+export function NotificationBell({
+  initialNotifications,
+  initialUnreadCount,
+  notificationsListHref,
+  calendarHref,
+}: NotificationBellProps) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState(initialNotifications);
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
@@ -258,17 +202,24 @@ export function NotificationBell({ initialNotifications, initialUnreadCount }: N
               )}
             </div>
 
-            {pathname !== "/calendar" ? (
-              <div className="border-t border-[#e5ebf3] px-4 py-3">
+            <div className="space-y-2 border-t border-[#e5ebf3] px-4 py-3">
+              <Link
+                href={notificationsListHref}
+                onClick={() => setOpen(false)}
+                className="block text-sm font-semibold text-[#0050d6] hover:text-[#0F63FF]"
+              >
+                Voir toutes les notifications
+              </Link>
+              {pathname !== calendarHref ? (
                 <Link
-                  href="/calendar"
+                  href={calendarHref}
                   onClick={() => setOpen(false)}
-                  className="text-sm font-semibold text-[#0050d6] hover:text-[#0F63FF]"
+                  className="block text-sm font-semibold text-[#0c0910]/72 hover:text-[#0c0910]"
                 >
                   Aller au calendrier
                 </Link>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </motion.div>
         ) : null}
       </AnimatePresence>

@@ -311,6 +311,42 @@ Ces commandes nécessitent aussi une connexion TCP → les éviter depuis le ré
 
 ---
 
+## Incident F bis — `prisma db seed` local : échec Neon par résolution DNS / accès réseau
+
+**Contexte :** après ajout d’un vrai `prisma/seed.ts` et configuration Prisma 7 du seed via `prisma.config.ts`, l’exécution locale de `npx prisma db seed` a été retestée depuis l’environnement de travail habituel.
+
+**Symptôme observé :**
+- échec du seed sur la connexion Neon serverless
+- erreur remontée :
+  - `getaddrinfo ENOTFOUND ep-crimson-violet-ag7bzsbj.c-2.eu-central-1.aws.neon.tech`
+- différence notable avec l’incident F initial :
+  - l’incident F documentait surtout un `ETIMEDOUT` sur la WebSocket `wss://…/v2`
+  - ici, le symptôme est un échec de résolution / joignabilité avant même la connexion utile
+
+**Diagnostic :**
+- le script de seed est correctement branché côté projet :
+  - commande déclarée dans `prisma.config.ts`
+  - client Prisma seed aligné avec l’adaptation Neon du projet
+- le blocage observé n’est pas un bug métier du seed lui-même
+- il s’inscrit dans la même famille de problèmes réseau locaux déjà rencontrés avec Neon depuis l’environnement/TGN
+
+**Conséquence pratique :**
+- le seed est valide côté code, mais sa vérification réelle contre Neon ne peut pas être considérée comme fiable depuis cet environnement local tant que la connectivité sortante reste instable
+
+**Contournements retenus :**
+- lancer le seed depuis un environnement hors TGN / hors sandbox réseau local
+- à défaut, conserver la validation locale au niveau :
+  - TypeScript
+  - lint
+  - tests unitaires
+  - build
+
+### Statut
+- ✅ Incident documenté
+- ⚠️ Validation du seed contre Neon à refaire depuis un environnement réseau non bloqué
+
+---
+
 ## Incident G — Railway : login OK puis `/dashboard` en erreur (« Couldn’t load » / HTTP 500)
 
 **Période :** avril 2026  
@@ -1075,12 +1111,12 @@ Résultat :
   - `/admin/calendar`
   - `/admin/programs`
 
-### Point métier encore ouvert
-Le modèle `SESSION_ONLY` est maintenant posé en base, validé en UI et manipulable par les formulaires.
+### Point métier ouvert à ce stade
+À ce moment de la phase 8, le modèle `SESSION_ONLY` était posé en base, exposé dans les formulaires et validé côté UI.
 
-Il reste à brancher ensuite le contrôle d’accès transverse sur les pages de contenu :
+Le point encore ouvert à ce stade du journal était le branchement du contrôle d’accès transverse sur les pages de contenu :
 - empêcher l’accès à certains cours / parcours si la session liée exige une inscription `APPROVED`
-- sans rouvrir les logiques des phases précédentes inutilement
+- sans rouvrir inutilement les logiques des phases précédentes
 
 ### Validation de stabilisation
 Après le recadrage, deux écarts code/base sont apparus en production :
@@ -1151,3 +1187,16 @@ Résultat :
 - pas de double attribution d’XP pour une même session
 - badges cohérents avec les présences réellement comptabilisées
 - la cloche devient utile jusqu’au bout du flux session
+
+### État actuel
+Livré :
+- calendriers et parcours MVP côté apprenant, formateur et admin
+- inscriptions, validation, présence et gamification de session
+- contrôle d’accès `SESSION_ONLY` sur catalogues, cours et chapitres
+- cloche de notifications avec marquage lu inline
+- rappels de session MVP sans scheduler externe
+
+Encore ouvert :
+- génération réelle des occurrences de récurrence à partir de `recurrenceRule`
+- page dédiée des notifications
+- statistiques admin calendrier

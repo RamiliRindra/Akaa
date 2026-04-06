@@ -22,6 +22,8 @@ type HeaderProps = {
     createdAt: string;
   }>;
   unreadNotificationCount: number;
+  notificationsListHref: string;
+  calendarHref: string;
 };
 
 export function Header({
@@ -32,6 +34,8 @@ export function Header({
   showGamification,
   notifications,
   unreadNotificationCount,
+  notificationsListHref,
+  calendarHref,
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6 sm:pt-5">
@@ -45,6 +49,8 @@ export function Header({
           <NotificationBell
             initialNotifications={notifications}
             initialUnreadCount={unreadNotificationCount}
+            notificationsListHref={notificationsListHref}
+            calendarHref={calendarHref}
           />
 
           {showGamification ? (

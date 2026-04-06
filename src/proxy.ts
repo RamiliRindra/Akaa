@@ -5,7 +5,15 @@ import type { NextRequest } from "next/server";
 type UserRole = "LEARNER" | "TRAINER" | "ADMIN";
 
 const AUTH_PAGES = ["/login", "/register"];
-const PLATFORM_PREFIXES = ["/dashboard", "/courses", "/calendar", "/programs", "/leaderboard", "/profile"];
+const PLATFORM_PREFIXES = [
+  "/dashboard",
+  "/courses",
+  "/calendar",
+  "/programs",
+  "/leaderboard",
+  "/profile",
+  "/notifications",
+];
 
 function matchesPrefix(pathname: string, prefix: string) {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -94,6 +102,8 @@ export const config = {
     "/programs/:path*",
     "/leaderboard/:path*",
     "/profile/:path*",
+    "/notifications",
+    "/notifications/:path*",
     "/trainer",
     "/trainer/:path*",
     "/admin",

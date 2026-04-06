@@ -50,6 +50,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "node --import tsx prisma/seed.ts",
   },
   datasource: {
     // Prisma CLI (migrations/introspection) doit cibler l'URL directe Neon.

@@ -113,13 +113,16 @@ async function createNotification({
 function revalidateTrainingSurfaces() {
   revalidatePath("/calendar");
   revalidatePath("/programs");
+  revalidatePath("/notifications");
   revalidatePath("/trainer/calendar");
   revalidatePath("/trainer/programs");
   revalidatePath("/trainer/dashboard");
   revalidatePath("/trainer/courses");
+  revalidatePath("/trainer/notifications");
   revalidatePath("/admin/calendar");
   revalidatePath("/admin/programs");
   revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/notifications");
 }
 
 async function assertSessionOwnership(sessionId: string, actorId: string, role: UserRole) {
@@ -895,6 +898,25 @@ export async function markNotificationReadInlineAction(notificationId: string) {
     where: {
       id: notificationId,
       userId: user.id,
+    },
+    data: {
+      isRead: true,
+    },
+  });
+
+  revalidateTrainingSurfaces();
+  revalidatePath("/dashboard");
+  revalidatePath("/courses");
+  revalidatePath("/profile");
+}
+
+export async function markAllNotificationsReadAction() {
+  const user = await requireAuthenticatedUser();
+
+  await db.notification.updateMany({
+    where: {
+      userId: user.id,
+      isRead: false,
     },
     data: {
       isRead: true,

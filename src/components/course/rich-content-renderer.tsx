@@ -1,8 +1,10 @@
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 
 import { getMarkdownFromStoredContent } from "@/lib/content";
+import { normalizeMarkdownForDisplay } from "@/lib/course-markdown";
 
 type RichContentRendererProps = {
   content: unknown;
@@ -56,9 +58,18 @@ export function RichContentRenderer({ content }: RichContentRendererProps) {
             ),
             pre: ({ children }) => <pre className="course-markdown-pre">{children}</pre>,
             img: ({ src, alt }) =>
-              src ? (
+              typeof src === "string" && src.length ? (
                 <figure className="course-markdown-figure">
-                  <img src={src} alt={alt ?? ""} className="course-markdown-image" loading="lazy" />
+                  <Image
+                    loader={({ src: imageSrc }) => imageSrc}
+                    unoptimized
+                    src={src}
+                    alt={alt ?? ""}
+                    width={1600}
+                    height={900}
+                    sizes="(max-width: 1024px) 100vw, 768px"
+                    className="course-markdown-image"
+                  />
                   {alt ? <figcaption className="course-markdown-caption">{alt}</figcaption> : null}
                 </figure>
               ) : null,
@@ -68,12 +79,5 @@ export function RichContentRenderer({ content }: RichContentRendererProps) {
         </ReactMarkdown>
       </div>
     </div>
-  );
-}
-
-function normalizeMarkdownForDisplay(markdown: string) {
-  return markdown.replace(
-    /(^|\n)(https?:\/\/[^\s]+?\.(?:png|jpe?g|gif|webp|svg)(?:\?[^\s]*)?)(?=\n|$)/gi,
-    "$1![]($2)",
   );
 }
