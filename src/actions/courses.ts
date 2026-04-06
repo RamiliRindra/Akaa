@@ -31,6 +31,12 @@ type TrainerSession = {
 type CourseImportRow = z.infer<typeof courseImportManifestSchema>[number];
 type CourseImportQuizFile = z.infer<typeof courseImportQuizFileSchema>;
 
+/** Import : nombreuses créations en chaîne ; le défaut Prisma (5 s) provoque P2028 sur gros cours / Neon lent. */
+const COURSE_IMPORT_TRANSACTION = {
+  maxWait: 10_000,
+  timeout: 120_000,
+} as const;
+
 function buildRedirectUrl(path: string, type: "success" | "error", message: string) {
   const url = new URL(path, "https://akaa.local");
   url.searchParams.set("type", type);
@@ -788,7 +794,7 @@ export async function importCourseArchiveAction(formData: FormData) {
     }
 
     return createdCourse;
-  });
+  }, COURSE_IMPORT_TRANSACTION);
 
   revalidateCourseSurfaces(slug);
 
