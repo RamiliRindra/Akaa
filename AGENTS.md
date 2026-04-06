@@ -125,6 +125,13 @@ npx prisma studio
 
 # Prisma — reset complet (drop + migrate + seed)
 npx prisma migrate reset
+
+# Tests unitaires (Vitest)
+npm test
+
+# Tests E2E (Playwright) — voir e2e/README.md ; CI dans .github/workflows/ci.yml
+npm run test:e2e:install
+npm run test:e2e
 ```
 
 ## Contraintes strictes

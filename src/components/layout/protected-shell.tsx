@@ -35,7 +35,8 @@ export async function ProtectedShell({
 
   const showGamification = session.user.role === "LEARNER";
   const showLearnerBottomNav = workspace === "platform" && session.user.role === "LEARNER";
-  const showGlobalSearch = workspace === "platform";
+  /** Recherche dans le header apprenant : désactivée tant qu’il n’y a pas de requête métier (catalogue / cours accessibles). Réactiver quand implémenté — voir PHASE.md. */
+  const showGlobalSearch = false;
   const [userGamification, notifications, unreadNotificationCount] = await Promise.all([
     showGamification
       ? db.user.findUnique({

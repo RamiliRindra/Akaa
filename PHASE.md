@@ -298,9 +298,10 @@ Ajouter la dimension formation planifiée :
 - Prototype Stitch / HTML exporté non intégré tel quel (CDN Tailwind, Material Symbols, etc.).
 
 ### À traiter ensuite (roadmap produit / technique)
+- **Recherche apprenant (header)** : le champ est **masqué** (`showGlobalSearch = false` dans `src/components/layout/protected-shell.tsx`) en attendant une implémentation utile. Prochaine étape : recherche sur le **catalogue** (titres / descriptions des cours publiés accessibles), via `searchParams` sur `/courses` ou équivalent Prisma (`contains` / full-text selon volume), puis réactiver l’affichage dans le shell.
 - **Déploiement** : appliquer toutes les migrations attendues sur chaque environnement (dont `feedback` si pas encore fait).
 - **UI** : passe par zone (shell → catalogue → contenu) en respectant `DESIGN.md` et les tokens `globals.css`.
-- **Qualité** : tests E2E ciblés quand le périmètre MVP est stable.
+- **Qualité** : **Playwright** (`e2e/`, `npm run test:e2e`) + **GitHub Actions** (`.github/workflows/ci.yml`) : job `quality` = lint + Vitest sans secret ; job `e2e` si `DATABASE_URL` est défini en secret (voir `e2e/README.md`).
 - Renderer Markdown : surveiller tout warning lint sur `rich-content-renderer.tsx`.
 
 ### Déjà livré (rappel — avril 2026)
