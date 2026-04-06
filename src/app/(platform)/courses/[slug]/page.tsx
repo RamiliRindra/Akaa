@@ -1,8 +1,10 @@
-import { ChapterProgressStatus, CourseStatus } from "@prisma/client";
+import type { ReactNode } from "react";
+import { ChapterProgressStatus, CourseStatus, FeedbackKind, UserRole } from "@prisma/client";
 import { ArrowRight, BookOpenCheck, Clock3, Layers3, PlayCircle, Sparkles, Trophy } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CourseLearnerFeedbackForm } from "@/components/feedback/course-learner-feedback-form";
 import { SuccessConfetti } from "@/components/feedback/success-confetti";
 import { FormFeedback } from "@/components/feedback/form-feedback";
 import { ProgressBar } from "@/components/course/progress-bar";
@@ -98,6 +100,38 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
     flatChapters.find((chapter) => chapter.chapterProgresses?.[0]?.status !== ChapterProgressStatus.COMPLETED) ??
     firstChapter;
   const moduleCount = course.modules.length;
+
+  let learnerFeedbackSection: ReactNode = null;
+  if (session?.user?.role === UserRole.LEARNER && session.user.id) {
+    const [existing, avgRow, reviewCount] = await Promise.all([
+      db.feedback.findFirst({
+        where: {
+          userId: session.user.id,
+          kind: FeedbackKind.LEARNER_COURSE,
+          courseId: course.id,
+        },
+        select: { rating: true, comment: true },
+      }),
+      db.feedback.aggregate({
+        where: { kind: FeedbackKind.LEARNER_COURSE, courseId: course.id },
+        _avg: { rating: true },
+      }),
+      db.feedback.count({
+        where: { kind: FeedbackKind.LEARNER_COURSE, courseId: course.id },
+      }),
+    ]);
+
+    learnerFeedbackSection = (
+      <CourseLearnerFeedbackForm
+        courseId={course.id}
+        courseSlug={course.slug}
+        initialRating={existing?.rating ?? null}
+        initialComment={existing?.comment ?? null}
+        aggregateRating={avgRow._avg.rating}
+        reviewCount={reviewCount}
+      />
+    );
+  }
 
   return (
     <section className="space-y-8">
@@ -257,6 +291,8 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
           </article>
         ))}
       </div>
+
+      {learnerFeedbackSection}
     </section>
   );
 }

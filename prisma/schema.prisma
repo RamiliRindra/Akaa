@@ -100,6 +100,13 @@ enum NotificationType {
   BADGE_UNLOCKED
 }
 
+enum FeedbackKind {
+  LEARNER_COURSE
+  LEARNER_PLATFORM
+  TRAINER_AUTHORING
+  TRAINER_PLATFORM
+}
+
 // Authentification (NextAuth + modèle métier User)
 model User {
   id            String    @id @default(uuid()) @db.Uuid
@@ -132,6 +139,7 @@ model User {
   attendanceMarked  SessionAttendance[] @relation("AttendanceMarkedBy")
   notifications     Notification[]
   streak            Streak?
+  feedbacks         Feedback[]
 
   @@index([totalXp(sort: Desc)], map: "idx_user_total_xp_desc")
   @@map("user")
@@ -218,6 +226,7 @@ model Course {
   enrollments Enrollment[]
   sessions    TrainingSession[]
   programCourses ProgramCourse[]
+  feedbacks      Feedback[]
 
   @@index([trainerId], map: "idx_course_trainer_id")
   @@index([categoryId], map: "idx_course_category_id")
@@ -555,4 +564,25 @@ model Notification {
   @@index([isRead], map: "idx_notification_is_read")
   @@index([createdAt(sort: Desc)], map: "idx_notification_created_at_desc")
   @@map("notification")
+}
+
+model Feedback {
+  id        String       @id @default(uuid()) @db.Uuid
+  userId    String       @map("user_id") @db.Uuid
+  kind      FeedbackKind
+  courseId  String?      @map("course_id") @db.Uuid
+  targetKey String       @map("target_key") @db.VarChar(96)
+  rating    Int
+  comment   String?      @db.Text
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, targetKey], map: "uq_feedback_user_target")
+  @@index([userId], map: "idx_feedback_user_id")
+  @@index([kind], map: "idx_feedback_kind")
+  @@index([courseId], map: "idx_feedback_course_id")
+  @@map("feedback")
 }

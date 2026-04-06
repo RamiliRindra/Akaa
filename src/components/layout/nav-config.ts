@@ -8,6 +8,7 @@ export type NavIconName =
   | "graduation-cap"
   | "list-checks"
   | "shield"
+  | "star"
   | "trophy"
   | "user-round"
   | "users-round";
@@ -24,6 +25,7 @@ export const platformNav: NavItem[] = [
   { href: "/calendar", label: "Calendrier", icon: "calendar-days" },
   { href: "/programs", label: "Parcours", icon: "list-checks" },
   { href: "/leaderboard", label: "Leaderboard", icon: "trophy" },
+  { href: "/feedback", label: "Avis", icon: "star" },
   { href: "/profile", label: "Profil", icon: "user-round" },
 ];
 
@@ -31,6 +33,7 @@ export const platformViewerNav: NavItem[] = [
   { href: "/courses", label: "Cours", icon: "book-open" },
   { href: "/calendar", label: "Calendrier", icon: "calendar-days" },
   { href: "/programs", label: "Parcours", icon: "list-checks" },
+  { href: "/feedback", label: "Avis", icon: "star" },
 ];
 
 export const trainerNav: NavItem[] = [
@@ -38,6 +41,7 @@ export const trainerNav: NavItem[] = [
   { href: "/trainer/courses", label: "Mes cours", icon: "graduation-cap" },
   { href: "/trainer/calendar", label: "Sessions", icon: "calendar-days" },
   { href: "/trainer/programs", label: "Parcours", icon: "list-checks" },
+  { href: "/feedback", label: "Avis", icon: "star" },
 ];
 
 export const adminNav: NavItem[] = [
@@ -46,6 +50,7 @@ export const adminNav: NavItem[] = [
   { href: "/admin/courses", label: "Cours", icon: "compass" },
   { href: "/admin/calendar", label: "Sessions", icon: "calendar-days" },
   { href: "/admin/programs", label: "Parcours", icon: "list-checks" },
+  { href: "/admin/feedback", label: "Synthèse avis", icon: "star" },
   { href: "/admin/categories", label: "Catégories", icon: "list-checks" },
   { href: "/admin/badges", label: "Badges", icon: "award" },
   { href: "/admin/xp", label: "Ajustement XP", icon: "trophy" },

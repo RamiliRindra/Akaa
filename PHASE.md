@@ -298,11 +298,38 @@ Ajouter la dimension formation planifiée :
 - Pages dédiées **notifications** : `/notifications` (apprenant / vue catalogue), `/trainer/notifications`, `/admin/notifications` — pagination, « tout marquer comme lu », liens depuis la cloche.
 - Socle **Vitest** : tests unitaires présents dans le dépôt (`npm test`).
 
-### Étape fonctionnelle suivante
-- système d’avis / feedback (cours + plateforme) — prochain chantier produit
-
 ### Compléments livrés (calendrier & parcours — 2026-04)
 - **Récurrence** : à la création, une `RRULE` (RFC 5545) génère **plusieurs lignes** `training_session` (plafond 52) ; `recurrence_series_id` regroupe la série ; texte d’aide sur les formulaires admin / formateur.
 - **Admin — calendrier** : cartes de stats (sessions par statut, inscriptions, présences, taux d’approbation, top formateurs par nombre de sessions).
 - **URLs détail** : `/calendar/sessions/[sessionId]`, `/trainer/sessions/[sessionId]`, `/admin/sessions/[sessionId]`, `/programs/[programId]`, `/trainer/programs/[programId]`, `/admin/programs/[programId]` avec liens depuis listes et calendriers.
+
+---
+
+## Lot feedback / avis (apprenant + formateur)
+Date: 2026-04-06
+
+### Objectif
+Recueillir des avis structurés (note 1–5 + commentaire optionnel) sur les cours, la plateforme apprenant et l’outil formateur, avec un composant d’étoiles réutilisable (pattern type ReUI Rating).
+
+### Livraisons
+- **Prisma** : enum `FeedbackKind`, modèle `Feedback` avec `targetKey` et contrainte `@@unique([userId, targetKey])`, relations `User` / `Course`, migration associée.
+- **Lib** : `src/lib/feedback-keys.ts`, validations Zod `src/lib/validations/feedback.ts`.
+- **Server Actions** : `src/actions/feedback.ts` (apprenant cours & plateforme, formateur plateforme & création par cours) ; redirections query `type` / `message` sans URL de base fictive.
+- **UI** : `Rating` (`src/components/feedback/star-rating.tsx`) — lecture, décimaux pour moyenne, tailles `sm` | `default` | `lg`, `editable`, `showValue`, `onRatingChange`.
+- **Pages** : `/feedback` (formulaires selon rôle) ; fiche cours apprenant : bloc « Noter ce cours » avec moyenne et comptage des avis.
+- **Navigation** : entrée « Avis » dans les sidebars concernées ; `src/proxy.ts` — préfixe `/feedback` protégé.
+
+### Validation exécutée
+- `npx prisma generate`
+- `npm run lint`
+- `npx tsc --noEmit`
+- `npm run build`
+- `npm test`
+
+### Statut global
+- Lot feedback livré au niveau MVP.
+- **Synthèse admin** : page `/admin/feedback` (cartes par type, tableaux par cours, derniers enregistrements avec commentaires).
+
+### Étape fonctionnelle suivante
+- À définir selon priorité produit (ex. export CSV, filtres par période).
 

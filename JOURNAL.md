@@ -1200,3 +1200,15 @@ Encore ouvert :
 - génération réelle des occurrences de récurrence à partir de `recurrenceRule`
 - page dédiée des notifications
 - statistiques admin calendrier
+
+---
+
+## Feedback / avis — 2026-04-06
+
+### Implémentation
+- Modèle `Feedback` + actions serveur pour avis cours (apprenant), plateforme apprenant, plateforme formateur et avis « création » par cours.
+- Composant client `Rating` (étoiles, partielles en lecture pour les moyennes).
+- Page `/feedback` et bloc sur la fiche cours apprenant ; navigation et matcher `proxy` étendus à `/feedback`.
+
+### Correction technique (pas un bug utilisateur)
+- Les redirections des actions feedback utilisaient `new URL(path, "https://akaa.local")` pour construire la query string. Remplacé par un assemblage explicite `path + ?type=…&message=…` (ou `&` si l’URL contenait déjà une query), pour éviter toute dépendance à un hôte fictif.

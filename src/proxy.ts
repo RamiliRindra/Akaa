@@ -13,6 +13,7 @@ const PLATFORM_PREFIXES = [
   "/leaderboard",
   "/profile",
   "/notifications",
+  "/feedback",
 ];
 
 function matchesPrefix(pathname: string, prefix: string) {
@@ -104,6 +105,8 @@ export const config = {
     "/profile/:path*",
     "/notifications",
     "/notifications/:path*",
+    "/feedback",
+    "/feedback/:path*",
     "/trainer",
     "/trainer/:path*",
     "/admin",
