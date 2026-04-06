@@ -61,7 +61,6 @@ export function RichContentRenderer({ content }: RichContentRendererProps) {
               typeof src === "string" && src.length ? (
                 <figure className="course-markdown-figure">
                   <Image
-                    loader={({ src: imageSrc }) => imageSrc}
                     unoptimized
                     src={src}
                     alt={alt ?? ""}

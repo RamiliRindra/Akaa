@@ -1212,3 +1212,8 @@ Encore ouvert :
 
 ### Correction technique (pas un bug utilisateur)
 - Les redirections des actions feedback utilisaient `new URL(path, "https://akaa.local")` pour construire la query string. Remplacé par un assemblage explicite `path + ?type=…&message=…` (ou `&` si l’URL contenait déjà une query), pour éviter toute dépendance à un hôte fictif.
+
+### Production — `next/image` + RSC (2026-04-06)
+- Erreur Railway : *Functions cannot be passed directly to Client Components* avec `{ loader: function loader, … }` sur `Image`.
+- Cause : `loader` sur `next/image` dans `rich-content-renderer.tsx` (fonction non sérialisable du Server Component vers le composant client interne).
+- Correctif : suppression du `loader` personnalisé ; `unoptimized` conservé pour les images Markdown (URLs externes).
