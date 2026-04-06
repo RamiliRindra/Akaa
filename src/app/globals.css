@@ -324,8 +324,14 @@ select:disabled {
   }
 }
 
+/* Masqué volontairement : petits libellés de section jugés redondants vis-à-vis des titres ; la classe reste pour structure / évolutions. */
 .editorial-eyebrow {
   display: none;
+}
+
+/* Cartes « fines » (12px) — complète les grandes cartes (--radius-card) pour grille dashboard type maquette. */
+.card-refined {
+  border-radius: 12px;
 }
 
 .mdxeditor-shell {

@@ -1,8 +1,10 @@
 "use client";
 
 import type { NotificationType } from "@prisma/client";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { Flame, Sparkles, Zap } from "lucide-react";
+import { Flame, Search, Zap } from "lucide-react";
+import Link from "next/link";
 
 import { NotificationBell } from "@/components/notifications/notification-bell";
 
@@ -12,6 +14,9 @@ type HeaderProps = {
   level: number;
   currentStreak: number;
   showGamification: boolean;
+  showGlobalSearch?: boolean;
+  userImage?: string | null;
+  userName?: string;
   notifications: Array<{
     id: string;
     type: NotificationType;
@@ -32,20 +37,45 @@ export function Header({
   level,
   currentStreak,
   showGamification,
+  showGlobalSearch = false,
+  userImage,
+  userName,
   notifications,
   unreadNotificationCount,
   notificationsListHref,
   calendarHref,
 }: HeaderProps) {
+  const xpIntoLevel = totalXp % 100;
+  const levelProgress = xpIntoLevel / 100;
+
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6 sm:pt-5">
-      <div className="glass-panel ambient-ring flex min-h-[4.75rem] items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <div className="min-w-0">
+      <div className="glass-panel ambient-ring flex min-h-[4.75rem] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        {showGlobalSearch ? (
+          <div className="relative order-2 hidden min-w-0 flex-1 lg:order-1 lg:block">
+            <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-[#64748b]">
+              <Search className="h-4 w-4" aria-hidden />
+            </span>
+            <input
+              type="search"
+              readOnly
+              tabIndex={-1}
+              placeholder="Rechercher dans vos formations…"
+              title="Fonctionnalité à venir"
+              aria-label="Recherche (bientôt disponible)"
+              className="w-full max-w-md rounded-full border-0 bg-[#eef1f3] py-2 pl-12 pr-4 text-sm text-[#2c2f31] outline-none ring-[#0050d6]/20 transition placeholder:text-[#64748b] focus:ring-2"
+            />
+          </div>
+        ) : null}
+
+        <div
+          className={`order-1 min-w-0 lg:order-2 ${showGlobalSearch ? "flex-1 lg:flex-none" : "flex-1"}`}
+        >
           <h1 className="font-display truncate text-lg font-extrabold text-[#0c0910] sm:text-2xl">{title}</h1>
           <p className="text-xs text-[#0c0910]/58 sm:text-sm">Plateforme e-learning gamifiée</p>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="order-3 flex flex-wrap items-center justify-end gap-2 sm:gap-3 lg:order-3">
           <NotificationBell
             initialNotifications={notifications}
             initialUnreadCount={unreadNotificationCount}
@@ -58,27 +88,51 @@ export function Header({
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="hidden items-center gap-2 rounded-full bg-[#655670]/12 px-4 py-2 text-xs font-semibold text-[#655670] sm:flex"
+                className="flex items-center gap-2 rounded-full border border-[#0050d6]/20 bg-[#0050d6]/8 px-2.5 py-1.5 sm:px-3"
               >
-                <Zap className="h-3.5 w-3.5 text-[#ffc857]" />
-                {totalXp} XP
-                <span className="text-[#655670]/70">• Niveau {level}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-[#0050d6]">
+                  Niv. {level}
+                </span>
+                <div
+                  className="hidden h-1.5 w-10 overflow-hidden rounded-full bg-slate-200 sm:block sm:w-14"
+                  title="Progression vers le niveau suivant"
+                >
+                  <div
+                    className="h-full rounded-full bg-[#0050d6] transition-[width]"
+                    style={{ width: `${Math.round(levelProgress * 100)}%` }}
+                  />
+                </div>
+                <span className="font-mono text-xs font-bold tabular-nums text-[#0050d6]">{totalXp} XP</span>
+                <Zap className="h-3.5 w-3.5 text-[#ffc857] sm:hidden" aria-hidden />
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="hidden items-center gap-2 rounded-full bg-[#ffc857]/18 px-4 py-2 text-xs font-semibold text-[#775600] lg:flex"
+                className="hidden items-center gap-1.5 rounded-full bg-[#ffc857]/18 px-3 py-1.5 text-xs font-semibold text-[#775600] lg:flex"
               >
-                <Flame className="h-3.5 w-3.5 text-[#f97316]" />
-                Streak {currentStreak} jour{currentStreak > 1 ? "s" : ""}
+                <Flame className="h-3.5 w-3.5 text-[#f97316]" aria-hidden />
+                <span>
+                  {currentStreak} jour{currentStreak > 1 ? "s" : ""}
+                </span>
               </motion.div>
             </>
           ) : null}
 
-          <div className="grid h-10 w-10 place-items-center rounded-full bg-[linear-gradient(135deg,rgba(0,80,214,0.12),rgba(15,99,255,0.18))] sm:hidden">
-            <Sparkles className="h-4 w-4 text-[#0F63FF]" />
-          </div>
+          {userImage ? (
+            <Link
+              href="/profile"
+              className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white shadow-sm"
+            >
+              <Image
+                src={userImage}
+                alt={userName ? `Photo de ${userName}` : "Profil"}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+            </Link>
+          ) : null}
         </div>
       </div>
     </header>

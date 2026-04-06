@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { Header } from "@/components/layout/header";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { PlatformBottomNav } from "@/components/layout/platform-bottom-nav";
 import type { NavItem } from "@/components/layout/nav-config";
 import { Sidebar } from "@/components/layout/sidebar";
 import { SessionReminderSync } from "@/components/notifications/session-reminder-sync";
@@ -33,6 +34,8 @@ export async function ProtectedShell({
   }
 
   const showGamification = session.user.role === "LEARNER";
+  const showLearnerBottomNav = workspace === "platform" && session.user.role === "LEARNER";
+  const showGlobalSearch = workspace === "platform";
   const [userGamification, notifications, unreadNotificationCount] = await Promise.all([
     showGamification
       ? db.user.findUnique({
@@ -100,6 +103,9 @@ export async function ProtectedShell({
             level={userGamification?.level ?? 1}
             currentStreak={userGamification?.streak?.currentStreak ?? 0}
             showGamification={showGamification}
+            showGlobalSearch={showGlobalSearch}
+            userImage={session.user.image}
+            userName={session.user.name ?? undefined}
             notifications={notifications.map((notification) => ({
               ...notification,
               createdAt: notification.createdAt.toISOString(),
@@ -119,7 +125,16 @@ export async function ProtectedShell({
             />
           </div>
         </div>
-        <main className="flex-1 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5">{children}</main>
+        <main
+          className={
+            showLearnerBottomNav
+              ? "flex-1 px-4 pb-24 pt-4 sm:px-6 sm:pt-5 md:pb-8"
+              : "flex-1 px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-5"
+          }
+        >
+          {children}
+        </main>
+        {showLearnerBottomNav ? <PlatformBottomNav /> : null}
       </div>
     </div>
   );

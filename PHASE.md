@@ -293,9 +293,12 @@ Ajouter la dimension formation planifiée :
 - `ARCHITECTURE.md` aligné avec les routes réelles (notifications, feedback, proxy, domaine Feedback en BDD).
 - Direction UI : `DESIGN.md` + `src/app/globals.css` comme référence pour les prochaines passes d’interface.
 
+### Passe UI — étape 4 (2026-04-06)
+- `.editorial-eyebrow` reste en **`display: none`** par choix produit (libellés de section non souhaités à l’écran) ; commentaire ajouté dans `globals.css`.
+- Prototype Stitch / HTML exporté non intégré tel quel (CDN Tailwind, Material Symbols, etc.).
+
 ### À traiter ensuite (roadmap produit / technique)
 - **Déploiement** : appliquer toutes les migrations attendues sur chaque environnement (dont `feedback` si pas encore fait).
-- **UI** : passe par zone selon `DESIGN.md` / `globals.css` (étape 4).
 - **UI** : passe par zone (shell → catalogue → contenu) en respectant `DESIGN.md` et les tokens `globals.css`.
 - **Qualité** : tests E2E ciblés quand le périmètre MVP est stable.
 - Renderer Markdown : surveiller tout warning lint sur `rich-content-renderer.tsx`.
