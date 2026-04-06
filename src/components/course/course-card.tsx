@@ -2,6 +2,7 @@ import { CourseStatus } from "@prisma/client";
 import { BookOpen, Clock3, Layers3 } from "lucide-react";
 import Link from "next/link";
 
+import { CourseThumbnail } from "@/components/course/course-thumbnail";
 import { CourseStatusBadge } from "@/components/course/course-status-badge";
 import AvatarGroupMaxDemo from "@/components/shadcn-studio/avatar/avatar-14";
 import { courseLevelBadgeStyles, getCourseLevelLabel, type CourseLevelValue } from "@/lib/course-level";
@@ -9,6 +10,7 @@ import { courseLevelBadgeStyles, getCourseLevelLabel, type CourseLevelValue } fr
 type CourseCardProps = {
   title: string;
   slug: string;
+  thumbnailUrl?: string | null;
   description?: string | null;
   categoryName?: string | null;
   moduleCount: number;
@@ -30,6 +32,7 @@ type CourseCardProps = {
 export function CourseCard({
   title,
   slug,
+  thumbnailUrl,
   description,
   categoryName,
   moduleCount,
@@ -46,7 +49,9 @@ export function CourseCard({
   const targetHref = href ?? `/courses/${slug}`;
 
   return (
-    <article className="panel-card overflow-hidden p-5 transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-surface-high)]">
+    <article className="panel-card overflow-hidden p-0 transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-surface-high)]">
+      <CourseThumbnail title={title} thumbnailUrl={thumbnailUrl} roundedClassName="rounded-none" />
+      <div className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -141,6 +146,7 @@ export function CourseCard({
         >
           Voir le cours
         </Link>
+      </div>
       </div>
     </article>
   );

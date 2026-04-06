@@ -1217,3 +1217,50 @@ Encore ouvert :
 - Erreur Railway : *Functions cannot be passed directly to Client Components* avec `{ loader: function loader, … }` sur `Image`.
 - Cause : `loader` sur `next/image` dans `rich-content-renderer.tsx` (fonction non sérialisable du Server Component vers le composant client interne).
 - Correctif : suppression du `loader` personnalisé ; `unoptimized` conservé pour les images Markdown (URLs externes).
+
+---
+
+## Correctifs produit & infra — 2026-04-06 (import, aide, aperçu fiche apprenant)
+
+### Import de cours — erreur Prisma `P2028` (transaction expirée)
+
+**Symptôme :** à l’import d’une archive ZIP, erreur `Transaction API error: A commit cannot be executed on an expired transaction` (timeout 5000 ms, durée réelle ~5224 ms).
+
+**Cause :** la transaction interactive Prisma par défaut est limitée à **5 s** ; l’import crée en chaîne cours, modules, chapitres, quiz, questions et options — insuffisant sur Neon (latence / cold start) ou gros contenu.
+
+**Correctif :** dans `importCourseArchiveAction` (`src/actions/courses.ts`), second argument à `db.$transaction` avec `maxWait: 10_000` et `timeout: 120_000` (constante `COURSE_IMPORT_TRANSACTION`).
+
+**Fichiers :** `src/actions/courses.ts`.
+
+---
+
+### Centre d’aide (lien externe Lovable)
+
+**Besoin :** exposer le hub guide hébergé séparément (`https://akaa-guide-hub.lovable.app`) depuis l’app.
+
+**Mise en place :**
+- constante `HELP_CENTER_URL` dans `src/lib/help-center.ts` ;
+- entrée **« Centre d’aide »** dans le sous-menu profil (`UserMenu`), au-dessus de **Déconnexion**, lien `target="_blank"` + `rel="noopener noreferrer"` ;
+- documentation associée : `docs/CENTRE-AIDE-PLAN.md`, `docs/README.md`, mention dans `ARCHITECTURE.md` (commits dédiés).
+
+**Fichiers :** `src/lib/help-center.ts`, `src/components/layout/user-menu.tsx`.
+
+---
+
+### « Ouvrir la fiche apprenant » → 404 (cours en brouillon)
+
+**Symptôme :** depuis l’édition formateur, le bouton **« Ouvrir la fiche apprenant »** pointe vers `/courses/{slug}` ; la page renvoyait **404** alors que la plateforme fonctionnait.
+
+**Cause :** les pages `/courses/[slug]` et `/courses/[slug]/learn/[chapterId]` ne chargeaient que les cours **`PUBLISHED`**. Un cours encore en **brouillon** ne correspondait pas à la requête → `notFound()`.
+
+**Correctif :**
+- helper `findCourseForPublicOrStaffPreview` + `shouldSkipLearnerAccessRulesForPreview` dans `src/lib/course-learner-view.ts` :
+  - d’abord recherche du cours **publié** ;
+  - sinon, si l’utilisateur est **formateur** (propriétaire) ou **admin**, chargement d’un cours **brouillon ou archivé** avec le même slug ;
+  - pour cet **aperçu staff**, pas d’application de `assertCourseAccessOrRedirect` (évite les redirections liées aux sessions réservées pendant la prévisualisation).
+- fiche cours : bandeau **« Aperçu formateur »**, pastilles de statut (brouillon / archivé).
+- lecteur chapitre : même logique + bandeau d’aperçu pour que les liens « Commencer / chapitre suivant » fonctionnent aussi en brouillon pour le formateur.
+
+**Comportement inchangé pour les apprenants :** seuls les cours publiés restent accessibles via le catalogue ; pas d’accès public au brouillon par URL pour un `LEARNER`.
+
+**Fichiers :** `src/lib/course-learner-view.ts`, `src/app/(platform)/courses/[slug]/page.tsx`, `src/app/(platform)/courses/[slug]/learn/[chapterId]/page.tsx`.

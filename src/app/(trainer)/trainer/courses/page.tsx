@@ -39,6 +39,7 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
       id: true,
       title: true,
       slug: true,
+      thumbnailUrl: true,
       description: true,
       estimatedHours: true,
       level: true,
@@ -113,6 +114,7 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
               key={course.id}
               title={course.title}
               slug={course.slug}
+              thumbnailUrl={course.thumbnailUrl}
               description={course.description}
               categoryName={course.category?.name}
               moduleCount={course.modules.length}

@@ -3,6 +3,7 @@ import { BookOpenCheck, GraduationCap, Sparkles, UsersRound } from "lucide-react
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { CourseThumbnail } from "@/components/course/course-thumbnail";
 import AvatarGroupMaxDemo from "@/components/shadcn-studio/avatar/avatar-14";
 import { getCachedSession } from "@/lib/auth-session";
 import { db } from "@/lib/db";
@@ -38,6 +39,7 @@ export default async function TrainerDashboardPage() {
       select: {
         id: true,
         title: true,
+        thumbnailUrl: true,
         status: true,
         enrollments: {
           orderBy: { enrolledAt: "desc" },
@@ -191,8 +193,13 @@ export default async function TrainerDashboardPage() {
           <div className="grid gap-4">
             {courses.length ? (
               courses.map((course) => (
-                <article key={course.id} className="panel-card p-5">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <article key={course.id} className="panel-card overflow-hidden p-0">
+                  <CourseThumbnail
+                    title={course.title}
+                    thumbnailUrl={course.thumbnailUrl}
+                    roundedClassName="rounded-none"
+                  />
+                  <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="chip chip-primary">{course.status === "PUBLISHED" ? "Publié" : "Brouillon"}</span>

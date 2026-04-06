@@ -5,11 +5,9 @@ import {
   ArrowRight,
   BookOpenCheck,
   CalendarDays,
-  Code,
   Flame,
   Layers3,
   Lock,
-  Palette,
   Sparkles,
   TrendingUp,
   Trophy,
@@ -19,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { CourseThumbnail } from "@/components/course/course-thumbnail";
 import { ProgressBar } from "@/components/course/progress-bar";
 import { WeeklyXpBars } from "@/components/gamification/weekly-xp-bars";
 import { getHomePathForRole } from "@/lib/auth-config";
@@ -81,6 +80,7 @@ export default async function LearnerDashboardPage() {
             id: true,
             title: true,
             slug: true,
+            thumbnailUrl: true,
             description: true,
             estimatedHours: true,
             level: true,
@@ -376,19 +376,20 @@ export default async function LearnerDashboardPage() {
           {publishedEnrollments.length ? (
             <div className="grid gap-6 sm:grid-cols-2">
               {publishedEnrollments.slice(0, 4).map((enrollment, index) => {
-                const Icon = index % 2 === 0 ? Code : Palette;
-                const accent = index % 2 === 0 ? "text-[#0050d6] bg-blue-100" : "text-[#655670] bg-purple-100";
+                const accent = index % 2 === 0 ? "text-[#0050d6]" : "text-[#655670]";
+                const barAccent = index % 2 === 0 ? "bg-[#0050d6]" : "bg-[#655670]";
                 return (
                   <Link
                     key={enrollment.id}
                     href={`/courses/${enrollment.course.slug}`}
-                    className="card-refined group bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-2"
+                    className="card-refined group overflow-hidden bg-white p-0 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-2"
                   >
-                    <div
-                      className={`card-refined mb-6 flex h-12 w-12 items-center justify-center ${accent}`}
-                    >
-                      <Icon className="h-6 w-6" aria-hidden />
-                    </div>
+                    <CourseThumbnail
+                      title={enrollment.course.title}
+                      thumbnailUrl={enrollment.course.thumbnailUrl}
+                      roundedClassName="rounded-none"
+                    />
+                    <div className="p-6">
                     <h4 className="mb-2 text-xl font-bold text-[#2c2f31]">{enrollment.course.title}</h4>
                     <p className="mb-6 line-clamp-2 text-sm text-slate-500">
                       {enrollment.course.description?.trim() || "Formation sur la plateforme Akaa."}
@@ -396,16 +397,17 @@ export default async function LearnerDashboardPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-400">Progression</span>
-                        <span className={index % 2 === 0 ? "text-[#0050d6]" : "text-[#655670]"}>
+                        <span className={accent}>
                           {enrollment.progressPercent}%
                         </span>
                       </div>
                       <div className="h-2.5 overflow-hidden rounded-full bg-[#dfe3e6]">
                         <div
-                          className={`h-full rounded-full ${index % 2 === 0 ? "bg-[#0050d6]" : "bg-[#655670]"}`}
+                          className={`h-full rounded-full ${barAccent}`}
                           style={{ width: `${enrollment.progressPercent}%` }}
                         />
                       </div>
+                    </div>
                     </div>
                   </Link>
                 );

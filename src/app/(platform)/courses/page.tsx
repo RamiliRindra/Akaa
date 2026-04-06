@@ -39,6 +39,7 @@ export default async function LearnerCoursesPage({ searchParams }: LearnerCourse
         id: true,
         title: true,
         slug: true,
+        thumbnailUrl: true,
         description: true,
         estimatedHours: true,
         level: true,
@@ -156,6 +157,7 @@ export default async function LearnerCoursesPage({ searchParams }: LearnerCourse
               key={course.id}
               title={course.title}
               slug={course.slug}
+              thumbnailUrl={course.thumbnailUrl}
               description={course.description}
               categoryName={course.category?.name}
               moduleCount={course.modules.length}

@@ -21,6 +21,7 @@ export default async function AdminCoursesPage() {
       id: true,
       title: true,
       slug: true,
+      thumbnailUrl: true,
       description: true,
       estimatedHours: true,
       level: true,
@@ -65,6 +66,7 @@ export default async function AdminCoursesPage() {
               <CourseCard
                 title={course.title}
                 slug={course.slug}
+                thumbnailUrl={course.thumbnailUrl}
                 description={course.description}
                 categoryName={course.category?.name}
                 moduleCount={course.modules.length}
