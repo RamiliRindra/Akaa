@@ -3,12 +3,14 @@
 import type { NotificationType } from "@prisma/client";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Flame, Search, Zap } from "lucide-react";
+import { Flame, Search, UserRound, Zap } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { NotificationBell } from "@/components/notifications/notification-bell";
 
 type HeaderProps = {
+  /** Vide = pas de titre (ex. apprenant sur la plateforme). */
   title: string;
   totalXp: number;
   level: number;
@@ -47,6 +49,8 @@ export function Header({
 }: HeaderProps) {
   const xpIntoLevel = totalXp % 100;
   const levelProgress = xpIntoLevel / 100;
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const showTitle = title.trim().length > 0;
 
   return (
     <header className="sticky top-0 z-20 px-3 pt-3 sm:px-6 sm:pt-5">
@@ -68,14 +72,17 @@ export function Header({
           </div>
         ) : null}
 
-        <div
-          className={`order-1 min-w-0 lg:order-2 ${showGlobalSearch ? "flex-1 lg:flex-none" : "flex-1"}`}
-        >
-          <h1 className="font-display truncate text-lg font-extrabold text-[#0c0910] sm:text-2xl">{title}</h1>
-          <p className="text-xs text-[#0c0910]/58 sm:text-sm">Plateforme e-learning gamifiée</p>
-        </div>
+        {showTitle ? (
+          <div
+            className={`order-1 min-w-0 lg:order-2 ${showGlobalSearch ? "flex-1 lg:flex-none" : "flex-1"}`}
+          >
+            <h1 className="font-display truncate text-lg font-extrabold text-[#0c0910] sm:text-2xl">{title}</h1>
+          </div>
+        ) : null}
 
-        <div className="order-3 flex flex-wrap items-center justify-end gap-2 sm:gap-3 lg:order-3">
+        <div
+          className={`order-3 flex flex-wrap items-center justify-end gap-2 sm:gap-3 lg:order-3 ${!showTitle ? "ml-auto" : ""}`}
+        >
           <NotificationBell
             initialNotifications={notifications}
             initialUnreadCount={unreadNotificationCount}
@@ -88,21 +95,21 @@ export function Header({
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2 rounded-full border border-[#0050d6]/20 bg-[#0050d6]/8 px-2.5 py-1.5 sm:px-3"
+                className="flex items-center gap-2 rounded-full bg-[#0050d6] px-2.5 py-1.5 text-white shadow-sm sm:px-3"
               >
-                <span className="text-[10px] font-bold uppercase tracking-wide text-[#0050d6]">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-white">
                   Niv. {level}
                 </span>
                 <div
-                  className="hidden h-1.5 w-10 overflow-hidden rounded-full bg-slate-200 sm:block sm:w-14"
+                  className="hidden h-1.5 w-10 overflow-hidden rounded-full bg-white/25 sm:block sm:w-14"
                   title="Progression vers le niveau suivant"
                 >
                   <div
-                    className="h-full rounded-full bg-[#0050d6] transition-[width]"
+                    className="h-full rounded-full bg-white transition-[width]"
                     style={{ width: `${Math.round(levelProgress * 100)}%` }}
                   />
                 </div>
-                <span className="font-mono text-xs font-bold tabular-nums text-[#0050d6]">{totalXp} XP</span>
+                <span className="font-mono text-xs font-bold tabular-nums text-white">{totalXp} XP</span>
                 <Zap className="h-3.5 w-3.5 text-[#ffc857] sm:hidden" aria-hidden />
               </motion.div>
 
@@ -119,20 +126,23 @@ export function Header({
             </>
           ) : null}
 
-          {userImage ? (
-            <Link
-              href="/profile"
-              className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white shadow-sm"
-            >
+          <Link
+            href="/profile"
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm"
+          >
+            {userImage && !avatarFailed ? (
               <Image
                 src={userImage}
                 alt={userName ? `Photo de ${userName}` : "Profil"}
                 width={40}
                 height={40}
                 className="h-full w-full object-cover"
+                onError={() => setAvatarFailed(true)}
               />
-            </Link>
-          ) : null}
+            ) : (
+              <UserRound className="h-5 w-5 text-slate-500" aria-hidden />
+            )}
+          </Link>
         </div>
       </div>
     </header>

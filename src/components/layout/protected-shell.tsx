@@ -92,6 +92,7 @@ export async function ProtectedShell({
         workspace={workspace}
         userName={session.user.name ?? "Utilisateur Akaa"}
         userEmail={session.user.email}
+        userImage={session.user.image}
         userRole={session.user.role}
       />
       <div className="flex min-h-screen flex-1 flex-col">
@@ -121,6 +122,7 @@ export async function ProtectedShell({
               workspace={workspace}
               userName={session.user.name ?? "Utilisateur Akaa"}
               userEmail={session.user.email}
+              userImage={session.user.image}
               userRole={session.user.role}
             />
           </div>

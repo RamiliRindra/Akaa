@@ -15,10 +15,11 @@ type SidebarProps = {
   workspace: "platform" | "trainer" | "admin";
   userName: string;
   userEmail?: string | null;
+  userImage?: string | null;
   userRole: "LEARNER" | "TRAINER" | "ADMIN";
 };
 
-export function Sidebar({ title, items, workspace, userName, userEmail, userRole }: SidebarProps) {
+export function Sidebar({ title, items, workspace, userName, userEmail, userImage, userRole }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -68,7 +69,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userRole
           <div className="shrink-0 px-4 pb-4">
             <Link
               href="/courses"
-              className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-[#0050d6] to-indigo-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#0050d6]/20 transition-opacity hover:opacity-90"
+              className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-[#0050d6] to-indigo-500 py-3.5 text-sm font-bold !text-white shadow-lg shadow-[#0050d6]/20 transition-opacity hover:opacity-90 hover:!text-white"
             >
               Explorer les formations
             </Link>
@@ -78,6 +79,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userRole
           <UserMenu
             name={userName}
             email={userEmail}
+            image={userImage}
             role={userRole}
             workspace={workspace}
             className="w-full"

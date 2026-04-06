@@ -13,7 +13,7 @@ export default async function PlatformLayout({ children }: PlatformLayoutProps) 
   return (
     <ProtectedShell
       navTitle={isLearner ? "Espace apprenant" : "Vue apprenant"}
-      headerTitle={isLearner ? "Plateforme" : "Catalogue des cours"}
+      headerTitle={isLearner ? "" : "Catalogue des cours"}
       navItems={isLearner ? platformNav : platformViewerNav}
       workspace="platform"
     >

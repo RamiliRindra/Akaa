@@ -36,7 +36,7 @@ export function PlatformBottomNav() {
             data-interactive="true"
             className={cn(
               "flex min-w-0 flex-1 flex-col items-center justify-center rounded-lg px-1 py-1 text-[10px] font-bold transition-transform active:scale-95",
-              isActive ? "bg-[#0050d6]/10 text-[#0050d6]" : "text-[#64748b]",
+              isActive ? "bg-[#0050d6] text-white" : "text-[#64748b]",
             )}
           >
             <Icon className="mb-0.5 h-5 w-5 shrink-0" aria-hidden />

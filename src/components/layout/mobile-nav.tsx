@@ -17,10 +17,11 @@ type MobileNavProps = {
   workspace: "platform" | "trainer" | "admin";
   userName: string;
   userEmail?: string | null;
+  userImage?: string | null;
   userRole: "LEARNER" | "TRAINER" | "ADMIN";
 };
 
-export function MobileNav({ title, items, workspace, userName, userEmail, userRole }: MobileNavProps) {
+export function MobileNav({ title, items, workspace, userName, userEmail, userImage, userRole }: MobileNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -97,6 +98,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userRo
                 <UserMenu
                   name={userName}
                   email={userEmail}
+                  image={userImage}
                   role={userRole}
                   workspace={workspace}
                   onNavigate={() => setOpen(false)}
