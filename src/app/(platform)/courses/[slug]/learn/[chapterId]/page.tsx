@@ -1,4 +1,4 @@
-import { ChapterProgressStatus, CourseStatus } from "@prisma/client";
+import { ChapterProgressStatus } from "@prisma/client";
 import { ChevronLeft, ChevronRight, PlayCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -12,6 +12,10 @@ import { VideoEmbed } from "@/components/course/video-embed";
 import { QuizPlayer } from "@/components/quiz/quiz-player";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getCachedSession } from "@/lib/auth-session";
+import {
+  findCourseForPublicOrStaffPreview,
+  shouldSkipLearnerAccessRulesForPreview,
+} from "@/lib/course-learner-view";
 import { db } from "@/lib/db";
 import { assertCourseAccessOrRedirect } from "@/lib/session-access";
 
@@ -27,120 +31,112 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
     redirect("/login");
   }
 
-  const [course, chapter] = await Promise.all([
-    db.course.findFirst({
-      where: {
-        slug,
-        status: CourseStatus.PUBLISHED,
+  const courseSelect = {
+    id: true,
+    title: true,
+    slug: true,
+    enrollments: {
+      where: { userId: session.user.id },
+      select: {
+        progressPercent: true,
       },
+    },
+    modules: {
+      orderBy: { order: "asc" },
       select: {
         id: true,
         title: true,
-        slug: true,
-        enrollments: {
-          where: { userId: session.user.id },
-          select: {
-            progressPercent: true,
-          },
-        },
-        modules: {
+        order: true,
+        chapters: {
           orderBy: { order: "asc" },
           select: {
             id: true,
             title: true,
-            order: true,
-            chapters: {
-              orderBy: { order: "asc" },
-              select: {
-                id: true,
-                title: true,
-                estimatedMinutes: true,
-                quiz: {
-                  select: { id: true },
-                },
-                chapterProgresses: {
-                  where: { userId: session.user.id },
-                  select: {
-                    status: true,
-                  },
-                },
-              },
+            estimatedMinutes: true,
+            quiz: {
+              select: { id: true },
             },
-          },
-        },
-      },
-    }),
-    db.chapter.findFirst({
-      where: {
-        id: chapterId,
-        module: {
-          course: {
-            slug,
-            status: CourseStatus.PUBLISHED,
-          },
-        },
-      },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        videoUrl: true,
-        estimatedMinutes: true,
-        module: {
-          select: {
-            title: true,
-          },
-        },
-        chapterProgresses: {
-          where: { userId: session.user.id },
-          select: {
-            status: true,
-          },
-        },
-        quiz: {
-          select: {
-            id: true,
-            title: true,
-            passingScore: true,
-            xpReward: true,
-            questions: {
-              orderBy: { order: "asc" },
-              select: {
-                id: true,
-                questionText: true,
-                type: true,
-                order: true,
-                options: {
-                  orderBy: { optionText: "asc" },
-                  select: {
-                    id: true,
-                    optionText: true,
-                    isCorrect: true,
-                  },
-                },
-              },
-            },
-            attempts: {
+            chapterProgresses: {
               where: { userId: session.user.id },
-              orderBy: { attemptedAt: "desc" },
-              take: 1,
               select: {
-                score: true,
-                passed: true,
-                attemptedAt: true,
+                status: true,
               },
             },
           },
         },
       },
-    }),
-  ]);
+    },
+  } as const;
+
+  const { course, isStaffPreview } = await findCourseForPublicOrStaffPreview(slug, session.user, courseSelect);
 
   if (!course) {
     notFound();
   }
 
-  await assertCourseAccessOrRedirect(course.id, session.user.id);
+  if (!shouldSkipLearnerAccessRulesForPreview(isStaffPreview, session.user.role)) {
+    await assertCourseAccessOrRedirect(course.id, session.user.id);
+  }
+
+  const chapter = await db.chapter.findFirst({
+    where: {
+      id: chapterId,
+      module: { courseId: course.id },
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      videoUrl: true,
+      estimatedMinutes: true,
+      module: {
+        select: {
+          title: true,
+        },
+      },
+      chapterProgresses: {
+        where: { userId: session.user.id },
+        select: {
+          status: true,
+        },
+      },
+      quiz: {
+        select: {
+          id: true,
+          title: true,
+          passingScore: true,
+          xpReward: true,
+          questions: {
+            orderBy: { order: "asc" },
+            select: {
+              id: true,
+              questionText: true,
+              type: true,
+              order: true,
+              options: {
+                orderBy: { optionText: "asc" },
+                select: {
+                  id: true,
+                  optionText: true,
+                  isCorrect: true,
+                },
+              },
+            },
+          },
+          attempts: {
+            where: { userId: session.user.id },
+            orderBy: { attemptedAt: "desc" },
+            take: 1,
+            select: {
+              score: true,
+              passed: true,
+              attemptedAt: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
   if (!chapter) {
     notFound();
@@ -268,6 +264,12 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
         </header>
 
         <FormFeedback type={feedback.type} message={feedback.message} />
+
+        {isStaffPreview ? (
+          <div className="rounded-2xl border border-[#ffc857]/40 bg-[#fff8e7] px-4 py-3 text-sm text-[#775600]">
+            <strong>Aperçu formateur</strong> — progression et quiz peuvent être limités tant que le cours n’est pas publié.
+          </div>
+        ) : null}
 
         <VideoEmbed url={chapter.videoUrl} title={chapter.title} />
         <RichContentRenderer content={chapter.content} />

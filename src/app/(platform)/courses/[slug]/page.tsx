@@ -10,6 +10,10 @@ import { FormFeedback } from "@/components/feedback/form-feedback";
 import { ProgressBar } from "@/components/course/progress-bar";
 import { getCachedSession } from "@/lib/auth-session";
 import { courseLevelBadgeStyles, getCourseLevelLabel } from "@/lib/course-level";
+import {
+  findCourseForPublicOrStaffPreview,
+  shouldSkipLearnerAccessRulesForPreview,
+} from "@/lib/course-learner-view";
 import { db } from "@/lib/db";
 import { assertCourseAccessOrRedirect } from "@/lib/session-access";
 
@@ -21,70 +25,74 @@ type CourseDetailPageProps = {
 export default async function CourseDetailPage({ params, searchParams }: CourseDetailPageProps) {
   const [{ slug }, feedback, session] = await Promise.all([params, searchParams, getCachedSession()]);
 
-  const course = await db.course.findFirst({
-    where: {
-      slug,
-      status: CourseStatus.PUBLISHED,
+  const courseSelect = {
+    id: true,
+    title: true,
+    slug: true,
+    description: true,
+    estimatedHours: true,
+    level: true,
+    status: true,
+    trainer: {
+      select: {
+        name: true,
+      },
     },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      description: true,
-      estimatedHours: true,
-      level: true,
-      trainer: {
-        select: {
-          name: true,
-        },
+    category: {
+      select: {
+        name: true,
       },
-      category: {
-        select: {
-          name: true,
-        },
-      },
-      enrollments: session?.user?.id
-        ? {
-            where: { userId: session.user.id },
-            select: {
-              progressPercent: true,
+    },
+    enrollments: session?.user?.id
+      ? {
+          where: { userId: session.user.id },
+          select: {
+            progressPercent: true,
+          },
+        }
+      : false,
+    modules: {
+      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        order: true,
+        chapters: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            title: true,
+            estimatedMinutes: true,
+            quiz: {
+              select: { id: true },
             },
-          }
-        : false,
-      modules: {
-        orderBy: { order: "asc" },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          order: true,
-          chapters: {
-            orderBy: { order: "asc" },
-            select: {
-              id: true,
-              title: true,
-              estimatedMinutes: true,
-              quiz: {
-                select: { id: true },
-              },
-              chapterProgresses: session?.user?.id
-                ? {
-                    where: { userId: session.user.id },
-                    select: { status: true },
-                  }
-                : false,
-            },
+            chapterProgresses: session?.user?.id
+              ? {
+                  where: { userId: session.user.id },
+                  select: { status: true },
+                }
+              : false,
           },
         },
       },
     },
-  });
+  } as const;
+
+  const { course, isStaffPreview } = await findCourseForPublicOrStaffPreview(
+    slug,
+    session?.user,
+    courseSelect,
+  );
 
   if (!course) {
     notFound();
   }
 
-  if (session?.user?.id) {
+  if (
+    session?.user?.id &&
+    !shouldSkipLearnerAccessRulesForPreview(isStaffPreview, session.user.role)
+  ) {
     await assertCourseAccessOrRedirect(course.id, session.user.id);
   }
 
@@ -141,13 +149,24 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
       />
       <FormFeedback type={feedback.type} message={feedback.message} />
 
+      {isStaffPreview ? (
+        <div className="rounded-2xl border border-[#ffc857]/40 bg-[#fff8e7] px-4 py-3 text-sm text-[#775600]">
+          <strong>Aperçu formateur</strong> — cette fiche correspond à un cours non publié ou archivé. Les apprenants ne
+          la voient pas dans le catalogue tant que le cours n’est pas publié.
+        </div>
+      ) : null}
+
       <div className="surface-section overflow-hidden p-6 sm:p-8">
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_340px] xl:items-start">
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="chip chip-primary">
                 <Sparkles className="h-3.5 w-3.5" />
-                Formation publiée
+                {course.status === CourseStatus.PUBLISHED
+                  ? "Formation publiée"
+                  : course.status === CourseStatus.DRAFT
+                    ? "Brouillon (aperçu)"
+                    : "Archivé (aperçu)"}
               </span>
               {course.category?.name ? <span className="chip chip-primary">{course.category.name}</span> : null}
               <span className={`chip ${courseLevelBadgeStyles[course.level]}`}>
