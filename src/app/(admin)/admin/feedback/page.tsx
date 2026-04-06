@@ -1,9 +1,16 @@
 import { FeedbackKind, UserRole } from "@prisma/client";
+import { Download } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Rating } from "@/components/feedback/star-rating";
 import { getCachedSession } from "@/lib/auth-session";
+import {
+  buildFeedbackWhere,
+  feedbackAdminFiltersToSearchParams,
+  hasActiveFeedbackFilters,
+  parseFeedbackAdminSearchParams,
+} from "@/lib/feedback-admin-filters";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
@@ -21,8 +28,19 @@ function formatAvg(avg: number | null | undefined) {
   return Number(avg.toFixed(1)).toString();
 }
 
-export default async function AdminFeedbackSynthesisPage() {
-  const session = await getCachedSession();
+function toInputDateValue(d: Date | null): string {
+  if (!d) {
+    return "";
+  }
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+type AdminFeedbackPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function AdminFeedbackSynthesisPage({ searchParams }: AdminFeedbackPageProps) {
+  const [session, rawParams] = await Promise.all([getCachedSession(), searchParams]);
 
   if (!session?.user?.id) {
     redirect("/login");
@@ -32,11 +50,17 @@ export default async function AdminFeedbackSynthesisPage() {
     redirect("/dashboard");
   }
 
+  const filters = parseFeedbackAdminSearchParams(rawParams);
+  const detailWhere = buildFeedbackWhere(filters);
+  const filtersActive = hasActiveFeedbackFilters(filters);
+  const takeLimit = filtersActive ? 200 : 40;
+
   const [
     totalCount,
     byKind,
     learnerCourseGroups,
     trainerAuthoringGroups,
+    filteredCount,
     recentFeedbacks,
   ] = await Promise.all([
     db.feedback.count(),
@@ -57,9 +81,11 @@ export default async function AdminFeedbackSynthesisPage() {
       _count: true,
       _avg: { rating: true },
     }),
+    db.feedback.count({ where: detailWhere }),
     db.feedback.findMany({
+      where: detailWhere,
       orderBy: { updatedAt: "desc" },
-      take: 40,
+      take: takeLimit,
       select: {
         id: true,
         kind: true,
@@ -106,14 +132,19 @@ export default async function AdminFeedbackSynthesisPage() {
 
   const commentsWithText = recentFeedbacks.filter((f) => f.comment && f.comment.trim().length > 0).length;
 
+  const exportQuery = feedbackAdminFiltersToSearchParams(filters);
+  const exportHref = exportQuery
+    ? `/api/admin/feedback/export?${exportQuery}`
+    : "/api/admin/feedback/export";
+
   return (
     <section className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-[#0c0910]">Synthèse des avis</h2>
           <p className="text-sm text-[#0c0910]/70">
-            Agrégations anonymisées par type et par cours, puis derniers enregistrements. Pour laisser votre propre avis
-            formateur, utilisez aussi la page{" "}
+            Agrégations globales par type et par cours, puis détail filtrable et export CSV. Pour laisser votre propre
+            avis formateur, utilisez aussi la page{" "}
             <Link href="/feedback" className="font-medium text-[#0F63FF] hover:underline">
               Avis
             </Link>
@@ -121,7 +152,7 @@ export default async function AdminFeedbackSynthesisPage() {
           </p>
         </div>
         <div className="rounded-xl border border-[#0c0910]/10 bg-white px-4 py-3 text-sm shadow-sm">
-          <p className="text-[#0c0910]/60">Total enregistrements</p>
+          <p className="text-[#0c0910]/60">Total enregistrements (global)</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-[#453750]">{totalCount}</p>
         </div>
       </div>
@@ -135,6 +166,13 @@ export default async function AdminFeedbackSynthesisPage() {
         </div>
       ) : (
         <>
+          {filtersActive ? (
+            <p className="rounded-xl border border-[#119da4]/25 bg-[#119da4]/8 px-4 py-3 text-sm text-[#0c0910]/85">
+              Filtres actifs : les cartes « vue par type » et les tableaux par cours ci-dessous restent{" "}
+              <strong>globaux</strong>. Le tableau détaillé et l’export CSV utilisent les filtres.
+            </p>
+          ) : null}
+
           <section className="space-y-3">
             <h3 className="text-lg font-semibold text-[#0c0910]">Vue par type</h3>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -295,12 +333,79 @@ export default async function AdminFeedbackSynthesisPage() {
             </section>
           </div>
 
-          <section className="space-y-3">
+          <section className="space-y-4">
+            <div className="rounded-2xl border border-[#0c0910]/10 bg-white p-4 shadow-sm sm:p-5">
+              <h3 className="text-sm font-semibold text-[#0c0910]">Filtres (détail + export)</h3>
+              <p className="mt-1 text-xs text-[#0c0910]/60">
+                Période basée sur la date de <strong>mise à jour</strong> de l’avis (UTC).
+              </p>
+              <form method="get" action="/admin/feedback" className="mt-4 flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+                <label className="flex min-w-[200px] flex-col gap-1.5 text-sm font-medium text-[#0c0910]">
+                  Type
+                  <select
+                    name="kind"
+                    defaultValue={filters.kind ?? ""}
+                    className="rounded-xl border border-[#0c0910]/12 bg-[#f8fafc] px-3 py-2 text-sm text-[#0c0910]"
+                  >
+                    <option value="">Tous les types</option>
+                    {(Object.keys(kindLabels) as FeedbackKind[]).map((k) => (
+                      <option key={k} value={k}>
+                        {kindLabels[k]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex min-w-[160px] flex-col gap-1.5 text-sm font-medium text-[#0c0910]">
+                  Du
+                  <input
+                    type="date"
+                    name="from"
+                    defaultValue={toInputDateValue(filters.updatedFrom)}
+                    className="rounded-xl border border-[#0c0910]/12 bg-[#f8fafc] px-3 py-2 text-sm text-[#0c0910]"
+                  />
+                </label>
+                <label className="flex min-w-[160px] flex-col gap-1.5 text-sm font-medium text-[#0c0910]">
+                  Au
+                  <input
+                    type="date"
+                    name="to"
+                    defaultValue={toInputDateValue(filters.updatedTo)}
+                    className="rounded-xl border border-[#0c0910]/12 bg-[#f8fafc] px-3 py-2 text-sm text-[#0c0910]"
+                  />
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B52D6]"
+                  >
+                    Appliquer
+                  </button>
+                  <Link
+                    href="/admin/feedback"
+                    className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/15 bg-white px-4 py-2.5 text-sm font-semibold text-[#0c0910] transition hover:bg-[#f8fafc]"
+                  >
+                    Réinitialiser
+                  </Link>
+                  <a
+                    href={exportHref}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#453750]/25 bg-[#453750]/06 px-4 py-2.5 text-sm font-semibold text-[#453750] transition hover:bg-[#453750]/12"
+                  >
+                    <Download className="h-4 w-4 shrink-0" />
+                    Télécharger CSV
+                  </a>
+                </div>
+              </form>
+            </div>
+
             <div className="flex flex-wrap items-end justify-between gap-2">
               <div>
-                <h3 className="text-lg font-semibold text-[#0c0910]">Derniers enregistrements</h3>
+                <h3 className="text-lg font-semibold text-[#0c0910]">Enregistrements détaillés</h3>
                 <p className="text-sm text-[#0c0910]/60">
-                  Les {recentFeedbacks.length} derniers avis mis à jour ({commentsWithText} avec commentaire).
+                  {filteredCount} résultat{filteredCount > 1 ? "s" : ""} correspondant aux filtres
+                  {filtersActive ? "" : ` (affichage des ${recentFeedbacks.length} plus récents)`}
+                  {commentsWithText > 0
+                    ? ` — ${commentsWithText} avec commentaire dans cette liste.`
+                    : "."}
                 </p>
               </div>
             </div>
@@ -350,6 +455,11 @@ export default async function AdminFeedbackSynthesisPage() {
                 </tbody>
               </table>
             </div>
+            {filteredCount > takeLimit ? (
+              <p className="text-xs text-[#0c0910]/55">
+                Affichage limité à {takeLimit} lignes. L’export CSV inclut jusqu’à 5000 lignes avec les mêmes filtres.
+              </p>
+            ) : null}
           </section>
         </>
       )}

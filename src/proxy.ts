@@ -48,7 +48,9 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isTrainerRoute = matchesPrefix(pathname, "/trainer");
   const isAdminRoute = matchesPrefix(pathname, "/admin");
-  const needsAuth = isPlatformRoute(pathname) || isTrainerRoute || isAdminRoute || isAuthPage(pathname);
+  const isAdminApiRoute = pathname.startsWith("/api/admin");
+  const needsAuth =
+    isPlatformRoute(pathname) || isTrainerRoute || isAdminRoute || isAdminApiRoute || isAuthPage(pathname);
 
   if (!needsAuth) {
     return NextResponse.next();
@@ -84,6 +86,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  if (isAdminApiRoute && role !== "ADMIN") {
+    return NextResponse.json({ error: "Interdit" }, { status: 403 });
+  }
+
   if (isAdminRoute && role !== "ADMIN") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
@@ -113,5 +119,7 @@ export const config = {
     "/admin/:path*",
     "/login",
     "/register",
+    "/api/admin",
+    "/api/admin/:path*",
   ],
 };

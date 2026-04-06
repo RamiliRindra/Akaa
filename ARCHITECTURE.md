@@ -1,7 +1,7 @@
 # Akaa - Architecture Plateforme E-Learning Gamifiée
 
 > Document de référence pour l'architecture technique du projet Akaa.
-> Dernière mise à jour : 5 avril 2026
+> Dernière mise à jour : 6 avril 2026
 
 ---
 
@@ -87,7 +87,7 @@ Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, ave
 DATABASE_URL="postgresql://user:pass@ep-xxx.region.aws.neon.tech/akaa?sslmode=require"
 DIRECT_URL="postgresql://user:pass@ep-xxx.region.aws.neon.tech/akaa?sslmode=require"
 
-# NextAuth
+# NextAuth (en production : définir aussi AUTH_URL ou NEXTAUTH_URL vers l’URL publique HTTPS)
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="generate-with-openssl-rand-base64-32"
 
@@ -102,7 +102,7 @@ GOOGLE_CLIENT_SECRET="xxx"
 
 ### 3.1 Vue d'ensemble
 
-Le schéma est organisé en **7 domaines** et compte aujourd'hui **23 modèles Prisma** :
+Le schéma est organisé en **8 domaines** et compte aujourd’hui **24 modèles Prisma** :
 
 1. **Authentification** : User, Account, Session, VerificationToken (tables NextAuth)
 2. **Contenu pédagogique** : Category, Course, Module, Chapter
@@ -111,6 +111,7 @@ Le schéma est organisé en **7 domaines** et compte aujourd'hui **23 modèles P
 5. **Gamification** : XpTransaction, Badge, UserBadge, Streak, XpLevelSetting
 6. **Planification** : TrainingProgram, ProgramCourse, TrainingSession, SessionEnrollment, SessionAttendance
 7. **Notifications** : Notification
+8. **Feedback** : Feedback (avis cours / plateforme / outil formateur)
 
 ### 3.2 Schéma détaillé
 
@@ -524,6 +525,27 @@ Le schéma est organisé en **7 domaines** et compte aujourd'hui **23 modèles P
 > crée des notifications de type SESSION_REMINDER selon `session.reminder_minutes`.
 > Pour ~300 utilisateurs, une vérification au chargement de page est acceptable en MVP.
 
+#### DOMAINE : Feedback
+
+> Avis structurés (note 1–5, commentaire optionnel) pour les cours, la plateforme apprenant et l’outil formateur.
+> Un utilisateur ne peut avoir qu’**un enregistrement par cible logique** grâce à une clé stable `target_key`.
+
+**Feedback**
+
+| Colonne | Type | Contraintes | Notes |
+|---------|------|-------------|-------|
+| id | UUID | PK | |
+| user_id | UUID | FK -> User(id) ON DELETE CASCADE | **INDEX** |
+| kind | ENUM | `LEARNER_COURSE`, `LEARNER_PLATFORM`, `TRAINER_AUTHORING`, `TRAINER_PLATFORM` | **INDEX** |
+| course_id | UUID | FK -> Course(id) ON DELETE SET NULL, nullable | **INDEX** — null pour les avis « plateforme seule » |
+| target_key | VARCHAR(96) | NOT NULL | Combiné à `user_id` pour l’unicité métier |
+| rating | INTEGER | NOT NULL | 1 à 5 |
+| comment | TEXT | nullable | |
+| created_at | TIMESTAMP | NOT NULL | |
+| updated_at | TIMESTAMP | NOT NULL | |
+
+> **UNIQUE(user_id, target_key)** — un seul avis par utilisateur et par cible (ex. un cours, ou la plateforme apprenant).
+
 ### 3.3 Index recommandés
 
 ```sql
@@ -554,7 +576,7 @@ CREATE INDEX idx_training_session_course ON training_session(course_id);
 CREATE INDEX idx_training_session_program ON training_session(program_id);
 CREATE INDEX idx_training_session_start ON training_session(start_at);
 CREATE INDEX idx_training_session_status ON training_session(status);
-CREATE INDEX idx_training_session_recurrence ON training_session(recurrence_parent_id);
+CREATE INDEX idx_training_session_recurrence_series ON training_session(recurrence_series_id);
 CREATE INDEX idx_session_enrollment_user ON session_enrollment(user_id);
 CREATE INDEX idx_session_enrollment_session ON session_enrollment(session_id);
 CREATE INDEX idx_session_enrollment_status ON session_enrollment(status);
@@ -564,7 +586,11 @@ CREATE INDEX idx_session_attendance_session ON session_attendance(session_id);
 -- Notifications
 CREATE INDEX idx_notification_user ON notification(user_id);
 CREATE INDEX idx_notification_user_unread ON notification(user_id, is_read) WHERE is_read = false;
-CREATE INDEX idx_notification_session ON notification(related_session_id);
+
+-- Feedback
+CREATE INDEX idx_feedback_user ON feedback(user_id);
+CREATE INDEX idx_feedback_kind ON feedback(kind);
+CREATE INDEX idx_feedback_course ON feedback(course_id);
 ```
 
 ### 3.4 Règles de gamification
@@ -620,16 +646,16 @@ CREATE INDEX idx_notification_session ON notification(related_session_id);
 ```
 akaa/
 ├── prisma/
-│   ├── schema.prisma              # Schéma complet Prisma (23 modèles, 7 domaines)
+│   ├── schema.prisma              # Schéma complet Prisma (24 modèles, 8 domaines)
 │   ├── seed.ts                    # Seed Prisma idempotent (admin, catégories, badges, cours/parcours/session démo)
 │   └── migrations/                # Généré par prisma migrate
 │
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/                # Login, register, layout centré
-│   │   ├── (platform)/            # Dashboard, courses, calendar, programs, leaderboard, profile
-│   │   ├── (trainer)/trainer/     # Dashboard, courses, calendar, programs
-│   │   ├── (admin)/admin/         # Dashboard, users, courses, categories, badges, xp, calendar, programs
+│   │   ├── (platform)/            # Dashboard, courses, calendar, programs, leaderboard, profile, notifications, feedback
+│   │   ├── (trainer)/trainer/     # Dashboard, courses, calendar, programs, notifications
+│   │   ├── (admin)/admin/         # Dashboard, users, courses, categories, badges, xp, calendar, programs, notifications, feedback (synthèse)
 │   │   ├── api/auth/[...nextauth]/route.ts
 │   │   ├── layout.tsx             # Root layout (fonts, metadata, providers)
 │   │   ├── page.tsx               # Landing page publique
@@ -638,6 +664,7 @@ akaa/
 │   │   ├── admin.ts
 │   │   ├── auth.ts
 │   │   ├── courses.ts
+│   │   ├── feedback.ts            # Avis cours / plateforme (apprenant & formateur)
 │   │   ├── quiz.ts
 │   │   └── training.ts            # Sessions, parcours, inscriptions, présence, notifications
 │   ├── components/
@@ -681,6 +708,7 @@ akaa/
 │       └── ux.mdc                 # Règles UX et gamification
 │
 ├── ARCHITECTURE.md                # Ce document
+├── DESIGN.md                      # Direction UI / design system (complément à globals.css)
 ├── next.config.ts
 ├── tsconfig.json
 ├── postcss.config.mjs
@@ -691,7 +719,20 @@ akaa/
 
 > État réel du dépôt :
 > - les pages liste `calendar` et `programs` sont livrées ;
-> - les routes de détail sont exposées : `/calendar/sessions/[sessionId]`, `/programs/[programId]`, et équivalents `/trainer/...`, `/admin/...`.
+> - les routes de détail sont exposées : `/calendar/sessions/[sessionId]`, `/programs/[programId]`, et équivalents `/trainer/...`, `/admin/...` ;
+> - avis utilisateurs : `/feedback` (formulaires) ; synthèse admin : `/admin/feedback`.
+
+### 4.1 Routes applicatives (référence)
+
+| Zone | Chemins principaux |
+|------|-------------------|
+| **Public** | `/`, `/login`, `/register` |
+| **Plateforme (auth)** | `/dashboard`, `/courses`, `/courses/[slug]`, `/courses/[slug]/learn/[chapterId]`, `/calendar`, `/calendar/sessions/[sessionId]`, `/programs`, `/programs/[programId]`, `/leaderboard`, `/profile`, `/notifications`, `/feedback` |
+| **Formateur** | `/trainer/dashboard`, `/trainer/courses`, `/trainer/courses/...`, `/trainer/calendar`, `/trainer/programs`, `/trainer/sessions/[sessionId]`, `/trainer/notifications`, `/feedback` |
+| **Admin** | `/admin/dashboard`, `/admin/users`, `/admin/courses`, `/admin/categories`, `/admin/badges`, `/admin/xp`, `/admin/calendar`, `/admin/programs`, `/admin/sessions/[sessionId]`, `/admin/notifications`, `/admin/feedback` |
+| **API (admin)** | `GET /api/admin/feedback/export` — export CSV des avis (filtres `kind`, `from`, `to` ; auth **ADMIN** ; protégé par `proxy.ts`) |
+
+Protection des routes : `src/proxy.ts` (matcher Next.js 16) — préfixes `/dashboard`, `/courses`, `/calendar`, `/programs`, `/leaderboard`, `/profile`, `/notifications`, `/feedback`, `/trainer`, `/admin`, `/api/admin`, etc.
 
 ---
 
@@ -728,13 +769,16 @@ akaa/
 | Gérer **toutes** les sessions/parcours | Non | Non | Oui |
 | Modifier XP des sessions de tout formateur | Non | Non | Oui |
 | Vue globale calendrier (tous formateurs) | Non | Non | Oui |
+| **— Avis / feedback —** | | | |
+| Soumettre un avis (apprenant ou formateur) | Oui | Oui | Oui |
+| Consulter la synthèse agrégée des avis | Non | Non | Oui (`/admin/feedback`) |
 
 ### Implémentation technique
 
 - **proxy.ts** : vérifie le rôle via la session NextAuth et redirige si non autorisé
-- Routes `(platform)/*` : accessible à tous les rôles authentifiés (dont `/calendar`, `/programs`)
+- Routes `(platform)/*` : accessible à tous les rôles authentifiés (dont `/calendar`, `/programs`, `/feedback`, `/notifications`)
 - Routes `(trainer)/*` : TRAINER et ADMIN uniquement (dont `/trainer/calendar`, `/trainer/programs`)
-- Routes `(admin)/*` : ADMIN uniquement (dont `/admin/calendar`, `/admin/programs`)
+- Routes `(admin)/*` : ADMIN uniquement (dont `/admin/calendar`, `/admin/programs`, `/admin/feedback`)
 - Server Actions : double vérification du rôle côté serveur avant toute mutation
 
 ---
@@ -743,7 +787,8 @@ akaa/
 
 > État actuel :
 > - phases 1 à 7 : livrées ;
-> - phase 8 : livrée au niveau MVP ; récurrence matérialisée (occurrences multiples), stats admin calendrier, pages détail session/parcours et notifications pleine page.
+> - phase 8 : livrée au niveau MVP ; récurrence matérialisée à la création (plusieurs `training_session` + `recurrence_series_id`), stats admin calendrier, pages détail session/parcours, notifications pleine page ;
+> - feedback / avis : modèle `Feedback`, pages `/feedback` et `/admin/feedback`, actions `src/actions/feedback.ts`.
 
 ### Phase 1 - Fondations (infrastructure et BDD)
 
@@ -900,4 +945,4 @@ akaa/
 - **Vue globale** : l'admin voit toutes les sessions de tous les formateurs
 - **Édition** : l'admin peut créer/modifier/supprimer n'importe quelle session ou parcours
 - **XP** : l'admin peut modifier le `xp_reward` de n'importe quelle session
-- **Statistiques** : nombre de sessions, taux de participation, présences par formateur (encore à implémenter)
+- **Statistiques** : cartes sur `/admin/calendar` (sessions par statut, inscriptions, présences, taux d’approbation, top formateurs) — livré au MVP

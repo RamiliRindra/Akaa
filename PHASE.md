@@ -281,22 +281,29 @@ Ajouter la dimension formation planifiée :
 - Phase 8 fonctionnelle livrée au niveau MVP.
 - Le calendrier et les parcours sont exploitables sur la base réelle sans reset complet.
 
-### Limites restantes
-- Génération réelle des occurrences de récurrence à partir de `recurrenceRule` non implémentée.
-- Statistiques admin calendrier non livrées.
+### Limites restantes (recadrage 2026-04)
+- **Récurrence** : à la création, une RRULE génère déjà plusieurs lignes `training_session` (MVP). Une **expansion dynamique** ultérieure uniquement à partir de `recurrence_rule` stockée (sans lignes pré-créées) reste un sujet d’évolution si besoin métier.
 - Seed Prisma : présent dans le dépôt (`prisma/seed.ts`) ; validation complète contre Neon dépend d’un réseau non bloqué (cf. `JOURNAL.md`).
 
 ---
 
 ## État actuel — prochain lot prioritaire
 
-### À corriger / consolider
-- Mettre `ARCHITECTURE.md` en cohérence si des écarts subsistent avec les routes réelles (ex. pages notifications).
-- Le renderer Markdown : `npm run lint` vert sur le périmètre actuel ; surveiller tout nouveau warning sur `rich-content-renderer.tsx`.
+### Consolidé (documentation — 2026-04-06)
+- `ARCHITECTURE.md` aligné avec les routes réelles (notifications, feedback, proxy, domaine Feedback en BDD).
+- Direction UI : `DESIGN.md` + `src/app/globals.css` comme référence pour les prochaines passes d’interface.
 
-### Livré après cette passe (avril 2026)
-- Pages dédiées **notifications** : `/notifications` (apprenant / vue catalogue), `/trainer/notifications`, `/admin/notifications` — pagination, « tout marquer comme lu », liens depuis la cloche.
-- Socle **Vitest** : tests unitaires présents dans le dépôt (`npm test`).
+### À traiter ensuite (roadmap produit / technique)
+- **Déploiement** : appliquer toutes les migrations attendues sur chaque environnement (dont `feedback` si pas encore fait).
+- **UI** : passe par zone selon `DESIGN.md` / `globals.css` (étape 4).
+- **UI** : passe par zone (shell → catalogue → contenu) en respectant `DESIGN.md` et les tokens `globals.css`.
+- **Qualité** : tests E2E ciblés quand le périmètre MVP est stable.
+- Renderer Markdown : surveiller tout warning lint sur `rich-content-renderer.tsx`.
+
+### Déjà livré (rappel — avril 2026)
+- Pages **notifications** : `/notifications`, `/trainer/notifications`, `/admin/notifications` (pagination, tout marquer comme lu).
+- Socle **Vitest** : `npm test`.
+- **Statistiques admin calendrier** : cartes sur `/admin/calendar`.
 
 ### Compléments livrés (calendrier & parcours — 2026-04)
 - **Récurrence** : à la création, une `RRULE` (RFC 5545) génère **plusieurs lignes** `training_session` (plafond 52) ; `recurrence_series_id` regroupe la série ; texte d’aide sur les formulaires admin / formateur.
@@ -331,5 +338,9 @@ Recueillir des avis structurés (note 1–5 + commentaire optionnel) sur les cou
 - **Synthèse admin** : page `/admin/feedback` (cartes par type, tableaux par cours, derniers enregistrements avec commentaires).
 
 ### Étape fonctionnelle suivante
-- À définir selon priorité produit (ex. export CSV, filtres par période).
+- Passe UI (shell / catalogue) selon `DESIGN.md` et `globals.css`, ou évolutions feedback (colonnes supplémentaires à l’export).
+
+### Complément — filtres + export CSV (2026-04-06)
+- Page `/admin/feedback` : filtres **type**, **du / au** (sur `updatedAt`, bornes UTC), tableau détaillé filtré, lien **Télécharger CSV** (`GET /api/admin/feedback/export` avec les mêmes paramètres query).
+- `src/proxy.ts` : matcher et garde **403** pour `/api/admin/*` si le JWT n’est pas `ADMIN`.
 
