@@ -1,12 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronUp, LogOut, UserRound } from "lucide-react";
+import { ChevronUp, CircleHelp, LogOut, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useMemo, useState, useTransition } from "react";
 
+import { HELP_CENTER_URL } from "@/lib/help-center";
 import { Spinner } from "@/components/ui/spinner";
 
 type UserMenuProps = {
@@ -127,6 +128,23 @@ export function UserMenu({ name, email, image, role, workspace, className, onNav
               </span>
               <span>{destinationLabel}</span>
             </Link>
+
+            <a
+              href={HELP_CENTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-interactive="true"
+              onClick={() => {
+                setOpen(false);
+                onNavigate?.();
+              }}
+              className="flex items-center gap-3 rounded-[1rem] px-3 py-3 text-sm font-medium text-[#0c0910]/82 transition hover:bg-[#0F63FF]/6 hover:text-[#0050d6]"
+            >
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#eef1f3]">
+                <CircleHelp className="h-4 w-4" aria-hidden />
+              </span>
+              <span>Centre d’aide</span>
+            </a>
 
             <button
               type="button"

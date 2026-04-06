@@ -3,6 +3,8 @@
 > Document de référence pour l'architecture technique du projet Akaa.
 > Dernière mise à jour : 6 avril 2026
 
+**Centre d’aide (articles utilisateurs)** : plan d’arborescence et consignes de rédaction dans [`docs/CENTRE-AIDE-PLAN.md`](docs/CENTRE-AIDE-PLAN.md) — à croiser avec [`PHASE.md`](PHASE.md) pour le périmètre livré ; le [`JOURNAL.md`](JOURNAL.md) reste un journal d’exploitation, pas une source pour les articles publics du centre d’aide.
+
 ---
 
 ## 1. Vision produit
