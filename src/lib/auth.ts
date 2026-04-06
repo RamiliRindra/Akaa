@@ -126,6 +126,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             clientId: getGoogleOAuthConfig().clientId as string,
             clientSecret: getGoogleOAuthConfig().clientSecret as string,
             allowDangerousEmailAccountLinking: true,
+            /** Affiche le sélecteur de comptes Google au lieu de réutiliser silencieusement la session déjà connectée. */
+            authorization: {
+              params: {
+                prompt: "select_account",
+              },
+            },
             profile(profile) {
               const fallbackName =
                 profile.name ??
