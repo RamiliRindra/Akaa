@@ -22,32 +22,17 @@ import { randomBytes } from "node:crypto";
 import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
+// NB : les fichiers `"use server"` de Next.js 16 ne peuvent exporter *que* des
+// fonctions async. Les constantes et les types d'état sont donc définis dans
+// un module séparé (`src/actions/api-tokens-types.ts`) et consommés ici
+// uniquement via `import type` (effacé au runtime).
+import type {
+  GenerateApiTokenState,
+  RevokeApiTokenState,
+} from "@/actions/api-tokens-types";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { apiTokenActionFormSchema } from "@/lib/validations/admin";
-
-// -----------------------------------------------------------------------------
-// Types d'état (useActionState)
-// -----------------------------------------------------------------------------
-
-export type GenerateApiTokenState =
-  | { status: "idle" }
-  | {
-      status: "success";
-      token: string;
-      userEmail: string;
-      userName: string | null;
-      generatedAt: string;
-    }
-  | { status: "error"; error: string };
-
-export type RevokeApiTokenState =
-  | { status: "idle" }
-  | { status: "success"; userEmail: string }
-  | { status: "error"; error: string };
-
-export const initialGenerateApiTokenState: GenerateApiTokenState = { status: "idle" };
-export const initialRevokeApiTokenState: RevokeApiTokenState = { status: "idle" };
 
 // -----------------------------------------------------------------------------
 // Helpers internes

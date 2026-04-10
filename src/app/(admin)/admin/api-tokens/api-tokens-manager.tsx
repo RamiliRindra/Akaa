@@ -15,10 +15,12 @@ import { useActionState, useState } from "react";
 
 import {
   generateApiTokenAction,
-  initialGenerateApiTokenState,
-  initialRevokeApiTokenState,
   revokeApiTokenAction,
 } from "@/actions/api-tokens";
+import {
+  initialGenerateApiTokenState,
+  initialRevokeApiTokenState,
+} from "@/actions/api-tokens-types";
 import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
 
