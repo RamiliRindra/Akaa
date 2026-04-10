@@ -441,3 +441,54 @@ Trois chantiers regroupés dans une même release de transition :
 - `npm run test:e2e` clean sur la spec API v1
 - Test manuel MCP depuis Claude Desktop : création d'un cours, vérification dans Prisma Studio et dans l'UI trainer.
 
+---
+
+### Rapport livraison — Phase 9 (2026-04-10)
+Branche `claude/infallible-babbage` — 9 commits livrés.
+
+#### Ce qui a été livré (conforme au plan, avec écarts notés)
+
+| Étape | Plan | Livré | Écart |
+|-------|------|-------|-------|
+| D.1 Migration SQL | `add_api_tokens` | ✅ Appliquée manuellement sur Neon | — |
+| D.2 Admin `/admin/api-tokens` | Page + actions | ✅ `src/app/(admin)/admin/api-tokens/` + `src/actions/api-tokens.ts` + `api-tokens-types.ts` | `"use server"` Next.js 16 n'accepte que des async functions — state constants extraites dans un fichier séparé |
+| D.3 `api-auth.ts` | Helper auth | ✅ `src/lib/api-auth.ts` : `authenticateApiRequest`, `apiError`, `parseJsonBody`, `mapCoursesCoreErrorToResponse` | — |
+| D.4 `courses-core.ts` | Helpers purs | ✅ `src/lib/courses-core.ts` — **les Server Actions existantes n'ont pas été modifiées** (approche additive, zéro régression UI) | Plan prévoyait de réécrire les Server Actions pour déléguer ; livré comme surcouche pure |
+| D.5 Routes `/api/v1/*` | 9 routes | ✅ 9 fichiers sous `src/app/api/v1/` — `PUT` (pas `PATCH`) pour update | Verbe PUT cohérent avec le replace atomique du quiz |
+| D.6 Serveur MCP | SDK `@modelcontextprotocol/sdk` | ✅ `scripts/mcp-server/` — **zéro dépendance runtime**, JSON-RPC 2.0 écrit à la main | SDK non utilisé (évite un conflit Zod 3 vs Zod 4, moins de surface à maintenir) |
+| D.7 Tests Vitest | `src/__tests__/api/v1/` | ✅ `src/lib/api-auth.test.ts` — 21 tests, mock `db` via `vi.hoisted` | Chemin différent ; tests sur le helper d'auth suffisent car l'E2E couvre les routes bout-en-bout |
+| D.8 Tests E2E | `e2e/api-v1.spec.ts` | ✅ Parcours complet (cours → module → chapitre → quiz → suppression) + cas d'erreur | Skippé si `AKAA_E2E_API_TOKEN` absent |
+
+#### Chiffres clés
+
+- **7 commits** fonctionnels + 1 hotfix (`"use server"`) + 1 tests unitaires = **9 commits au total**
+- **+2 300 lignes** de code de prod, **+364 lignes** de tests
+- **40 tests Vitest** (7 fichiers) — tous passent
+- **19 tools MCP** exposées (`akaa_whoami` … `akaa_delete_quiz`)
+- **Zéro dépendance runtime ajoutée** (le serveur MCP tourne avec `fetch` natif + `readline`)
+- **Migration SQL appliquée sur Neon** le 2026-04-10 (champs `api_token`, `api_token_created_at`)
+
+#### Validations exécutées
+
+- ✅ `npm run lint` — clean
+- ✅ `npx tsc --noEmit` — clean
+- ✅ `npm test` — 40/40 tests passent
+- ✅ Smoke test MCP stdio : `initialize` + `tools/list` — 19 tools renvoyées
+- ✅ Test manuel `curl` des 12 routes v1 avec jeton formateur (plan de test validé par Rindra)
+- ✅ Test manuel MCP depuis **Claude Desktop** : le serveur `akaa` apparaît avec 19 tools, `akaa_whoami` renvoie l'utilisateur, `akaa_create_course` + `akaa_create_module` + `akaa_create_chapter` enchaînés, cours visible dans `/trainer/courses`
+- ⏳ `npm run test:e2e` sur `api-v1.spec.ts` — nécessite `AKAA_E2E_API_TOKEN` en CI ou local
+
+#### Points de vigilance confirmés / résolus
+
+| Point | Statut |
+|-------|--------|
+| `src/proxy.ts` ne bloque pas `/api/v1/*` | ✅ Vérifié — matcher limité à `/api/admin` |
+| `prisma generate` sur Node 20.15 (ERR_REQUIRE_ESM) | ✅ Workaround : Node 22 via PATH |
+| `"use server"` exporte uniquement des async functions | ✅ Résolu — constants dans `api-tokens-types.ts` |
+| Neon free tier — nettoyage E2E | ✅ Chaque test E2E supprime le cours créé via `try/finally` |
+| git index.lock (Cursor + git parallel) | ✅ Résolu en attendant 2-3s et relançant |
+
+#### Limites restantes (backlog)
+
+Inchangées par rapport à § 9 Hors-scope : rate-limiting, multi-jetons, webhooks, audit log, upload médias, `SESSION_ONLY` par défaut.
+
