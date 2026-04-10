@@ -918,6 +918,79 @@ export async function markSessionAttendanceAction(formData: FormData) {
   redirect(buildRedirectUrl(returnTo, "success", "La présence a été enregistrée."));
 }
 
+export async function bulkApproveEnrollmentsAction(formData: FormData) {
+  const user = await requireTrainerOrAdmin();
+  const returnTo = getSafeReturnTo(
+    formData,
+    user.role === UserRole.ADMIN ? "/admin/calendar" : "/trainer/calendar",
+  );
+
+  const sessionId = getString(formData, "sessionId");
+  const enrollmentIds = getStringArray(formData, "enrollmentIds");
+
+  if (!sessionId) {
+    redirect(buildRedirectUrl(returnTo, "error", "Session manquante."));
+  }
+
+  if (enrollmentIds.length === 0) {
+    redirect(buildRedirectUrl(returnTo, "error", "Aucune inscription sélectionnée."));
+  }
+
+  let session;
+  try {
+    session = await assertSessionOwnership(sessionId, user.id, user.role);
+  } catch (error) {
+    redirect(
+      buildRedirectUrl(
+        returnTo,
+        "error",
+        error instanceof Error ? error.message : "Session inaccessible.",
+      ),
+    );
+  }
+
+  const enrollments = await db.sessionEnrollment.findMany({
+    where: {
+      id: { in: enrollmentIds },
+      sessionId,
+      status: SessionEnrollmentStatus.PENDING,
+    },
+    select: { id: true, userId: true },
+  });
+
+  if (enrollments.length === 0) {
+    redirect(
+      buildRedirectUrl(returnTo, "error", "Aucune inscription en attente parmi la sélection."),
+    );
+  }
+
+  await db.sessionEnrollment.updateMany({
+    where: { id: { in: enrollments.map((e) => e.id) } },
+    data: { status: SessionEnrollmentStatus.APPROVED },
+  });
+
+  await Promise.all(
+    enrollments.map((enrollment) =>
+      createNotification({
+        userId: enrollment.userId,
+        type: NotificationType.SESSION_APPROVED,
+        title: "Inscription approuvée",
+        message: `Votre inscription à la session « ${session.title} » a été approuvée.`,
+        relatedUrl: "/calendar",
+      }),
+    ),
+  );
+
+  revalidateTrainingSurfaces();
+  redirect(
+    buildRedirectUrl(
+      returnTo,
+      "success",
+      `${enrollments.length} inscription${enrollments.length > 1 ? "s approuvées" : " approuvée"}.`,
+    ),
+  );
+}
+
 export async function markNotificationReadAction(notificationId: string, returnTo = "/calendar") {
   await markNotificationReadInlineAction(notificationId);
   redirect(buildRedirectUrl(returnTo, "success", "Notification marquée comme lue."));
