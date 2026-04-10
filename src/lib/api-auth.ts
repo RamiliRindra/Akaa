@@ -221,6 +221,43 @@ export async function authenticateApiRequest(
 }
 
 // -----------------------------------------------------------------------------
+// Parsing JSON body
+// -----------------------------------------------------------------------------
+
+/**
+ * Parse le body JSON d'une requête API v1.
+ *
+ * En cas de JSON malformé, on renvoie un 400 avec un message lisible par un
+ * agent IA (plutôt que l'exception TypeError native de `request.json()`).
+ *
+ * Un body absent (POST sans contenu) est traité comme un objet vide — utile
+ * pour des endpoints où toutes les clés sont optionnelles.
+ */
+export async function parseJsonBody<T = unknown>(
+  request: Request,
+): Promise<
+  | { ok: true; body: T }
+  | { ok: false; response: Response }
+> {
+  const text = await request.text();
+  if (!text || text.trim() === "") {
+    return { ok: true, body: {} as T };
+  }
+  try {
+    return { ok: true, body: JSON.parse(text) as T };
+  } catch {
+    return {
+      ok: false,
+      response: apiError(
+        400,
+        "VALIDATION_FAILED",
+        "Body JSON invalide. Vérifiez la syntaxe de votre requête.",
+      ),
+    };
+  }
+}
+
+// -----------------------------------------------------------------------------
 // Mapping d'erreurs métier
 // -----------------------------------------------------------------------------
 
