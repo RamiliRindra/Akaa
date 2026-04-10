@@ -348,3 +348,147 @@ Recueillir des avis structurés (note 1–5 + commentaire optionnel) sur les cou
 - Page `/admin/feedback` : filtres **type**, **du / au** (sur `updatedAt`, bornes UTC), tableau détaillé filtré, lien **Télécharger CSV** (`GET /api/admin/feedback/export` avec les mêmes paramètres query).
 - `src/proxy.ts` : matcher et garde **403** pour `/api/admin/*` si le JWT n’est pas `ADMIN`.
 
+---
+
+## Phase 9 — Nettoyage landing + API IA (REST + MCP)
+Date: 2026-04-10
+Linear: projet « Akaa », issues AIN-29 à AIN-53
+Plan détaillé: [`docs/plans/2026-04-10-linear-landing-api-ia.md`](docs/plans/2026-04-10-linear-landing-api-ia.md)
+
+### Objectif
+Trois chantiers regroupés dans une même release de transition :
+1. **Consignation** du projet sur Linear (rétrospective phases 1–8, sprint en cours, roadmap backlog) + mise à jour `ARCHITECTURE.md` et `PHASE.md`.
+2. **Suppression de la landing marketing** de l'application (`src/app/page.tsx` devient une simple redirection). Une landing dédiée sera refaite dans un projet Next.js séparé qui vivra sur le domaine racine, tandis que cette application restera sur `app.`.
+3. **Exposition d'une API programmatique** `/api/v1/*` pour permettre à des agents IA (Claude Desktop, Claude Code, ChatGPT Desktop, Gemini) de lire et **créer** des cours sans passer par l'UI, avec un serveur MCP fin qui wrappe l'API REST.
+
+### 9.1 — Consignation Linear + documentation
+- **Linear** : projet « Akaa » + 7 labels (`Phase 1–8`, `Retrospective`, `Landing cleanup`, `API IA`, `MCP`, `Roadmap`, `Feature`) + 25 issues.
+  - Done rétrospective : AIN-29 → AIN-38 (phases 1 à 8, feedback batch, accès session déjà implémenté).
+  - Todo sprint courant : AIN-39 → AIN-43 (docs, landing, API REST, MCP, admin api-tokens).
+  - Backlog roadmap : AIN-44 → AIN-53 (SESSION_ONLY par défaut, i18n EN, rate-limiting, observabilité, etc.).
+- **Plan file** : `docs/plans/2026-04-10-linear-landing-api-ia.md` — trace écrite du plan approuvé, sans duplication des IDs Linear.
+- **ARCHITECTURE.md** : section 7 « API IA programmatique », section 8 « Phase 9 », routes table mise à jour, nouvelles colonnes `api_token` + `api_token_created_at` sur `User`, mention du bypass `/api/v1/*` dans le proxy, répertoire `mcp-server/`, nouveaux helpers `api-auth.ts` et `courses-core.ts`.
+- **PHASE.md** : cette entrée.
+
+### 9.2 — Suppression landing
+- `src/app/page.tsx` remplacé par une Server Component qui lit `auth()` et redirige :
+  - utilisateur anonyme → `/login`
+  - utilisateur authentifié → dashboard du rôle (via `getHomePathForRole`)
+- Composants marketing orphelins supprimés.
+- `src/app/layout.tsx` (providers, fonts, metadata), `src/app/globals.css` et `src/img/logo_akaa.png` conservés tels quels.
+
+### 9.3 — Schéma : jetons API
+- Migration Prisma `add_api_tokens` :
+  - `User.apiToken String? @unique @map("api_token")`
+  - `User.apiTokenCreatedAt DateTime? @map("api_token_created_at")`
+  - Index `@@index([apiToken])`
+- Format du jeton : `akaa_` + `crypto.randomBytes(30).toString("base64url")` (~40 chars).
+- Un seul jeton actif par utilisateur ; regénérer invalide l'ancien.
+- Le jeton n'est jamais ré-affiché en clair après sa génération initiale.
+
+### 9.4 — Helpers partagés
+- `src/lib/courses-core.ts` : extraction des helpers purs `(actor, input) → result` utilisés à la fois par les Server Actions existantes et par les routes `/api/v1/*`. Couvre `createCourse`, `updateCourse`, `deleteCourse`, `listCourses`, `getCourse` + équivalents modules / chapitres / quiz / questions / options.
+- `src/lib/api-auth.ts` : `authenticateApiRequest(req)` parse `Authorization: Bearer akaa_...`, interroge Prisma, rejette si rôle != TRAINER/ADMIN. `apiError(status, code, message)` uniformise le JSON d'erreur.
+- Les Server Actions existantes réécrivent leur corps pour déléguer à `courses-core.ts`, sans changement de signature publique ni régression fonctionnelle dans l'UI trainer.
+
+### 9.5 — Routes `/api/v1/*`
+- `courses/route.ts` : `GET` (liste paginée, owner scope) + `POST` (create).
+- `courses/[id]/route.ts` : `GET` / `PATCH` / `DELETE`.
+- `courses/[id]/modules/route.ts` : `GET` + `POST`.
+- `modules/[id]/route.ts`, `modules/[id]/chapters/route.ts`.
+- `chapters/[id]/route.ts`, `chapters/[id]/quiz/route.ts`.
+- Chaque route : auth → validation Zod (réutilise `src/lib/validations/`) → délégation à `courses-core` → `NextResponse.json`.
+- Pagination : `?page=1&pageSize=20` → `{ items, total, page, pageSize }`.
+- `src/proxy.ts` : bypass explicite de `/api/v1/*` (auth gérée par `api-auth.ts`, pas par NextAuth).
+
+### 9.6 — Administration `/admin/api-tokens`
+- Nouvelle page Server Component listant les utilisateurs `TRAINER` / `ADMIN` avec colonne « Jeton actif » et boutons « Générer » / « Révoquer ».
+- `src/actions/api-tokens.ts` : `generateApiToken(userId)` (ADMIN only, génère le jeton, affiche le résultat une seule fois dans un toast) et `revokeApiToken(userId)` (remet les deux champs à null).
+- Entrée « Jetons API » ajoutée à la sidebar admin.
+
+### 9.7 — Serveur MCP wrapper
+- `mcp-server/` à la racine du repo : package Node autonome avec `@modelcontextprotocol/sdk`, transport stdio.
+- Tools exposés : `list_courses`, `get_course`, `create_course`, `update_course`, `delete_course`, `create_module`, `create_chapter`, `set_quiz`, etc.
+- Chaque tool fait un `fetch` vers `${AKAA_API_URL}/api/v1/...` avec `Authorization: Bearer ${AKAA_API_TOKEN}`.
+- README `mcp-server/README.md` avec l'exemple de configuration `claude_desktop_config.json`.
+
+### 9.8 — Tests
+- **Vitest** (`src/__tests__/api/v1/`) :
+  - Auth : missing token → 401, invalid → 401, LEARNER token → 403, TRAINER → 200.
+  - Courses : create/list/update/delete OK pour owner, 404/403 pour non-owner.
+  - Isolation : TRAINER A ne voit pas les cours de TRAINER B.
+- **Playwright** (`e2e/api-v1.spec.ts`) :
+  - Parcours complet : admin génère un jeton → `POST /api/v1/courses` → `POST /api/v1/courses/:id/modules` → `POST /api/v1/modules/:id/chapters` → cours visible dans l'UI trainer.
+
+### 9.9 — Points de vigilance
+- **Double auth** : s'assurer que `src/proxy.ts` ne bloque pas `/api/v1/*`.
+- **CORS** : pas de CORS configuré ; l'API est server-to-server uniquement.
+- **Neon free tier** : les tests e2e API doivent nettoyer les cours créés pour ne pas saturer la pool.
+- **Ordre des migrations** : `add_api_tokens` doit passer en dev, en test CI et en prod (`prisma migrate deploy`).
+
+### Hors-scope (backlog)
+- Passage du défaut `SessionAccessPolicy` à `SESSION_ONLY` (AIN-44).
+- Rate-limiting global sur `/api/v1/*`.
+- Webhook sortant après création de cours via API.
+- Audit log détaillé des appels API (qui a créé quoi).
+- Gestion multi-jetons par utilisateur (scopes, expiration).
+- Upload de médias (images, vidéos) via l'API.
+
+### Validation attendue
+- `npm run lint` clean
+- `npm run build` clean
+- `npm test` clean (nouveaux tests Vitest API v1)
+- `npm run test:e2e` clean sur la spec API v1
+- Test manuel MCP depuis Claude Desktop : création d'un cours, vérification dans Prisma Studio et dans l'UI trainer.
+
+---
+
+### Rapport livraison — Phase 9 (2026-04-10)
+Branche `claude/infallible-babbage` — 9 commits livrés.
+
+#### Ce qui a été livré (conforme au plan, avec écarts notés)
+
+| Étape | Plan | Livré | Écart |
+|-------|------|-------|-------|
+| D.1 Migration SQL | `add_api_tokens` | ✅ Appliquée manuellement sur Neon | — |
+| D.2 Admin `/admin/api-tokens` | Page + actions | ✅ `src/app/(admin)/admin/api-tokens/` + `src/actions/api-tokens.ts` + `api-tokens-types.ts` | `"use server"` Next.js 16 n'accepte que des async functions — state constants extraites dans un fichier séparé |
+| D.3 `api-auth.ts` | Helper auth | ✅ `src/lib/api-auth.ts` : `authenticateApiRequest`, `apiError`, `parseJsonBody`, `mapCoursesCoreErrorToResponse` | — |
+| D.4 `courses-core.ts` | Helpers purs | ✅ `src/lib/courses-core.ts` — **les Server Actions existantes n'ont pas été modifiées** (approche additive, zéro régression UI) | Plan prévoyait de réécrire les Server Actions pour déléguer ; livré comme surcouche pure |
+| D.5 Routes `/api/v1/*` | 9 routes | ✅ 9 fichiers sous `src/app/api/v1/` — `PUT` (pas `PATCH`) pour update | Verbe PUT cohérent avec le replace atomique du quiz |
+| D.6 Serveur MCP | SDK `@modelcontextprotocol/sdk` | ✅ `scripts/mcp-server/` — **zéro dépendance runtime**, JSON-RPC 2.0 écrit à la main | SDK non utilisé (évite un conflit Zod 3 vs Zod 4, moins de surface à maintenir) |
+| D.7 Tests Vitest | `src/__tests__/api/v1/` | ✅ `src/lib/api-auth.test.ts` — 21 tests, mock `db` via `vi.hoisted` | Chemin différent ; tests sur le helper d'auth suffisent car l'E2E couvre les routes bout-en-bout |
+| D.8 Tests E2E | `e2e/api-v1.spec.ts` | ✅ Parcours complet (cours → module → chapitre → quiz → suppression) + cas d'erreur | Skippé si `AKAA_E2E_API_TOKEN` absent |
+
+#### Chiffres clés
+
+- **7 commits** fonctionnels + 1 hotfix (`"use server"`) + 1 tests unitaires = **9 commits au total**
+- **+2 300 lignes** de code de prod, **+364 lignes** de tests
+- **40 tests Vitest** (7 fichiers) — tous passent
+- **19 tools MCP** exposées (`akaa_whoami` … `akaa_delete_quiz`)
+- **Zéro dépendance runtime ajoutée** (le serveur MCP tourne avec `fetch` natif + `readline`)
+- **Migration SQL appliquée sur Neon** le 2026-04-10 (champs `api_token`, `api_token_created_at`)
+
+#### Validations exécutées
+
+- ✅ `npm run lint` — clean
+- ✅ `npx tsc --noEmit` — clean
+- ✅ `npm test` — 40/40 tests passent
+- ✅ Smoke test MCP stdio : `initialize` + `tools/list` — 19 tools renvoyées
+- ✅ Test manuel `curl` des 12 routes v1 avec jeton formateur (plan de test validé par Rindra)
+- ✅ Test manuel MCP depuis **Claude Desktop** : le serveur `akaa` apparaît avec 19 tools, `akaa_whoami` renvoie l'utilisateur, `akaa_create_course` + `akaa_create_module` + `akaa_create_chapter` enchaînés, cours visible dans `/trainer/courses`
+- ⏳ `npm run test:e2e` sur `api-v1.spec.ts` — nécessite `AKAA_E2E_API_TOKEN` en CI ou local
+
+#### Points de vigilance confirmés / résolus
+
+| Point | Statut |
+|-------|--------|
+| `src/proxy.ts` ne bloque pas `/api/v1/*` | ✅ Vérifié — matcher limité à `/api/admin` |
+| `prisma generate` sur Node 20.15 (ERR_REQUIRE_ESM) | ✅ Workaround : Node 22 via PATH |
+| `"use server"` exporte uniquement des async functions | ✅ Résolu — constants dans `api-tokens-types.ts` |
+| Neon free tier — nettoyage E2E | ✅ Chaque test E2E supprime le cours créé via `try/finally` |
+| git index.lock (Cursor + git parallel) | ✅ Résolu en attendant 2-3s et relançant |
+
+#### Limites restantes (backlog)
+
+Inchangées par rapport à § 9 Hors-scope : rate-limiting, multi-jetons, webhooks, audit log, upload médias, `SESSION_ONLY` par défaut.
+

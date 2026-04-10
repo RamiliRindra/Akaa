@@ -129,3 +129,7 @@ export const adminXpAdjustmentFormSchema = z.object({
     .min(3, "La raison doit contenir au moins 3 caractères.")
     .max(500, "La raison est trop longue."),
 });
+
+export const apiTokenActionFormSchema = z.object({
+  userId: z.uuid("Utilisateur invalide."),
+});

@@ -1,7 +1,7 @@
 # Akaa - Architecture Plateforme E-Learning Gamifiée
 
 > Document de référence pour l'architecture technique du projet Akaa.
-> Dernière mise à jour : 6 avril 2026
+> Dernière mise à jour : 10 avril 2026
 
 **Centre d’aide (articles utilisateurs)** : plan d’arborescence et consignes de rédaction dans [`docs/CENTRE-AIDE-PLAN.md`](docs/CENTRE-AIDE-PLAN.md) — à croiser avec [`PHASE.md`](PHASE.md) pour le périmètre livré ; le [`JOURNAL.md`](JOURNAL.md) reste un journal d’exploitation, pas une source pour les articles publics du centre d’aide.
 
@@ -20,7 +20,8 @@ Akaa est une plateforme e-learning gamifiée destinée à ~300 utilisateurs, ave
 - Budget infrastructure minimal : Railway Hobby + Neon Free
 - **Light mode uniquement** pour le MVP (dark mode envisagé en fin de projet)
 - Les emails transactionnels (confirmation d'inscription, bienvenue par rôle, etc.) sont **prévu plus tard** et ne seront pas implémentés avant la stabilisation du domaine/emailing de la plateforme
-- L'architecture doit rester compatible avec une **séparation future entre le site vitrine et l'application**, par exemple `domaine-principal.tld` pour la landing publique et `app.domaine-principal.tld` pour l'application authentifiée
+- **Site vitrine externalisé** : la landing marketing est traitée dans un projet séparé. L'application Akaa ne contient plus de page d'accueil publique : la racine `/` redirige vers `/login` (ou vers le dashboard du rôle si l'utilisateur est déjà connecté). La future topologie cible est `domaine-principal.tld` pour la landing et `app.domaine-principal.tld` pour cette application
+- **API IA programmatique** : exposition d'une API REST versionnée `/api/v1/*` + serveur MCP fin wrappant cette API, pour permettre à des agents (Claude, ChatGPT, Gemini) de lire et créer des cours de façon automatisée (voir section 7)
 
 ### Identité visuelle
 
@@ -133,8 +134,12 @@ Le schéma est organisé en **8 domaines** et compte aujourd’hui **24 modèles
 | total_xp | INTEGER | NOT NULL, default 0 | **Champ dénormalisé** : mis à jour à chaque XpTransaction |
 | level | INTEGER | NOT NULL, default 1 | Calculé : `floor(total_xp / 100) + 1` |
 | email_verified | TIMESTAMP | nullable | |
+| api_token | VARCHAR(64) | UNIQUE, nullable | Jeton d'accès API IA (`akaa_...`) ; généré par l'admin, uniquement pour TRAINER/ADMIN |
+| api_token_created_at | TIMESTAMP | nullable | Date de génération du jeton API |
 | created_at | TIMESTAMP | NOT NULL, default now() | |
 | updated_at | TIMESTAMP | NOT NULL, default now() | |
+
+> **Jeton API** : les colonnes `api_token` / `api_token_created_at` sont ajoutées à la phase 9 pour authentifier les appels `/api/v1/*` et le serveur MCP. Un utilisateur n'a jamais qu'un seul jeton actif ; le régénérer invalide l'ancien. Le jeton n'est visible en clair qu'au moment de la génération (affiché une seule fois dans l'UI admin).
 
 **Account** - Comptes OAuth (table NextAuth standard)
 
@@ -659,11 +664,20 @@ akaa/
 │   │   ├── (trainer)/trainer/     # Dashboard, courses, calendar, programs, notifications
 │   │   ├── (admin)/admin/         # Dashboard, users, courses, categories, badges, xp, calendar, programs, notifications, feedback (synthèse)
 │   │   ├── api/auth/[...nextauth]/route.ts
+│   │   ├── api/v1/                # API REST pour agents IA (Bearer token)
+│   │   │   ├── courses/route.ts              # GET list, POST create
+│   │   │   ├── courses/[id]/route.ts         # GET, PATCH, DELETE
+│   │   │   ├── courses/[id]/modules/route.ts # GET, POST
+│   │   │   ├── modules/[id]/route.ts         # GET, PATCH, DELETE
+│   │   │   ├── modules/[id]/chapters/route.ts # GET, POST
+│   │   │   ├── chapters/[id]/route.ts        # GET, PATCH, DELETE
+│   │   │   └── chapters/[id]/quiz/route.ts   # GET, PUT, DELETE
 │   │   ├── layout.tsx             # Root layout (fonts, metadata, providers)
-│   │   ├── page.tsx               # Landing page publique
+│   │   ├── page.tsx               # Racine `/` — redirige vers /login ou dashboard du rôle
 │   │   └── globals.css            # Tailwind v4 + design tokens
 │   ├── actions/
 │   │   ├── admin.ts
+│   │   ├── api-tokens.ts          # Génération / révocation des jetons API IA (admin)
 │   │   ├── auth.ts
 │   │   ├── courses.ts
 │   │   ├── feedback.ts            # Avis cours / plateforme (apprenant & formateur)
@@ -680,9 +694,11 @@ akaa/
 │   │   ├── quiz/
 │   │   └── ui/
 │   ├── lib/
+│   │   ├── api-auth.ts            # Auth Bearer token pour /api/v1/* (phase 9)
 │   │   ├── auth.ts
 │   │   ├── auth-session.ts
 │   │   ├── content.ts
+│   │   ├── courses-core.ts        # Helpers purs réutilisés par Server Actions et /api/v1 (phase 9)
 │   │   ├── db.ts
 │   │   ├── gamification.ts
 │   │   ├── progress.ts
@@ -702,6 +718,11 @@ akaa/
 │   └── images/                    # Images statiques
 ├── src/img/
 │   └── logo_akaa.png              # Logo Akaa (bleu #0F63FF)
+│
+├── mcp-server/                    # Serveur MCP wrapper de l'API /api/v1 (phase 9)
+│   ├── package.json               # Dépendances autonomes (@modelcontextprotocol/sdk)
+│   ├── README.md                  # Instructions Claude Desktop / Claude Code
+│   └── src/index.ts               # Tools: list_courses, create_course, ...
 │
 ├── .env.local                     # Variables d'environnement (NON COMMITÉ)
 ├── .cursor/
@@ -728,11 +749,12 @@ akaa/
 
 | Zone | Chemins principaux |
 |------|-------------------|
-| **Public** | `/`, `/login`, `/register` |
+| **Public** | `/login`, `/register` (la racine `/` est une redirection, pas une page publique — voir section 7) |
 | **Plateforme (auth)** | `/dashboard`, `/courses`, `/courses/[slug]`, `/courses/[slug]/learn/[chapterId]`, `/calendar`, `/calendar/sessions/[sessionId]`, `/programs`, `/programs/[programId]`, `/leaderboard`, `/profile`, `/notifications`, `/feedback` |
 | **Formateur** | `/trainer/dashboard`, `/trainer/courses`, `/trainer/courses/...`, `/trainer/calendar`, `/trainer/programs`, `/trainer/sessions/[sessionId]`, `/trainer/notifications`, `/feedback` |
-| **Admin** | `/admin/dashboard`, `/admin/users`, `/admin/courses`, `/admin/categories`, `/admin/badges`, `/admin/xp`, `/admin/calendar`, `/admin/programs`, `/admin/sessions/[sessionId]`, `/admin/notifications`, `/admin/feedback` |
+| **Admin** | `/admin/dashboard`, `/admin/users`, `/admin/courses`, `/admin/categories`, `/admin/badges`, `/admin/xp`, `/admin/calendar`, `/admin/programs`, `/admin/sessions/[sessionId]`, `/admin/notifications`, `/admin/feedback`, `/admin/api-tokens` |
 | **API (admin)** | `GET /api/admin/feedback/export` — export CSV des avis (filtres `kind`, `from`, `to` ; auth **ADMIN** ; protégé par `proxy.ts`) |
+| **API IA (agents)** | `/api/v1/courses`, `/api/v1/courses/[id]`, `/api/v1/courses/[id]/modules`, `/api/v1/modules/[id]`, `/api/v1/modules/[id]/chapters`, `/api/v1/chapters/[id]`, `/api/v1/chapters/[id]/quiz` — auth `Authorization: Bearer akaa_...` (TRAINER/ADMIN). Non protégé par `proxy.ts` (bypass explicite) |
 
 Protection des routes : `src/proxy.ts` (matcher Next.js 16) — préfixes `/dashboard`, `/courses`, `/calendar`, `/programs`, `/leaderboard`, `/profile`, `/notifications`, `/feedback`, `/trainer`, `/admin`, `/api/admin`, etc.
 
@@ -863,7 +885,7 @@ Protection des routes : `src/proxy.ts` (matcher Next.js 16) — préfixes `/dash
 ### Phase 7 - UI, Polish et Production
 
 - Intégration UI complète (design system, composants, pages)
-- Landing page publique engageante
+- ~~Landing page publique engageante~~ (déplacée vers projet marketing séparé, cf. phase 9)
 - Responsive mobile complet
 - Animations Framer Motion sur l'ensemble de l'app
 - États de chargement explicites sur les actions longues (submit buttons, transitions de zones)
@@ -948,3 +970,109 @@ Protection des routes : `src/proxy.ts` (matcher Next.js 16) — préfixes `/dash
 - **Édition** : l'admin peut créer/modifier/supprimer n'importe quelle session ou parcours
 - **XP** : l'admin peut modifier le `xp_reward` de n'importe quelle session
 - **Statistiques** : cartes sur `/admin/calendar` (sessions par statut, inscriptions, présences, taux d’approbation, top formateurs) — livré au MVP
+
+---
+
+## 7. API IA programmatique (`/api/v1/*`) et serveur MCP
+
+> Cette section décrit l'API REST introduite en **phase 9** pour permettre à des agents IA
+> (Claude Desktop, Claude Code, ChatGPT Desktop, Gemini, scripts internes) de lire et créer
+> du contenu pédagogique sans passer par l'UI. Le serveur MCP distribué dans `mcp-server/`
+> est un simple wrapper stdio de cette API REST.
+
+### 7.1 — Principes
+
+- **Non-invasif** : l'API ne réimplémente pas la logique métier. Elle appelle les mêmes helpers purs (`src/lib/courses-core.ts`) que les Server Actions existantes, pour garantir qu'un cours créé via `/api/v1/courses` est strictement équivalent à un cours créé via l'UI formateur.
+- **Versionnée** : préfixe `/api/v1/`. Toute rupture de contrat passera par `/api/v2/`.
+- **Server-to-server uniquement** : pas de CORS, pas d'usage browser. Les tools MCP tournent en local ou sur un serveur de confiance.
+- **Bypass proxy** : `src/proxy.ts` ignore explicitement `/api/v1/*` (l'authentification est gérée par `src/lib/api-auth.ts`, pas par NextAuth).
+- **Même modèle de données** : aucune table dédiée. L'API lit et écrit directement dans `course`, `module`, `chapter`, `quiz`, `quiz_question`, `quiz_option`.
+
+### 7.2 — Authentification
+
+- Format du jeton : `akaa_` + 40 caractères base64url (`crypto.randomBytes(30).toString("base64url")`).
+- Header requis : `Authorization: Bearer akaa_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+- Stockage : colonnes `user.api_token` (UNIQUE) et `user.api_token_created_at`. Le jeton est stocké en clair (pas de hash) pour permettre la lecture directe ; pour le MVP c'est acceptable, un passage à un hash + prefix sera évalué dans le backlog.
+- Vérification : `authenticateApiRequest(req)` dans `src/lib/api-auth.ts` parse le header, interroge Prisma sur `apiToken`, et rejette si le rôle n'est pas `TRAINER` ou `ADMIN`.
+- Génération et révocation : via `/admin/api-tokens` (ADMIN uniquement) et les Server Actions `src/actions/api-tokens.ts`. Le jeton n'est affiché en clair **qu'une seule fois**, dans le toast de succès — l'admin doit le copier immédiatement.
+
+### 7.3 — Matrice rôles
+
+| Action | LEARNER | TRAINER | ADMIN |
+|--------|:-------:|:-------:|:-----:|
+| Posséder un jeton API | Non | Oui | Oui |
+| `GET /api/v1/courses` | — | Ses cours uniquement | Tous les cours |
+| `POST /api/v1/courses` | — | Oui, `trainer_id = self` | Oui |
+| `PATCH /api/v1/courses/[id]` | — | Oui si owner | Oui |
+| `DELETE /api/v1/courses/[id]` | — | Oui si owner | Oui |
+| Modules / chapitres / quiz | — | Oui si owner du cours parent | Oui |
+
+Les refus renvoient `403 Forbidden` avec `{ error: { code: "FORBIDDEN", message: "..." } }`.
+
+### 7.4 — Format des réponses
+
+- Toutes les réponses sont JSON.
+- Succès : `200` / `201` + payload.
+- Erreur : code HTTP approprié + `{ error: { code: string, message: string } }`.
+- Pagination sur les `GET` de liste : `?page=1&pageSize=20` → `{ items, total, page, pageSize }`.
+- Validation : chaque route applique un schéma Zod importé de `src/lib/validations/` (réutilisation directe des schémas UI).
+
+### 7.5 — Serveur MCP `mcp-server/`
+
+- Package Node indépendant dans `mcp-server/` avec son propre `package.json` et `@modelcontextprotocol/sdk`.
+- Transport stdio, adapté à Claude Desktop et Claude Code.
+- Variables d'environnement : `AKAA_API_URL` (ex. `https://app.akaa.tld`) et `AKAA_API_TOKEN`.
+- Tools exposés (chaque tool fait un `fetch` vers `AKAA_API_URL/api/v1/...`) :
+  - `list_courses`, `get_course`, `create_course`, `update_course`, `delete_course`
+  - `list_modules`, `create_module`, `update_module`, `delete_module`
+  - `list_chapters`, `create_chapter`, `update_chapter`, `delete_chapter`
+  - `get_quiz`, `set_quiz`, `delete_quiz`
+- README dans `mcp-server/README.md` avec l'exemple de configuration `claude_desktop_config.json`.
+
+### 7.6 — Garanties et non-objectifs
+
+**Garanties** :
+- Idempotence sur les DELETE (404 si déjà absent, pas d'erreur).
+- Authentification stricte sur chaque requête (pas de session partagée).
+- Isolation TRAINER : un formateur ne peut jamais lire/modifier les cours d'un autre.
+
+**Non-objectifs (backlog)** :
+- Rate-limiting global
+- Webhooks sortants
+- Audit log détaillé des appels API (qui a créé quel cours via API)
+- Gestion multi-jetons par utilisateur (scopes, expiration)
+- Gestion des médias (upload images/vidéos via API)
+
+---
+
+## 8. Phase 9 — Nettoyage landing et API IA
+
+> Phase de transition livrée le 10 avril 2026. Deux objectifs indépendants regroupés dans
+> une même release car ils partagent le même périmètre de revue (structure applicative).
+
+### 8.1 — Suppression de la landing marketing
+
+- `src/app/page.tsx` devient une Server Component qui :
+  - lit la session NextAuth via `auth()`
+  - si l'utilisateur est connecté, redirige vers `getHomePathForRole(session.user.role)` (dashboard apprenant, formateur ou admin selon le rôle)
+  - sinon, redirige vers `/login`
+- Les composants marketing qui n'étaient utilisés que par l'ancienne landing sont supprimés.
+- `src/app/layout.tsx` (providers, fonts, metadata, globals) reste **intact**.
+- La landing publique sera refaite dans un projet Next.js séparé qui vivra sur le domaine racine, tandis que cette application restera destinée au sous-domaine `app.`.
+
+### 8.2 — Infrastructure API IA
+
+Ordre d'implémentation :
+
+1. **Migration Prisma `add_api_tokens`** : ajout de `apiToken` et `apiTokenCreatedAt` sur le modèle `User`.
+2. **Helpers purs `src/lib/courses-core.ts`** : extraction de la logique métier de `src/actions/courses.ts` (et modules/chapters/quiz) en fonctions pures `(actor, input) → result`. Les Server Actions existantes réécrivent leur corps pour déléguer à ces helpers, sans changer leur signature publique.
+3. **Helper `src/lib/api-auth.ts`** : `authenticateApiRequest(req)` + `apiError(status, code, message)`.
+4. **Routes `src/app/api/v1/*`** : chaque route applique le trio `authenticate → validate → delegate to courses-core`.
+5. **Admin `/admin/api-tokens`** : liste des users TRAINER/ADMIN, bouton Générer / Révoquer, affichage one-time du jeton.
+6. **Serveur MCP `mcp-server/`** : wrapper autonome de l'API REST.
+7. **Bypass proxy** : `src/proxy.ts` exclut explicitement `/api/v1/*` de son matcher.
+8. **Tests** : Vitest sur les routes API (auth + isolation TRAINER) + Playwright end-to-end (création d'un cours via API, vérification dans l'UI trainer).
+
+### 8.3 — Accès par session (vérification, pas d'implémentation)
+
+Le système `SessionAccessPolicy` (`OPEN` / `SESSION_ONLY`) et les helpers `src/lib/session-access.ts` (`buildAccessibleCourseWhere`, `buildAccessibleProgramWhere`, `assertCourseAccessOrRedirect`) sont déjà en place depuis la phase 8. La phase 9 confirme qu'aucun changement n'est nécessaire. Le passage du défaut à `SESSION_ONLY` est ajouté au backlog (pas livré dans cette phase) pour éviter un changement de comportement silencieux.

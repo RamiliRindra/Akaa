@@ -6,6 +6,7 @@ export type NavIconName =
   | "compass"
   | "gauge"
   | "graduation-cap"
+  | "key-round"
   | "list-checks"
   | "shield"
   | "star"
@@ -54,4 +55,5 @@ export const adminNav: NavItem[] = [
   { href: "/admin/categories", label: "Catégories", icon: "list-checks" },
   { href: "/admin/badges", label: "Badges", icon: "award" },
   { href: "/admin/xp", label: "Ajustement XP", icon: "trophy" },
+  { href: "/admin/api-tokens", label: "Jetons API IA", icon: "key-round" },
 ];

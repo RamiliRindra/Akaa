@@ -119,6 +119,23 @@ const TRAINER_EMAIL = (process.env.SEED_TRAINER_EMAIL ?? "formateur@akaa.local")
 const LEARNER_EMAIL = (process.env.SEED_LEARNER_EMAIL ?? "apprenant@akaa.local").trim().toLowerCase();
 const DEFAULT_PASSWORD = process.env.SEED_DEFAULT_PASSWORD ?? "AkaaDemo123!";
 
+/**
+ * Jeton API de démo pour le formateur. Défini uniquement si la variable
+ * `SEED_TRAINER_API_TOKEN` est présente dans l'environnement (env CI par
+ * exemple). En local il est recommandé de le générer via `/admin/api-tokens`
+ * plutôt que de l'inscrire dans un fichier de config.
+ * Doit commencer par `akaa_` et avoir au moins 16 caractères.
+ */
+const SEED_TRAINER_API_TOKEN = (() => {
+  const raw = (process.env.SEED_TRAINER_API_TOKEN ?? "").trim();
+  if (!raw) return undefined;
+  if (!raw.startsWith("akaa_") || raw.length < 16) {
+    console.warn("SEED_TRAINER_API_TOKEN ignoré : doit commencer par 'akaa_' et avoir ≥16 chars.");
+    return undefined;
+  }
+  return raw;
+})();
+
 function addDays(days: number, hours = 9, minutes = 0) {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() + days);
@@ -131,7 +148,12 @@ async function upsertUser(input: {
   name: string;
   role: UserRole;
   passwordHash: string;
+  apiToken?: string;
 }) {
+  const apiTokenData = input.apiToken
+    ? { apiToken: input.apiToken, apiTokenCreatedAt: new Date() }
+    : {};
+
   return db.user.upsert({
     where: { email: input.email },
     update: {
@@ -140,6 +162,7 @@ async function upsertUser(input: {
       isActive: true,
       passwordHash: input.passwordHash,
       emailVerified: new Date(),
+      ...apiTokenData,
     },
     create: {
       email: input.email,
@@ -148,6 +171,7 @@ async function upsertUser(input: {
       isActive: true,
       passwordHash: input.passwordHash,
       emailVerified: new Date(),
+      ...apiTokenData,
     },
   });
 }
@@ -260,6 +284,7 @@ async function main() {
       name: "Formateur Démo",
       role: UserRole.TRAINER,
       passwordHash,
+      apiToken: SEED_TRAINER_API_TOKEN,
     }),
     upsertUser({
       email: LEARNER_EMAIL,
@@ -518,6 +543,9 @@ async function main() {
   console.info(`Formateur : ${trainer.email}`);
   console.info(`Apprenant : ${learner.email}`);
   console.info(`Mot de passe par défaut : ${DEFAULT_PASSWORD}`);
+  if (SEED_TRAINER_API_TOKEN) {
+    console.info(`Jeton API formateur seedé : ${SEED_TRAINER_API_TOKEN.slice(0, 12)}…`);
+  }
 }
 
 main()

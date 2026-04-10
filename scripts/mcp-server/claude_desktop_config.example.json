@@ -1,0 +1,16 @@
+{
+  "_comment": "Copie ce contenu dans ~/Library/Application Support/Claude/claude_desktop_config.json (macOS) ou %APPDATA%\\Claude\\claude_desktop_config.json (Windows). Remplace le chemin absolu du script et colle ton jeton. Redémarre complètement Claude Desktop après modification.",
+  "mcpServers": {
+    "akaa": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "/Users/TON_USER/Akaa_project/scripts/mcp-server/index.ts"
+      ],
+      "env": {
+        "AKAA_API_BASE_URL": "http://localhost:3000",
+        "AKAA_API_TOKEN": "akaa_REMPLACE_MOI_PAR_UN_VRAI_JETON"
+      }
+    }
+  }
+}
