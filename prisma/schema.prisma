@@ -109,18 +109,20 @@ enum FeedbackKind {
 
 // Authentification (NextAuth + modèle métier User)
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
-  email         String    @unique @db.VarChar(255)
-  name          String    @db.VarChar(255)
-  image         String?   @db.Text
-  passwordHash  String?   @map("password_hash") @db.Text
-  role          UserRole  @default(LEARNER)
-  isActive      Boolean   @default(true) @map("is_active")
-  totalXp       Int       @default(0) @map("total_xp")
-  level         Int       @default(1)
-  emailVerified DateTime? @map("email_verified") @db.Timestamp(6)
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
+  id                String    @id @default(uuid()) @db.Uuid
+  email             String    @unique @db.VarChar(255)
+  name              String    @db.VarChar(255)
+  image             String?   @db.Text
+  passwordHash      String?   @map("password_hash") @db.Text
+  role              UserRole  @default(LEARNER)
+  isActive          Boolean   @default(true) @map("is_active")
+  totalXp           Int       @default(0) @map("total_xp")
+  level             Int       @default(1)
+  emailVerified     DateTime? @map("email_verified") @db.Timestamp(6)
+  apiToken          String?   @unique @map("api_token") @db.VarChar(64)
+  apiTokenCreatedAt DateTime? @map("api_token_created_at") @db.Timestamp(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamp(6)
 
   accounts Account[]
   sessions Session[]
@@ -142,6 +144,7 @@ model User {
   feedbacks         Feedback[]
 
   @@index([totalXp(sort: Desc)], map: "idx_user_total_xp_desc")
+  @@index([apiToken], map: "idx_user_api_token")
   @@map("user")
 }
 
