@@ -367,7 +367,7 @@ export default async function LearnerDashboardPage() {
       <div className="grid gap-8 lg:grid-cols-3 lg:items-start">
         <div className="space-y-8 lg:col-span-2">
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-0">
-            <h3 className="font-display text-2xl font-bold text-[#2c2f31]">Continuer</h3>
+            <h3 className="font-display text-2xl font-bold text-[var(--color-text)]">Continuer</h3>
             <Link href="/courses" className="text-sm font-bold text-[#0050d6] hover:underline">
               Tout voir
             </Link>
@@ -377,7 +377,7 @@ export default async function LearnerDashboardPage() {
             <div className="grid gap-6 sm:grid-cols-2">
               {publishedEnrollments.slice(0, 4).map((enrollment, index) => {
                 const accent = index % 2 === 0 ? "text-[#0050d6]" : "text-[#655670]";
-                const barAccent = index % 2 === 0 ? "bg-[#0050d6]" : "bg-[#655670]";
+                const barAccent = index % 2 === 0 ? "bg-[var(--color-primary)]" : "bg-[#655670]";
                 return (
                   <Link
                     key={enrollment.id}
@@ -390,7 +390,7 @@ export default async function LearnerDashboardPage() {
                       roundedClassName="rounded-none"
                     />
                     <div className="p-6">
-                    <h4 className="mb-2 text-xl font-bold text-[#2c2f31]">{enrollment.course.title}</h4>
+                    <h4 className="mb-2 text-xl font-bold text-[var(--color-text)]">{enrollment.course.title}</h4>
                     <p className="mb-6 line-clamp-2 text-sm text-slate-500">
                       {enrollment.course.description?.trim() || "Formation sur la plateforme Akaa."}
                     </p>
@@ -415,7 +415,7 @@ export default async function LearnerDashboardPage() {
             </div>
           ) : (
             <div className="card-refined bg-white px-6 py-10 text-center shadow-sm">
-              <h3 className="font-display text-xl font-black text-[#2c2f31]">Aucun cours démarré</h3>
+              <h3 className="font-display text-xl font-black text-[var(--color-text)]">Aucun cours démarré</h3>
               <p className="mt-2 text-sm text-[#64748b]">Explore le catalogue pour commencer.</p>
               <Link href="/courses" className="cta-button mt-4 inline-flex px-6 py-2.5 text-sm font-semibold">
                 Catalogue
@@ -425,9 +425,9 @@ export default async function LearnerDashboardPage() {
 
           <div className="card-refined bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] sm:p-8">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <h3 className="font-display text-xl font-bold text-[#2c2f31]">Activité hebdomadaire</h3>
+              <h3 className="font-display text-xl font-bold text-[var(--color-text)]">Activité hebdomadaire</h3>
               <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                <span className="h-3 w-3 rounded-full bg-[#0050d6]" />
+                <span className="h-3 w-3 rounded-full bg-[var(--color-primary)]" />
                 XP gagnés
               </div>
             </div>
@@ -437,8 +437,8 @@ export default async function LearnerDashboardPage() {
           <div className="surface-section p-5 sm:p-6">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-2">
-                <h2 className="font-display text-xl font-black text-[#2c2f31]">Sessions et parcours</h2>
-                <p className="max-w-2xl text-sm text-[#2c2f31]/68">
+                <h2 className="font-display text-xl font-black text-[var(--color-text)]">Sessions et parcours</h2>
+                <p className="max-w-2xl text-sm text-[var(--color-text)]/68">
                   Inscriptions ouvertes et parcours publiés.
                 </p>
               </div>
@@ -455,16 +455,16 @@ export default async function LearnerDashboardPage() {
             <div className="mt-5 grid gap-4 lg:grid-cols-2">
               <article className="panel-card p-5">
                 <div className="flex items-start gap-4">
-                  <div className="grid h-12 w-12 place-items-center rounded-full bg-[#0F63FF]/12 text-[#0F63FF]">
+                  <div className="grid h-12 w-12 place-items-center rounded-full bg-[var(--color-primary-bright)]/12 text-[var(--color-primary-bright)]">
                     <CalendarDays className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1 space-y-3">
                     <div>
-                      <p className="text-sm font-semibold text-[#2c2f31]">
+                      <p className="text-sm font-semibold text-[var(--color-text)]">
                         {availableSessions.length} session{availableSessions.length > 1 ? "s" : ""} ouverte
                         {availableSessions.length > 1 ? "s" : ""}
                       </p>
-                      <p className="text-xs text-[#2c2f31]/62">
+                      <p className="text-xs text-[var(--color-text)]/62">
                         {upcomingApprovedSessionsCount} inscription
                         {upcomingApprovedSessionsCount > 1 ? "s" : ""} approuvée
                         {upcomingApprovedSessionsCount > 1 ? "s" : ""} à venir.
@@ -474,9 +474,9 @@ export default async function LearnerDashboardPage() {
                     {availableSessions.length ? (
                       <div className="space-y-2">
                         {availableSessions.map((trainingSession) => (
-                          <div key={trainingSession.id} className="rounded-2xl bg-[#f7f9ff] px-4 py-3">
-                            <p className="text-sm font-semibold text-[#2c2f31]">{trainingSession.title}</p>
-                            <p className="text-xs text-[#2c2f31]/62">
+                          <div key={trainingSession.id} className="rounded-2xl bg-[var(--color-surface-high)] px-4 py-3">
+                            <p className="text-sm font-semibold text-[var(--color-text)]">{trainingSession.title}</p>
+                            <p className="text-xs text-[var(--color-text)]/62">
                               {formatDate(trainingSession.startsAt)}
                               {trainingSession.course ? ` • ${trainingSession.course.title}` : ""}
                               {trainingSession.program ? ` • ${trainingSession.program.title}` : ""}
@@ -485,7 +485,7 @@ export default async function LearnerDashboardPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-[#2c2f31]/62">Aucune session ouverte pour le moment.</p>
+                      <p className="text-sm text-[var(--color-text)]/62">Aucune session ouverte pour le moment.</p>
                     )}
                   </div>
                 </div>
@@ -498,18 +498,18 @@ export default async function LearnerDashboardPage() {
                   </div>
                   <div className="min-w-0 flex-1 space-y-3">
                     <div>
-                      <p className="text-sm font-semibold text-[#2c2f31]">
+                      <p className="text-sm font-semibold text-[var(--color-text)]">
                         {publishedPrograms.length} parcours publié{publishedPrograms.length > 1 ? "s" : ""}
                       </p>
-                      <p className="text-xs text-[#2c2f31]/62">Parcours structurés pour aller plus loin.</p>
+                      <p className="text-xs text-[var(--color-text)]/62">Parcours structurés pour aller plus loin.</p>
                     </div>
 
                     {publishedPrograms.length ? (
                       <div className="space-y-2">
                         {publishedPrograms.map((program) => (
                           <div key={program.id} className="rounded-2xl bg-[#fcfbff] px-4 py-3">
-                            <p className="text-sm font-semibold text-[#2c2f31]">{program.title}</p>
-                            <p className="text-xs text-[#2c2f31]/62">
+                            <p className="text-sm font-semibold text-[var(--color-text)]">{program.title}</p>
+                            <p className="text-xs text-[var(--color-text)]/62">
                               {program.courses.length} cours
                               {program.sessions.length
                                 ? ` • ${program.sessions.length} session${program.sessions.length > 1 ? "s" : ""} à venir`
@@ -519,7 +519,7 @@ export default async function LearnerDashboardPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-[#2c2f31]/62">Aucun parcours publié pour le moment.</p>
+                      <p className="text-sm text-[var(--color-text)]/62">Aucun parcours publié pour le moment.</p>
                     )}
                   </div>
                 </div>
@@ -539,7 +539,7 @@ export default async function LearnerDashboardPage() {
                   {formatDistanceToNow(nextApprovedSession.startsAt, { locale: fr, addSuffix: true })}
                 </span>
               </div>
-              <h4 className="mb-4 text-xl font-bold text-[#2c2f31]">{nextApprovedSession.title}</h4>
+              <h4 className="mb-4 text-xl font-bold text-[var(--color-text)]">{nextApprovedSession.title}</h4>
               <div className="mb-6 flex items-center gap-3">
                 {nextApprovedSession.trainer.image ? (
                   // eslint-disable-next-line @next/next/no-img-element -- URL externe (Google OAuth, etc.)
@@ -551,7 +551,7 @@ export default async function LearnerDashboardPage() {
                     className="h-8 w-8 rounded-full border border-[#dfe3e6] object-cover"
                   />
                 ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef1f3] text-xs font-bold text-[#64748b]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-surface-low)] text-xs font-bold text-[#64748b]">
                     {nextApprovedSession.trainer.name.slice(0, 1).toUpperCase()}
                   </div>
                 )}
@@ -578,7 +578,7 @@ export default async function LearnerDashboardPage() {
           ) : null}
 
           <div className="card-refined bg-white/90 p-6 backdrop-blur-xl">
-            <h3 className="mb-6 font-display text-lg font-bold text-[#2c2f31]">Badges récents</h3>
+            <h3 className="mb-6 font-display text-lg font-bold text-[var(--color-text)]">Badges récents</h3>
             <div className="grid grid-cols-2 gap-4">
               {recentBadges.map((entry) => (
                 <div
@@ -595,7 +595,7 @@ export default async function LearnerDashboardPage() {
                     />
                   </div>
                   <span className="text-[10px] font-black uppercase text-slate-400">Badge</span>
-                  <span className="text-xs font-bold text-[#2c2f31]">{entry.badge.name}</span>
+                  <span className="text-xs font-bold text-[var(--color-text)]">{entry.badge.name}</span>
                 </div>
               ))}
               {Array.from({ length: Math.max(0, 4 - recentBadges.length) }).map((_, i) => (
@@ -618,7 +618,7 @@ export default async function LearnerDashboardPage() {
 
           <div className="card-refined space-y-4 bg-white p-6">
             <div className="space-y-1">
-              <h3 className="font-display text-lg font-bold text-[#2c2f31]">Synthèse</h3>
+              <h3 className="font-display text-lg font-bold text-[var(--color-text)]">Synthèse</h3>
               <p className="text-sm text-[#64748b]">XP, progression et historique.</p>
             </div>
 
@@ -629,8 +629,8 @@ export default async function LearnerDashboardPage() {
                     <Zap className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#2c2f31]">{displayTransactions.length} gains récents</p>
-                    <p className="text-xs text-[#2c2f31]/62">Transactions XP.</p>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{displayTransactions.length} gains récents</p>
+                    <p className="text-xs text-[var(--color-text)]/62">Transactions XP.</p>
                   </div>
                 </div>
               </div>
@@ -640,8 +640,8 @@ export default async function LearnerDashboardPage() {
                     <TrendingUp className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#2c2f31]">{totalPublishedChapters} chapitres</p>
-                    <p className="text-xs text-[#2c2f31]/62">Publiés dans tes cours.</p>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{totalPublishedChapters} chapitres</p>
+                    <p className="text-xs text-[var(--color-text)]/62">Publiés dans tes cours.</p>
                   </div>
                 </div>
               </div>
@@ -651,8 +651,8 @@ export default async function LearnerDashboardPage() {
                     <Trophy className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#2c2f31]">{recentBadges.length} badge(s)</p>
-                    <p className="text-xs text-[#2c2f31]/62">Affichés ci-dessus.</p>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{recentBadges.length} badge(s)</p>
+                    <p className="text-xs text-[var(--color-text)]/62">Affichés ci-dessus.</p>
                   </div>
                 </div>
               </div>
@@ -661,16 +661,16 @@ export default async function LearnerDashboardPage() {
             <ProgressBar value={overallProgress} label="Tous les chapitres publiés" />
 
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-[#2c2f31]">Historique XP</p>
+              <p className="text-sm font-semibold text-[var(--color-text)]">Historique XP</p>
               {displayTransactions.length ? (
                 <div className="space-y-2">
                   {displayTransactions.map((transaction) => (
                     <div key={transaction.id} className="panel-card flex items-start justify-between gap-3 p-3">
                       <div>
-                        <p className="text-sm font-semibold text-[#2c2f31]">
+                        <p className="text-sm font-semibold text-[var(--color-text)]">
                           {transaction.description || "Gain d’XP"}
                         </p>
-                        <p className="text-xs text-[#2c2f31]/58">{formatDate(transaction.createdAt)}</p>
+                        <p className="text-xs text-[var(--color-text)]/58">{formatDate(transaction.createdAt)}</p>
                       </div>
                       <span className="chip chip-secondary shrink-0">+{transaction.amount} XP</span>
                     </div>
@@ -683,15 +683,15 @@ export default async function LearnerDashboardPage() {
 
             <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(0,80,214,0.06),rgba(101,86,112,0.05))] px-4 py-4">
               <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-full bg-[#0050d6]/12 text-[#0050d6]">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-[var(--color-primary)]/12 text-[#0050d6]">
                   <BookOpenCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#2c2f31]">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     {totalCompletedChapters} chapitre{totalCompletedChapters > 1 ? "s" : ""} validé
                     {totalCompletedChapters > 1 ? "s" : ""}
                   </p>
-                  <p className="text-xs text-[#2c2f31]/65">Complétés sur les cours suivis.</p>
+                  <p className="text-xs text-[var(--color-text)]/65">Complétés sur les cours suivis.</p>
                 </div>
               </div>
             </div>
@@ -701,11 +701,11 @@ export default async function LearnerDashboardPage() {
                   <Flame className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#2c2f31]">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     Record : {user.streak?.longestStreak ?? 0} jour
                     {(user.streak?.longestStreak ?? 0) > 1 ? "s" : ""}
                   </p>
-                  <p className="text-xs text-[#2c2f31]/65">Meilleure série.</p>
+                  <p className="text-xs text-[var(--color-text)]/65">Meilleure série.</p>
                 </div>
               </div>
             </div>

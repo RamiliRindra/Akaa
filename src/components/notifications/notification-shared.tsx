@@ -16,7 +16,7 @@ export const notificationTypeMeta: Record<
 > = {
   SESSION_REQUEST: {
     icon: CalendarClock,
-    accent: "bg-[#0F63FF]/10 text-[#0050d6]",
+    accent: "bg-[var(--color-primary-bright)]/10 text-[#0050d6]",
     label: "Demande",
   },
   SESSION_APPROVED: {

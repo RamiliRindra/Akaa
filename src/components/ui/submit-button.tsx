@@ -2,45 +2,39 @@
 
 import type { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
+import { Button, type ButtonProps } from "@/components/ui/button";
 
-import { Spinner } from "@/components/ui/spinner";
-
-type SubmitButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type SubmitButtonProps = Omit<ButtonProps, "type" | "loading"> & {
   pendingLabel?: string;
   pendingChildren?: ReactNode;
+  /** @deprecated Le spinner est toujours affiché pendant le chargement. */
   showSpinner?: boolean;
 };
 
 export function SubmitButton({
   children,
-  className,
-  disabled,
   pendingLabel,
   pendingChildren,
-  showSpinner = true,
-  type = "submit",
+  disabled,
+  variant = "primary",
+  size = "md",
+  showSpinner: _showSpinner,
   ...props
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();
 
-  const content = pending
-    ? (pendingChildren ?? (
-        <>
-          {showSpinner ? <Spinner className="h-4 w-4" /> : null}
-          <span>{pendingLabel ?? "Traitement..."}</span>
-        </>
-      ))
-    : children;
-
   return (
-    <button
-      type={type}
-      disabled={disabled || pending}
-      aria-busy={pending}
-      className={`${className ?? ""}${pending ? " cursor-wait" : ""}`}
+    <Button
+      type="submit"
+      variant={variant}
+      size={size}
+      loading={pending}
+      disabled={disabled}
       {...props}
     >
-      {content}
-    </button>
+      {pending
+        ? (pendingChildren ?? <span>{pendingLabel ?? "Traitement..."}</span>)
+        : children}
+    </Button>
   );
 }

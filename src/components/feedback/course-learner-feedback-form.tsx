@@ -30,8 +30,8 @@ export function CourseLearnerFeedbackForm({
     <div className="surface-section space-y-5 p-6 sm:p-8">
       <div>
         <p className="editorial-eyebrow">Votre avis</p>
-        <h2 className="font-display text-2xl font-black text-[#2c2f31]">Noter ce cours</h2>
-        <p className="mt-1 text-sm text-[#2c2f31]/70">
+        <h2 className="font-display text-2xl font-black text-[var(--color-text)]">Noter ce cours</h2>
+        <p className="mt-1 text-sm text-[var(--color-text)]/70">
           Note de 1 à 5 étoiles, commentaire facultatif. Vous pouvez modifier votre avis à tout moment.
         </p>
       </div>
@@ -43,7 +43,7 @@ export function CourseLearnerFeedbackForm({
           <span className="text-sm text-[#775600]/80">({reviewCount} avis)</span>
         </div>
       ) : (
-        <p className="text-sm text-[#2c2f31]/60">Soyez le premier à laisser une note sur ce cours.</p>
+        <p className="text-sm text-[var(--color-text)]/60">Soyez le premier à laisser une note sur ce cours.</p>
       )}
 
       <form action={submitLearnerCourseFeedbackAction} className="space-y-4">
@@ -52,7 +52,7 @@ export function CourseLearnerFeedbackForm({
         <input type="hidden" name="rating" value={rating > 0 ? String(rating) : ""} />
 
         <div className="space-y-2">
-          <span className="text-sm font-medium text-[#2c2f31]">Votre note</span>
+          <span className="text-sm font-medium text-[var(--color-text)]">Votre note</span>
           <Rating
             rating={rating > 0 ? rating : 0}
             maxRating={5}
@@ -65,7 +65,7 @@ export function CourseLearnerFeedbackForm({
           {rating === 0 ? <p className="text-xs text-[#ef4444]">Sélectionnez au moins une étoile.</p> : null}
         </div>
 
-        <label className="block space-y-2 text-sm font-medium text-[#2c2f31]">
+        <label className="block space-y-2 text-sm font-medium text-[var(--color-text)]">
           Commentaire (optionnel)
           <textarea
             name="comment"

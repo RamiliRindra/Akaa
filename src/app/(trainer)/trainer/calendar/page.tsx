@@ -81,8 +81,8 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
   return (
     <section className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Sessions de formation</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Sessions de formation</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Créez, planifiez et pilotez les inscriptions de vos sessions synchrones.
         </p>
       </div>
@@ -98,8 +98,8 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
         {/* ---------------------------------------------------------------- */}
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold text-[#0c0910]">Mes sessions</h3>
-            <p className="text-sm text-[#0c0910]/60">
+            <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Mes sessions</h3>
+            <p className="text-sm text-[var(--color-text-dark)]/60">
               Gérez vos sessions. Cliquez sur &laquo;&nbsp;Gestion&nbsp;&raquo; pour les inscriptions et le
               pointage de présence.
             </p>
@@ -123,7 +123,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                         {sessionAccessPolicyLabels[trainingSession.accessPolicy]}
                       </span>
                       {trainingSession.course ? (
-                        <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+                        <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                           {trainingSession.course.title}
                         </span>
                       ) : null}
@@ -133,28 +133,28 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                         </span>
                       ) : null}
                     </div>
-                    <h4 className="text-lg font-semibold text-[#0c0910]">
+                    <h4 className="text-lg font-semibold text-[var(--color-text-dark)]">
                       <Link
                         href={`/trainer/sessions/${trainingSession.id}`}
-                        className="hover:text-[#0F63FF]"
+                        className="hover:text-[var(--color-primary-bright)]"
                       >
                         {trainingSession.title}
                       </Link>
                     </h4>
-                    <p className="text-sm text-[#0c0910]/70">
+                    <p className="text-sm text-[var(--color-text-dark)]/70">
                       {formatDateTime(trainingSession.startsAt)} →{" "}
                       {formatDateTime(trainingSession.endsAt)}
                     </p>
                     {trainingSession.location ? (
-                      <p className="text-sm text-[#0c0910]/60">
+                      <p className="text-sm text-[var(--color-text-dark)]/60">
                         Lieu&nbsp;: {trainingSession.location}
                       </p>
                     ) : null}
                     {trainingSession.description ? (
-                      <p className="text-sm text-[#0c0910]/70">{trainingSession.description}</p>
+                      <p className="text-sm text-[var(--color-text-dark)]/70">{trainingSession.description}</p>
                     ) : null}
                     {trainingSession._count.enrollments > 0 ? (
-                      <p className="text-xs text-[#0c0910]/55">
+                      <p className="text-xs text-[var(--color-text-dark)]/55">
                         {trainingSession._count.enrollments} inscription
                         {trainingSession._count.enrollments > 1 ? "s" : ""}
                       </p>
@@ -165,7 +165,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                   <div className="flex shrink-0 flex-wrap items-start gap-2">
                     <Link
                       href={`/trainer/sessions/${trainingSession.id}`}
-                      className="inline-flex items-center justify-center rounded-xl border border-[#0F63FF]/30 bg-[#0F63FF]/5 px-4 py-2 text-sm font-semibold text-[#0F63FF] transition hover:bg-[#0F63FF]/10"
+                      className="inline-flex items-center justify-center rounded-xl border border-[#0F63FF]/30 bg-[var(--color-primary-bright)]/5 px-4 py-2 text-sm font-semibold text-[var(--color-primary-bright)] transition hover:bg-[var(--color-primary-bright)]/10"
                     >
                       Gestion
                     </Link>
@@ -189,11 +189,11 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                 {/* Inline edit form */}
                 <form
                   action={updateTrainingSessionAction}
-                  className="mt-5 grid gap-4 rounded-2xl bg-[#f7f9ff] p-4 md:grid-cols-2"
+                  className="mt-5 grid gap-4 rounded-2xl bg-[var(--color-surface-high)] p-4 md:grid-cols-2"
                 >
                   <input type="hidden" name="returnTo" value="/trainer/calendar" />
                   <input type="hidden" name="sessionId" value={trainingSession.id} />
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                     Titre
                     <input
                       name="title"
@@ -201,7 +201,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Début
                     <input
                       name="startsAt"
@@ -210,7 +210,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Fin
                     <input
                       name="endsAt"
@@ -219,7 +219,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Statut
                     <select
                       name="status"
@@ -233,7 +233,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       ))}
                     </select>
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Politique d&apos;accès
                     <select
                       name="accessPolicy"
@@ -247,7 +247,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       ))}
                     </select>
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     XP
                     <input
                       name="xpReward"
@@ -257,7 +257,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Journée entière
                     <select
                       name="isAllDay"
@@ -268,7 +268,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       <option value="true">Oui</option>
                     </select>
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Rappel
                     <input
                       name="reminderMinutes"
@@ -278,7 +278,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Lieu
                     <input
                       name="location"
@@ -286,7 +286,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Lien visio
                     <input
                       name="meetingUrl"
@@ -294,7 +294,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Cours lié
                     <select
                       name="courseId"
@@ -308,11 +308,11 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs font-normal text-[#0c0910]/55">
+                    <p className="text-xs font-normal text-[var(--color-text-dark)]/55">
                       Renseignez un seul rattachement.
                     </p>
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Parcours lié
                     <select
                       name="programId"
@@ -326,11 +326,11 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs font-normal text-[#0c0910]/55">
+                    <p className="text-xs font-normal text-[var(--color-text-dark)]/55">
                       Laissez vide si la session cible un cours.
                     </p>
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                     Description
                     <textarea
                       name="description"
@@ -339,7 +339,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                       className="form-textarea text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                     Récurrence
                     <input
                       name="recurrenceRule"
@@ -359,11 +359,11 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
               </article>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-              <h3 className="text-lg font-semibold text-[#0c0910]">
+            <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+              <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">
                 Aucune session pour le moment
               </h3>
-              <p className="mt-2 text-sm text-[#0c0910]/70">
+              <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
                 Créez votre première session pour ouvrir les inscriptions apprenantes.
               </p>
             </div>
@@ -375,10 +375,10 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
         {/* ---------------------------------------------------------------- */}
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold text-[#0c0910]">
+            <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">
               Sessions des autres formateurs
             </h3>
-            <p className="text-sm text-[#0c0910]/60">
+            <p className="text-sm text-[var(--color-text-dark)]/60">
               Lecture seule pour garder une vue globale du calendrier.
             </p>
           </div>
@@ -403,15 +403,15 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                         {trainingSession.trainer.name}
                       </span>
                     </div>
-                    <h4 className="font-semibold text-[#0c0910]">
+                    <h4 className="font-semibold text-[var(--color-text-dark)]">
                       <Link
                         href={`/trainer/sessions/${trainingSession.id}`}
-                        className="hover:text-[#0F63FF]"
+                        className="hover:text-[var(--color-primary-bright)]"
                       >
                         {trainingSession.title}
                       </Link>
                     </h4>
-                    <p className="text-sm text-[#0c0910]/65">
+                    <p className="text-sm text-[var(--color-text-dark)]/65">
                       {formatDateTime(trainingSession.startsAt)} →{" "}
                       {formatDateTime(trainingSession.endsAt)}
                     </p>
@@ -419,7 +419,7 @@ export default async function TrainerCalendarPage({ searchParams }: TrainerCalen
                 </article>
               ))
             ) : (
-              <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center text-sm text-[#0c0910]/60">
+              <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center text-sm text-[var(--color-text-dark)]/60">
                 Aucune autre session visible pour le moment.
               </div>
             )}

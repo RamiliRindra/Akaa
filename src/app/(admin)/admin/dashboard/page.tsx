@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
     {
       label: "Utilisateurs actifs",
       value: `${activeUsers} / ${totalUsers}`,
-      accent: "text-[#0F63FF]",
+      accent: "text-[var(--color-primary-bright)]",
       href: "/admin/users",
     },
     {
@@ -125,8 +125,8 @@ export default async function AdminDashboardPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Dashboard admin</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Dashboard admin</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Vue globale de l’exploitation : utilisateurs, catalogue, gamification et opérations récentes.
         </p>
       </div>
@@ -136,9 +136,9 @@ export default async function AdminDashboardPage() {
           <Link
             key={card.label}
             href={card.href}
-            className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5"
+            className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-5 shadow-sm transition hover:-translate-y-0.5"
           >
-            <p className="text-sm text-[#0c0910]/60">{card.label}</p>
+            <p className="text-sm text-[var(--color-text-dark)]/60">{card.label}</p>
             <p className={`mt-2 text-3xl font-bold ${card.accent}`}>{card.value}</p>
           </Link>
         ))}
@@ -146,13 +146,13 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_1fr]">
         <div className="space-y-6">
-          <section className="rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-[#0c0910]">Top apprenants</h3>
-                <p className="text-sm text-[#0c0910]/60">Classement interne actuel par XP total.</p>
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Top apprenants</h3>
+                <p className="text-sm text-[var(--color-text-dark)]/60">Classement interne actuel par XP total.</p>
               </div>
-              <Link href="/leaderboard" className="text-sm font-medium text-[#0F63FF] hover:underline">
+              <Link href="/leaderboard" className="text-sm font-medium text-[var(--color-primary-bright)] hover:underline">
                 Voir le leaderboard
               </Link>
             </div>
@@ -161,44 +161,44 @@ export default async function AdminDashboardPage() {
               {topLearners.map((learner, index) => (
                 <div
                   key={learner.id}
-                  className="flex items-center justify-between rounded-xl bg-[#f7f9ff] px-4 py-3"
+                  className="flex items-center justify-between rounded-xl bg-[var(--color-surface-high)] px-4 py-3"
                 >
                   <div>
-                    <p className="font-medium text-[#0c0910]">
+                    <p className="font-medium text-[var(--color-text-dark)]">
                       #{index + 1} {learner.name}
                     </p>
-                    <p className="text-sm text-[#0c0910]/60">{learner.email}</p>
+                    <p className="text-sm text-[var(--color-text-dark)]/60">{learner.email}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-[#0F63FF]">{learner.totalXp} XP</p>
-                    <p className="text-sm text-[#0c0910]/60">Niveau {learner.level}</p>
+                    <p className="font-semibold text-[var(--color-primary-bright)]">{learner.totalXp} XP</p>
+                    <p className="text-sm text-[var(--color-text-dark)]/60">Niveau {learner.level}</p>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-[#0c0910]">Derniers utilisateurs</h3>
-                <p className="text-sm text-[#0c0910]/60">Nouveaux comptes et statut d’activation.</p>
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Derniers utilisateurs</h3>
+                <p className="text-sm text-[var(--color-text-dark)]/60">Nouveaux comptes et statut d’activation.</p>
               </div>
-              <Link href="/admin/users" className="text-sm font-medium text-[#0F63FF] hover:underline">
+              <Link href="/admin/users" className="text-sm font-medium text-[var(--color-primary-bright)] hover:underline">
                 Gérer les comptes
               </Link>
             </div>
 
             <div className="mt-4 space-y-3">
               {recentUsers.map((user) => (
-                <div key={user.id} className="flex items-center justify-between rounded-xl bg-[#f7f9ff] px-4 py-3">
+                <div key={user.id} className="flex items-center justify-between rounded-xl bg-[var(--color-surface-high)] px-4 py-3">
                   <div>
-                    <p className="font-medium text-[#0c0910]">{user.name}</p>
-                    <p className="text-sm text-[#0c0910]/60">{user.email}</p>
+                    <p className="font-medium text-[var(--color-text-dark)]">{user.name}</p>
+                    <p className="text-sm text-[var(--color-text-dark)]/60">{user.email}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-[#0c0910]">{user.role}</p>
-                    <p className="text-xs text-[#0c0910]/60">
+                    <p className="text-sm font-medium text-[var(--color-text-dark)]">{user.role}</p>
+                    <p className="text-xs text-[var(--color-text-dark)]/60">
                       {user.isActive ? "Actif" : "Désactivé"} • {formatDate(user.createdAt)}
                     </p>
                   </div>
@@ -209,21 +209,21 @@ export default async function AdminDashboardPage() {
         </div>
 
         <div className="space-y-6">
-          <section className="rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-[#0c0910]">XP distribués</h3>
-            <p className="mt-1 text-sm text-[#0c0910]/60">
+          <section className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">XP distribués</h3>
+            <p className="mt-1 text-sm text-[var(--color-text-dark)]/60">
               Somme des transactions positives enregistrées sur la plateforme.
             </p>
             <p className="mt-4 text-4xl font-bold text-[#ffc857]">{xpDistributed._sum.amount ?? 0} XP</p>
           </section>
 
-          <section className="rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-[#0c0910]">Derniers ajustements admin</h3>
-                <p className="text-sm text-[#0c0910]/60">Transactions XP manuelles les plus récentes.</p>
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Derniers ajustements admin</h3>
+                <p className="text-sm text-[var(--color-text-dark)]/60">Transactions XP manuelles les plus récentes.</p>
               </div>
-              <Link href="/admin/xp" className="text-sm font-medium text-[#0F63FF] hover:underline">
+              <Link href="/admin/xp" className="text-sm font-medium text-[var(--color-primary-bright)] hover:underline">
                 Ajuster l’XP
               </Link>
             </div>
@@ -233,10 +233,10 @@ export default async function AdminDashboardPage() {
                 recentAdminAdjustments.map((adjustment) => (
                   <div
                     key={adjustment.id}
-                    className="rounded-xl bg-[#f7f9ff] px-4 py-3"
+                    className="rounded-xl bg-[var(--color-surface-high)] px-4 py-3"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="font-medium text-[#0c0910]">{adjustment.user.name}</p>
+                      <p className="font-medium text-[var(--color-text-dark)]">{adjustment.user.name}</p>
                       <p
                         className={`text-sm font-semibold ${
                           adjustment.amount >= 0 ? "text-[#119da4]" : "text-[#c2410c]"
@@ -246,9 +246,9 @@ export default async function AdminDashboardPage() {
                         {adjustment.amount} XP
                       </p>
                     </div>
-                    <p className="text-sm text-[#0c0910]/60">{adjustment.user.email}</p>
-                    <p className="mt-1 text-xs text-[#0c0910]/60">{adjustment.description ?? "Sans raison"}</p>
-                    <p className="mt-1 text-xs text-[#0c0910]/50">
+                    <p className="text-sm text-[var(--color-text-dark)]/60">{adjustment.user.email}</p>
+                    <p className="mt-1 text-xs text-[var(--color-text-dark)]/60">{adjustment.description ?? "Sans raison"}</p>
+                    <p className="mt-1 text-xs text-[var(--color-text-dark)]/50">
                       {new Intl.DateTimeFormat("fr-FR", {
                         dateStyle: "medium",
                         timeStyle: "short",
@@ -257,7 +257,7 @@ export default async function AdminDashboardPage() {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-[#0c0910]/60">Aucun ajustement manuel pour le moment.</p>
+                <p className="text-sm text-[var(--color-text-dark)]/60">Aucun ajustement manuel pour le moment.</p>
               )}
             </div>
           </section>

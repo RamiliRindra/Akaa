@@ -10,7 +10,7 @@ type XpLineChartProps = {
 export function XpLineChart({ points }: XpLineChartProps) {
   if (!points.length) {
     return (
-      <div className="panel-card px-4 py-6 text-sm text-[#2c2f31]/65">
+      <div className="panel-card px-4 py-6 text-sm text-[var(--color-text)]/65">
         Pas encore assez d’activité pour afficher une courbe d’évolution.
       </div>
     );
@@ -43,8 +43,8 @@ export function XpLineChart({ points }: XpLineChartProps) {
     <div className="panel-card p-4">
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-[#2c2f31]">Évolution récente</p>
-          <p className="text-xs text-[#2c2f31]/62">Progression cumulée sur les 7 derniers jours.</p>
+          <p className="text-sm font-semibold text-[var(--color-text)]">Évolution récente</p>
+          <p className="text-xs text-[var(--color-text)]/62">Progression cumulée sur les 7 derniers jours.</p>
         </div>
         <span className="chip chip-primary">{points[points.length - 1]?.value ?? 0} XP</span>
       </div>

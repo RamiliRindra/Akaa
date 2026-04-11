@@ -90,11 +90,11 @@ export function CourseCard({
                 {status ? <CourseStatusBadge status={status} /> : null}
               </div>
 
-              <h3 className="line-clamp-2 min-h-[2.5rem] font-display text-sm font-extrabold leading-snug text-[#2c2f31] sm:text-base">
+              <h3 className="line-clamp-2 min-h-[2.5rem] font-display text-sm font-extrabold leading-snug text-[var(--color-text)] sm:text-base">
                 {title}
               </h3>
 
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#2c2f31]/70">
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--color-text)]/70">
                 <span className="inline-flex items-center gap-1">
                   <Layers3 className="h-3 w-3 shrink-0" />
                   {moduleCount} module{moduleCount > 1 ? "s" : ""}
@@ -114,11 +114,11 @@ export function CourseCard({
 
             {typeof progressPercent === "number" ? (
               <div className="pointer-events-none space-y-1 px-3 pb-3 sm:px-4 sm:pb-4">
-                <div className="flex items-center justify-between text-[11px] font-medium text-[#2c2f31]/70">
+                <div className="flex items-center justify-between text-[11px] font-medium text-[var(--color-text)]/70">
                   <span>Progression</span>
                   <span>{progressPercent}%</span>
                 </div>
-                <div className="rounded-[1rem] bg-[#eef1f3] p-1">
+                <div className="rounded-[1rem] bg-[var(--color-surface-low)] p-1">
                   <div
                     className="h-2 rounded-full bg-[linear-gradient(90deg,#0050d6_0%,#119da4_100%)]"
                     style={{ width: `${progressPercent}%` }}
@@ -129,13 +129,13 @@ export function CourseCard({
           </div>
 
           {hasLearnerBlock && learnerPreview ? (
-            <div className="relative z-20 border-t border-[#0c0910]/10 bg-[#f7f9ff] p-3 sm:p-4">
+            <div className="relative z-20 border-t border-[var(--color-text-dark)]/10 bg-[var(--color-surface-high)] p-3 sm:p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-[#2c2f31]">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     {totalLearners} apprenant{totalLearners > 1 ? "s" : ""}
                   </p>
-                  <p className="text-xs text-[#2c2f31]/62">Dernières inscriptions.</p>
+                  <p className="text-xs text-[var(--color-text)]/62">Dernières inscriptions.</p>
                 </div>
                 <AvatarGroupMaxDemo
                   items={learnerPreview}
@@ -152,7 +152,7 @@ export function CourseCard({
                 <div className="mt-3">
                   <Link
                     href={learnersHref}
-                    className="relative z-30 inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-3 py-2 text-xs font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5 sm:text-sm"
+                    className="relative z-30 inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white px-3 py-2 text-xs font-semibold text-[var(--color-text-dark)] transition hover:bg-[var(--color-primary-bright)]/5 sm:text-sm"
                   >
                     Voir tous les apprenants
                   </Link>
@@ -164,8 +164,8 @@ export function CourseCard({
       </HoverCardTrigger>
 
       <HoverCardContent side="right" align="start">
-        <p className="font-display text-base font-bold leading-snug text-[#0c0910]">{title}</p>
-        <p className="mt-3 text-sm leading-relaxed text-[#0c0910]/78">{descriptionText}</p>
+        <p className="font-display text-base font-bold leading-snug text-[var(--color-text-dark)]">{title}</p>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-dark)]/78">{descriptionText}</p>
       </HoverCardContent>
     </HoverCard>
   );

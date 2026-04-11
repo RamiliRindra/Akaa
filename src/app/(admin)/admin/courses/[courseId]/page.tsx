@@ -78,21 +78,21 @@ export default async function AdminCourseDetailPage({ params }: AdminCourseDetai
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <Link href="/admin/courses" className="text-sm font-medium text-[#0F63FF] hover:underline">
+        <Link href="/admin/courses" className="text-sm font-medium text-[var(--color-primary-bright)] hover:underline">
           ← Retour à la supervision des cours
         </Link>
-        <h2 className="text-2xl font-bold text-[#0c0910]">Vue admin du cours</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Vue admin du cours</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Consultation en lecture depuis l’espace admin. Vous pouvez ensuite ouvrir l’édition formateur si nécessaire.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               {course.category?.name ? (
-                <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+                <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                   {course.category.name}
                 </span>
               ) : null}
@@ -103,13 +103,13 @@ export default async function AdminCourseDetailPage({ params }: AdminCourseDetai
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold text-[#0c0910]">{course.title}</h1>
-              <p className="mt-2 max-w-3xl text-sm text-[#0c0910]/70">
+              <h1 className="text-3xl font-bold text-[var(--color-text-dark)]">{course.title}</h1>
+              <p className="mt-2 max-w-3xl text-sm text-[var(--color-text-dark)]/70">
                 {course.description?.trim() || "Aucune description n’a encore été renseignée pour ce cours."}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4 text-sm text-[#0c0910]/70">
+            <div className="flex flex-wrap gap-4 text-sm text-[var(--color-text-dark)]/70">
               <span>Formateur : {course.trainer.name}</span>
               <span>{course.trainer.email}</span>
               {course.estimatedHours ? (
@@ -126,20 +126,20 @@ export default async function AdminCourseDetailPage({ params }: AdminCourseDetai
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
             <Link
               href={`/admin/courses`}
-              className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white px-4 py-2 text-sm font-semibold text-[var(--color-text-dark)] transition hover:bg-[var(--color-primary-bright)]/5"
             >
               Voir tous les cours
             </Link>
             <Link
               href={`/courses/${course.slug}`}
-              className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white px-4 py-2 text-sm font-semibold text-[var(--color-text-dark)] transition hover:bg-[var(--color-primary-bright)]/5"
             >
               <PlayCircle className="mr-2 h-4 w-4" />
               Prévisualiser côté plateforme
             </Link>
             <Link
               href={`/trainer/courses/${course.id}/edit`}
-              className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
+              className="inline-flex items-center justify-center rounded-xl bg-[var(--color-primary-bright)] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[var(--color-primary-bright)]/90"
             >
               <SquarePen className="mr-2 h-4 w-4" />
               Ouvrir l’édition
@@ -150,29 +150,29 @@ export default async function AdminCourseDetailPage({ params }: AdminCourseDetai
 
       <div className="space-y-4">
         {course.modules.map((module) => (
-          <article key={module.id} className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
+          <article key={module.id} className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-5 shadow-sm">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-[#453750]">Module {module.order}</p>
-              <h3 className="text-xl font-semibold text-[#0c0910]">{module.title}</h3>
-              {module.description ? <p className="text-sm text-[#0c0910]/70">{module.description}</p> : null}
+              <h3 className="text-xl font-semibold text-[var(--color-text-dark)]">{module.title}</h3>
+              {module.description ? <p className="text-sm text-[var(--color-text-dark)]/70">{module.description}</p> : null}
             </div>
 
             <div className="mt-4 space-y-2">
               {module.chapters.map((chapter, index) => (
                 <div
                   key={chapter.id}
-                  className="flex flex-col gap-2 rounded-xl border border-[#0c0910]/10 px-4 py-3 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-2 rounded-xl border border-[var(--color-text-dark)]/10 px-4 py-3 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
-                    <p className="font-medium text-[#0c0910]">
+                    <p className="font-medium text-[var(--color-text-dark)]">
                       {index + 1}. {chapter.title}
                     </p>
-                    <p className="text-xs text-[#0c0910]/60">
+                    <p className="text-xs text-[var(--color-text-dark)]/60">
                       {chapter.estimatedMinutes ? `${chapter.estimatedMinutes} min` : "Durée non renseignée"}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                    <span className="rounded-full bg-[#0c0910]/5 px-2.5 py-1 text-[#0c0910]/70">
+                    <span className="rounded-full bg-(--color-text-dark)/5 px-2.5 py-1 text-[var(--color-text-dark)]/70">
                       {chapter.videoType === "NONE" ? "Sans vidéo" : chapter.videoType}
                     </span>
                     <span

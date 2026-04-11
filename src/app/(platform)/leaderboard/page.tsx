@@ -51,14 +51,14 @@ export default async function LeaderboardPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-[#0c0910]">Leaderboard</h1>
-        <p className="text-sm text-[#0c0910]/70">
+        <h1 className="text-2xl font-bold text-[var(--color-text-dark)]">Leaderboard</h1>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Classement général des apprenants selon leur XP total.
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#0c0910]/10 bg-white shadow-sm">
-        <div className="grid grid-cols-[72px_minmax(0,1fr)_110px_90px] gap-3 border-b border-[#0c0910]/10 bg-[#f7f9ff] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#0c0910]/60">
+      <div className="overflow-hidden rounded-2xl border border-[var(--color-text-dark)]/10 bg-white shadow-sm">
+        <div className="grid grid-cols-[72px_minmax(0,1fr)_110px_90px] gap-3 border-b border-[var(--color-text-dark)]/10 bg-[var(--color-surface-high)] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/60">
           <span>Rang</span>
           <span>Utilisateur</span>
           <span>XP</span>
@@ -77,12 +77,12 @@ export default async function LeaderboardPage() {
                 <div
                   className={`grid h-10 w-10 place-items-center rounded-full text-sm font-bold ${
                     index === 0
-                      ? "bg-[#ffc857] text-[#0c0910]"
+                      ? "bg-[#ffc857] text-[var(--color-text-dark)]"
                       : index === 1
-                        ? "bg-[#d9dde8] text-[#0c0910]"
+                        ? "bg-[#d9dde8] text-[var(--color-text-dark)]"
                         : index === 2
                           ? "bg-[#d4a373] text-white"
-                          : "bg-[#0F63FF]/10 text-[#0F63FF]"
+                          : "bg-[var(--color-primary-bright)]/10 text-[var(--color-primary-bright)]"
                   }`}
                 >
                   #{index + 1}
@@ -93,14 +93,14 @@ export default async function LeaderboardPage() {
                 {user.image ? (
                   <Image src={user.image} alt={user.name} width={44} height={44} className="h-11 w-11 rounded-full object-cover" />
                 ) : (
-                  <div className="grid h-11 w-11 place-items-center rounded-full bg-[#0F63FF] text-sm font-bold text-white">
+                  <div className="grid h-11 w-11 place-items-center rounded-full bg-[var(--color-primary-bright)] text-sm font-bold text-white">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                 )}
 
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-[#0c0910]">{user.name}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#0c0910]/60">
+                  <p className="truncate font-semibold text-[var(--color-text-dark)]">{user.name}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-dark)]/60">
                     <span>Streak : {user.streak?.currentStreak ?? 0}</span>
                     {user.badges[0] ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-[#453750]/10 px-2 py-0.5 text-[#453750]">
@@ -119,7 +119,7 @@ export default async function LeaderboardPage() {
               </div>
 
               <div className="flex items-center font-semibold text-[#453750]">{user.totalXp} XP</div>
-              <div className="flex items-center font-semibold text-[#0F63FF]">Niv. {user.level}</div>
+              <div className="flex items-center font-semibold text-[var(--color-primary-bright)]">Niv. {user.level}</div>
             </article>
           ))}
         </div>

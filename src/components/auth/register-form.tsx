@@ -58,11 +58,11 @@ export function RegisterForm() {
       className="space-y-4"
     >
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[#0c0910]" htmlFor="name">
+        <label className="text-sm font-medium text-[var(--color-text-dark)]" htmlFor="name">
           Nom complet
         </label>
         <div className="relative">
-          <UserRound className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <UserRound className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[var(--color-text-dark)]/50" />
           <input
             id="name"
             type="text"
@@ -76,11 +76,11 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[#0c0910]" htmlFor="email">
+        <label className="text-sm font-medium text-[var(--color-text-dark)]" htmlFor="email">
           Email
         </label>
         <div className="relative">
-          <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[var(--color-text-dark)]/50" />
           <input
             id="email"
             type="email"
@@ -94,11 +94,11 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[#0c0910]" htmlFor="password">
+        <label className="text-sm font-medium text-[var(--color-text-dark)]" htmlFor="password">
           Mot de passe
         </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[var(--color-text-dark)]/50" />
           <input
             id="password"
             type={showPassword ? "text" : "password"}
@@ -112,7 +112,7 @@ export function RegisterForm() {
             type="button"
             data-interactive="true"
             onClick={() => setShowPassword((value) => !value)}
-            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 text-[var(--color-text-dark)]/60 transition hover:text-[var(--color-text-dark)]"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -120,11 +120,11 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[#0c0910]" htmlFor="confirmPassword">
+        <label className="text-sm font-medium text-[var(--color-text-dark)]" htmlFor="confirmPassword">
           Confirmer le mot de passe
         </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#0c0910]/50" />
+          <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[var(--color-text-dark)]/50" />
           <input
             id="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
@@ -140,7 +140,7 @@ export function RegisterForm() {
             type="button"
             data-interactive="true"
             onClick={() => setShowConfirmPassword((value) => !value)}
-            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 text-[#0c0910]/60 transition hover:text-[#0c0910]"
+            className="absolute right-4 top-1/2 z-10 -translate-y-1/2 text-[var(--color-text-dark)]/60 transition hover:text-[var(--color-text-dark)]"
           >
             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -160,9 +160,9 @@ export function RegisterForm() {
         {isPending ? "Création du compte..." : "Créer mon compte"}
       </motion.button>
 
-      <p className="text-center text-sm text-[#0c0910]/70">
+      <p className="text-center text-sm text-[var(--color-text-dark)]/70">
         Déjà inscrit ?{" "}
-        <Link className="font-semibold text-[#0F63FF] hover:underline" href="/login">
+        <Link className="font-semibold text-[var(--color-primary-bright)] hover:underline" href="/login">
           Se connecter
         </Link>
       </p>

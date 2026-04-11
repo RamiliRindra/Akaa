@@ -15,8 +15,8 @@ export function SectionLoading({ eyebrow, title, description }: SectionLoadingPr
         </div>
         <div className="space-y-2">
           <p className="editorial-eyebrow">{eyebrow}</p>
-          <h2 className="font-display text-2xl font-black text-[#2c2f31]">{title}</h2>
-          <p className="text-sm leading-6 text-[#2c2f31]/68">{description}</p>
+          <h2 className="font-display text-2xl font-black text-[var(--color-text)]">{title}</h2>
+          <p className="text-sm leading-6 text-[var(--color-text)]/68">{description}</p>
         </div>
       </div>
     </div>

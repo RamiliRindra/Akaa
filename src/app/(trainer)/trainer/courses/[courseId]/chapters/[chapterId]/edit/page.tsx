@@ -86,19 +86,19 @@ export default async function EditChapterPage({ params, searchParams }: EditChap
       <div className="space-y-2">
         <Link
           href={`/trainer/courses/${courseId}/edit`}
-          className="text-sm font-medium text-[#0F63FF] hover:underline"
+          className="text-sm font-medium text-[var(--color-primary-bright)] hover:underline"
         >
           ← Retour à l’édition du cours
         </Link>
-        <h2 className="text-2xl font-bold text-[#0c0910]">{chapter.title}</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">{chapter.title}</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Cours : {chapter.module.course.title} • Module : {chapter.module.title}
         </p>
       </div>
 
       <FormFeedback type={feedback.type} message={feedback.message} />
 
-      <div className="rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
         <ChapterEditorForm
           action={updateChapterAction}
           courseId={courseId}

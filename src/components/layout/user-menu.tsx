@@ -83,7 +83,7 @@ export function UserMenu({ name, email, image, role, workspace, className, onNav
             className="ambient-ring absolute bottom-[calc(100%+0.65rem)] left-0 right-0 z-20 overflow-hidden rounded-[1.35rem] bg-white/96 p-2 shadow-[0_20px_45px_-24px_rgba(44,47,49,0.42)] backdrop-blur"
           >
             {workspaces.length > 1 ? (
-              <div className="mb-1 space-y-1 rounded-[1rem] bg-[#f7f9ff] p-2">
+              <div className="mb-1 space-y-1 rounded-[1rem] bg-[var(--color-surface-high)] p-2">
                 {workspaces.map((item) => {
                   const isActive = item === workspace;
 
@@ -98,8 +98,8 @@ export function UserMenu({ name, email, image, role, workspace, className, onNav
                       }}
                       className={`flex items-center justify-between rounded-[0.9rem] px-3 py-2.5 text-sm font-medium ${
                         isActive
-                          ? "bg-[#0F63FF] !text-white"
-                          : "text-[#0c0910]/76 hover:bg-white hover:text-[#0050d6]"
+                          ? "bg-[var(--color-primary-bright)] !text-white"
+                          : "text-[var(--color-text-dark)]/76 hover:bg-white hover:text-[#0050d6]"
                       }`}
                     >
                       <span>{workspaceLabels[item]}</span>
@@ -121,9 +121,9 @@ export function UserMenu({ name, email, image, role, workspace, className, onNav
                 setOpen(false);
                 onNavigate?.();
               }}
-              className="flex items-center gap-3 rounded-[1rem] px-3 py-3 text-sm font-medium text-[#0c0910]/82 hover:bg-[#0F63FF]/6 hover:text-[#0050d6]"
+              className="flex items-center gap-3 rounded-[1rem] px-3 py-3 text-sm font-medium text-[var(--color-text-dark)]/82 hover:bg-[var(--color-primary-bright)]/6 hover:text-[#0050d6]"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#eef1f3]">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-surface-low)]">
                 <UserRound className="h-4 w-4" />
               </span>
               <span>{destinationLabel}</span>
@@ -138,9 +138,9 @@ export function UserMenu({ name, email, image, role, workspace, className, onNav
                 setOpen(false);
                 onNavigate?.();
               }}
-              className="flex items-center gap-3 rounded-[1rem] px-3 py-3 text-sm font-medium text-[#0c0910]/82 transition hover:bg-[#0F63FF]/6 hover:text-[#0050d6]"
+              className="flex items-center gap-3 rounded-[1rem] px-3 py-3 text-sm font-medium text-[var(--color-text-dark)]/82 transition hover:bg-[var(--color-primary-bright)]/6 hover:text-[#0050d6]"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#eef1f3]">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-surface-low)]">
                 <CircleHelp className="h-4 w-4" aria-hidden />
               </span>
               <span>Centre d’aide</span>
@@ -155,9 +155,9 @@ export function UserMenu({ name, email, image, role, workspace, className, onNav
                 });
               }}
               disabled={isPending}
-              className="flex w-full items-center gap-3 rounded-[1rem] px-3 py-3 text-sm font-medium text-[#0c0910]/82 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center gap-3 rounded-[1rem] px-3 py-3 text-sm font-medium text-[var(--color-text-dark)]/82 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#eef1f3]">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-surface-low)]">
                 {isPending ? <Spinner className="h-4 w-4" /> : <LogOut className="h-4 w-4" />}
               </span>
               <span>{isPending ? "Déconnexion..." : "Déconnexion"}</span>
@@ -189,17 +189,17 @@ export function UserMenu({ name, email, image, role, workspace, className, onNav
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold text-[#0c0910]">{name}</span>
-          <span className="block truncate text-xs text-[#0c0910]/58">
+          <span className="block truncate text-sm font-semibold text-[var(--color-text-dark)]">{name}</span>
+          <span className="block truncate text-xs text-[var(--color-text-dark)]/58">
             {email ?? roleLabels[role]}
           </span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-1">
-          <span className="rounded-full bg-[#0F63FF]/10 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0050d6]">
+          <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0050d6]">
             {roleLabels[role]}
           </span>
           <ChevronUp
-            className={`h-4 w-4 text-[#0c0910]/46 transition-transform ${open ? "" : "rotate-180"}`}
+            className={`h-4 w-4 text-[var(--color-text-dark)]/46 transition-transform ${open ? "" : "rotate-180"}`}
           />
         </span>
       </button>

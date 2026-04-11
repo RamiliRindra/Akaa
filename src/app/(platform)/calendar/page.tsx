@@ -84,8 +84,8 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
   return (
     <section className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Mon calendrier</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Mon calendrier</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Retrouvez vos sessions approuvées, vos demandes en attente et les prochaines formations disponibles.
         </p>
       </div>
@@ -95,8 +95,8 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_0.95fr]">
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold text-[#0c0910]">Mes inscriptions</h3>
-            <p className="text-sm text-[#0c0910]/60">
+            <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Mes inscriptions</h3>
+            <p className="text-sm text-[var(--color-text-dark)]/60">
               Sessions en attente ou déjà approuvées par le formateur.
             </p>
           </div>
@@ -118,22 +118,22 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
                           {sessionAccessPolicyLabels[enrollment.session.accessPolicy]}
                         </span>
                         {enrollment.session.course ? (
-                          <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+                          <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                             {enrollment.session.course.title}
                           </span>
                         ) : null}
                       </div>
-                      <h4 className="text-lg font-semibold text-[#0c0910]">
-                        <Link href={`/calendar/sessions/${enrollment.session.id}`} className="hover:text-[#0F63FF]">
+                      <h4 className="text-lg font-semibold text-[var(--color-text-dark)]">
+                        <Link href={`/calendar/sessions/${enrollment.session.id}`} className="hover:text-[var(--color-primary-bright)]">
                           {enrollment.session.title}
                         </Link>
                       </h4>
-                      <p className="text-sm text-[#0c0910]/70">
+                      <p className="text-sm text-[var(--color-text-dark)]/70">
                         {formatDateTime(enrollment.session.startsAt)} → {formatDateTime(enrollment.session.endsAt)}
                       </p>
-                      <p className="text-sm text-[#0c0910]/60">Formateur : {enrollment.session.trainer.name}</p>
+                      <p className="text-sm text-[var(--color-text-dark)]/60">Formateur : {enrollment.session.trainer.name}</p>
                       {enrollment.session.location ? (
-                        <p className="text-sm text-[#0c0910]/60">Lieu : {enrollment.session.location}</p>
+                        <p className="text-sm text-[var(--color-text-dark)]/60">Lieu : {enrollment.session.location}</p>
                       ) : null}
                     </div>
 
@@ -154,9 +154,9 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-              <h3 className="text-lg font-semibold text-[#0c0910]">Aucune session réservée</h3>
-              <p className="mt-2 text-sm text-[#0c0910]/70">
+            <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+              <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucune session réservée</h3>
+              <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
                 Explorez les prochaines sessions disponibles pour faire une demande d’inscription.
               </p>
             </div>
@@ -165,8 +165,8 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold text-[#0c0910]">Sessions disponibles</h3>
-            <p className="text-sm text-[#0c0910]/60">
+            <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Sessions disponibles</h3>
+            <p className="text-sm text-[var(--color-text-dark)]/60">
               Catalogue des prochaines sessions ouvertes à l’inscription.
             </p>
           </div>
@@ -189,20 +189,20 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
                         </span>
                       ) : null}
                     </div>
-                    <h4 className="text-lg font-semibold text-[#0c0910]">
-                      <Link href={`/calendar/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                    <h4 className="text-lg font-semibold text-[var(--color-text-dark)]">
+                      <Link href={`/calendar/sessions/${trainingSession.id}`} className="hover:text-[var(--color-primary-bright)]">
                         {trainingSession.title}
                       </Link>
                     </h4>
-                    <p className="text-sm text-[#0c0910]/70">
+                    <p className="text-sm text-[var(--color-text-dark)]/70">
                       {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                     </p>
-                    <p className="text-sm text-[#0c0910]/60">Formateur : {trainingSession.trainer.name}</p>
+                    <p className="text-sm text-[var(--color-text-dark)]/60">Formateur : {trainingSession.trainer.name}</p>
                     {trainingSession.location ? (
-                      <p className="text-sm text-[#0c0910]/60">Lieu : {trainingSession.location}</p>
+                      <p className="text-sm text-[var(--color-text-dark)]/60">Lieu : {trainingSession.location}</p>
                     ) : null}
                     {trainingSession.description ? (
-                      <p className="text-sm text-[#0c0910]/70">{trainingSession.description}</p>
+                      <p className="text-sm text-[var(--color-text-dark)]/70">{trainingSession.description}</p>
                     ) : null}
                   </div>
 
@@ -216,9 +216,9 @@ export default async function PlatformCalendarPage({ searchParams }: PlatformCal
                 </article>
               ))
             ) : (
-              <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-                <h3 className="text-lg font-semibold text-[#0c0910]">Aucune session disponible</h3>
-                <p className="mt-2 text-sm text-[#0c0910]/70">
+              <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucune session disponible</h3>
+                <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
                   Les nouvelles sessions ouvertes apparaîtront ici automatiquement.
                 </p>
               </div>

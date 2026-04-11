@@ -53,8 +53,8 @@ export default async function AdminCoursesPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Administration des cours</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Administration des cours</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Supervisez l’ensemble du catalogue, consultez les cours dans l’espace admin et ouvrez l’édition si nécessaire.
         </p>
       </div>
@@ -76,16 +76,16 @@ export default async function AdminCoursesPage() {
                 status={course.status}
                 href={`/admin/courses/${course.id}`}
               />
-              <div className="rounded-xl bg-white px-4 py-3 text-sm text-[#0c0910]/70 ring-1 ring-[#0c0910]/10">
-                Formateur : <span className="font-medium text-[#0c0910]">{course.trainer.name}</span> ({course.trainer.email})
+              <div className="rounded-xl bg-white px-4 py-3 text-sm text-[var(--color-text-dark)]/70 ring-1 ring-[#0c0910]/10">
+                Formateur : <span className="font-medium text-[var(--color-text-dark)]">{course.trainer.name}</span> ({course.trainer.email})
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Aucun cours dans le catalogue</h3>
-          <p className="mt-2 text-sm text-[#0c0910]/70">
+        <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucun cours dans le catalogue</h3>
+          <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
             Les cours créés par les formateurs apparaîtront ici automatiquement.
           </p>
         </div>

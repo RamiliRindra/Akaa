@@ -1,4 +1,5 @@
 import Image from "next/image";
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -15,14 +16,14 @@ export function RichContentRenderer({ content }: RichContentRendererProps) {
 
   if (!markdown) {
     return (
-      <div className="panel-card px-5 py-6 text-sm text-[#2c2f31]/65">
+      <div className="course-reading-area text-sm text-[var(--color-text)]/65">
         Aucun contenu de chapitre n’a encore été rédigé.
       </div>
     );
   }
 
   return (
-    <div className="panel-card px-5 py-6 sm:px-8 sm:py-8">
+    <div className="course-reading-area">
       <div className="course-markdown">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkBreaks]}
@@ -31,7 +32,25 @@ export function RichContentRenderer({ content }: RichContentRendererProps) {
             h2: ({ children }) => <h2 className="course-markdown-h2">{children}</h2>,
             h3: ({ children }) => <h3 className="course-markdown-h3">{children}</h3>,
             h4: ({ children }) => <h4 className="course-markdown-h4">{children}</h4>,
-            p: ({ children }) => <p className="course-markdown-p">{children}</p>,
+            p: ({ children }) => {
+              // ReactMarkdown wraps block-level images in a <p>. Since our img override
+              // returns a <figure>, that would produce invalid HTML (<figure> inside <p>)
+              // and a hydration error. If any child is an image element (detected via a
+              // `src` prop — present on the React element BEFORE our img override runs),
+              // skip the <p> wrapper entirely.
+              const childArray = React.Children.toArray(children).filter(
+                (child) => !(typeof child === "string" && child.trim() === ""),
+              );
+              const hasImage = childArray.some(
+                (child) =>
+                  React.isValidElement(child) &&
+                  typeof (child.props as { src?: unknown }).src === "string",
+              );
+              if (hasImage) {
+                return <>{children}</>;
+              }
+              return <p className="course-markdown-p">{children}</p>;
+            },
             ul: ({ children }) => <ul className="course-markdown-ul">{children}</ul>,
             ol: ({ children }) => <ol className="course-markdown-ol">{children}</ol>,
             li: ({ children }) => <li className="course-markdown-li">{children}</li>,

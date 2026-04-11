@@ -67,7 +67,7 @@ export function Header({
               placeholder="Rechercher dans vos formations…"
               title="Fonctionnalité à venir"
               aria-label="Recherche (bientôt disponible)"
-              className="w-full max-w-md rounded-full border-0 bg-[#eef1f3] py-2 pl-12 pr-4 text-sm text-[#2c2f31] outline-none ring-[#0050d6]/20 transition placeholder:text-[#64748b] focus:ring-2"
+              className="w-full max-w-md rounded-full border-0 bg-[var(--color-surface-low)] py-2 pl-12 pr-4 text-sm text-[var(--color-text)] outline-none ring-[#0050d6]/20 transition placeholder:text-[#64748b] focus:ring-2"
             />
           </div>
         ) : null}
@@ -76,7 +76,7 @@ export function Header({
           <div
             className={`order-1 min-w-0 lg:order-2 ${showGlobalSearch ? "flex-1 lg:flex-none" : "flex-1"}`}
           >
-            <h1 className="font-display truncate text-lg font-extrabold text-[#0c0910] sm:text-2xl">{title}</h1>
+            <h1 className="font-display truncate text-lg font-extrabold text-[var(--color-text-dark)] sm:text-2xl">{title}</h1>
           </div>
         ) : null}
 
@@ -95,7 +95,7 @@ export function Header({
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2 rounded-full bg-[#0050d6] px-2.5 py-1.5 text-white shadow-sm sm:px-3"
+                className="flex items-center gap-2 rounded-full bg-[var(--color-primary)] px-2.5 py-1.5 text-white shadow-sm sm:px-3"
               >
                 <span className="text-[10px] font-bold uppercase tracking-wide text-white">
                   Niv. {level}

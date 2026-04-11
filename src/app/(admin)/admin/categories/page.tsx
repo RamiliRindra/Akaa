@@ -53,8 +53,8 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Catégories de formation</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Catégories de formation</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Gérez le référentiel des catégories affichées dans le catalogue et dans le builder de cours.
         </p>
       </div>
@@ -63,16 +63,16 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
 
       <form
         action={createCategoryAction}
-        className="grid gap-4 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm lg:grid-cols-2"
+        className="grid gap-4 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm lg:grid-cols-2"
       >
         <div className="space-y-2 lg:col-span-2">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Créer une catégorie</h3>
-          <p className="text-sm text-[#0c0910]/60">
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Créer une catégorie</h3>
+          <p className="text-sm text-[var(--color-text-dark)]/60">
             Les catégories actives sont proposées aux formateurs lors de la création et de l’import des cours.
           </p>
         </div>
 
-        <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+        <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
           Nom
           <input
             name="name"
@@ -82,7 +82,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
           />
         </label>
 
-        <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+        <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
           Description
           <textarea
             name="description"
@@ -97,7 +97,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Ordre
             <input
               name="order"
@@ -108,7 +108,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
               className="form-input text-sm"
             />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             État
             <select
               name="isActive"
@@ -133,7 +133,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
         {categories.map((category) => (
           <article
             key={category.id}
-            className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-5 shadow-sm"
           >
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <span
@@ -142,8 +142,8 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
               >
                 <CategoryIcon iconName={category.icon} className="h-4 w-4" />
               </span>
-              <span className="text-lg font-semibold text-[#0c0910]">{category.name}</span>
-              <span className="rounded-full bg-[#0c0910]/5 px-2.5 py-1 text-xs font-medium text-[#0c0910]/70">
+              <span className="text-lg font-semibold text-[var(--color-text-dark)]">{category.name}</span>
+              <span className="rounded-full bg-(--color-text-dark)/5 px-2.5 py-1 text-xs font-medium text-[var(--color-text-dark)]/70">
                 {category.slug}
               </span>
               <span
@@ -155,14 +155,14 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
               >
                 {category.isActive ? "Active" : "Inactive"}
               </span>
-              <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+              <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                 {category._count.courses} cours
               </span>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[1fr_auto]">
               <form action={updateCategoryAction.bind(null, category.id)} className="grid gap-4 lg:grid-cols-2">
-                <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                   Nom
                   <input
                     name="name"
@@ -172,7 +172,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                   />
                 </label>
 
-                <label className="space-y-2 text-sm font-medium text-[#0c0910] lg:col-span-2">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] lg:col-span-2">
                   Description
                   <textarea
                     name="description"
@@ -187,7 +187,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Ordre
                     <input
                       name="order"
@@ -198,7 +198,7 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
                       className="form-input text-sm"
                     />
                   </label>
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     État
                     <select
                       name="isActive"

@@ -84,21 +84,21 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
     <section className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[#0c0910]">Gestion des cours</h2>
-          <p className="text-sm text-[#0c0910]/70">
+          <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Gestion des cours</h2>
+          <p className="text-sm text-[var(--color-text-dark)]/70">
             Créez vos cours, structurez-les en modules et pilotez leur publication.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/trainer/courses/import"
-            className="inline-flex items-center justify-center rounded-xl border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0F63FF]/5"
+            className="inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white px-4 py-2 text-sm font-semibold text-[var(--color-text-dark)] transition hover:bg-[var(--color-primary-bright)]/5"
           >
             Importer un cours
           </Link>
           <Link
             href="/trainer/courses/new"
-            className="inline-flex items-center justify-center rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
+            className="inline-flex items-center justify-center rounded-xl bg-[var(--color-primary-bright)] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[var(--color-primary-bright)]/90"
           >
             Nouveau cours
           </Link>
@@ -134,9 +134,9 @@ export default async function TrainerCoursesPage({ searchParams }: TrainerCourse
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Aucun cours pour le moment</h3>
-          <p className="mt-2 text-sm text-[#0c0910]/70">
+        <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucun cours pour le moment</h3>
+          <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
             Lancez votre premier cours pour alimenter le catalogue apprenant.
           </p>
         </div>

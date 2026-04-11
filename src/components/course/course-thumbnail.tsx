@@ -26,7 +26,7 @@ export function CourseThumbnail({
   return (
     <div
       className={cn(
-        "relative aspect-[16/9] w-full overflow-hidden bg-[#eef1f3]",
+        "relative aspect-[16/9] w-full overflow-hidden bg-[var(--color-surface-low)]",
         roundedClassName,
         className,
       )}
@@ -42,7 +42,7 @@ export function CourseThumbnail({
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#E8F0FF] to-[#eef1f3]">
-          <BookOpen className="h-12 w-12 text-[#0F63FF]/25" aria-hidden />
+          <BookOpen className="h-12 w-12 text-[var(--color-primary-bright)]/25" aria-hidden />
         </div>
       )}
     </div>

@@ -37,31 +37,31 @@ export function ProgramDetailPanel({ program, backHref, sessionDetailHref }: Pro
   return (
     <section className="mx-auto max-w-3xl space-y-8">
       <div>
-        <Link href={backHref} className="text-sm font-semibold text-[#0050d6] hover:text-[#0F63FF]">
+        <Link href={backHref} className="text-sm font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]">
           ← Retour aux parcours
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getProgramStatusClassName(program.status)}`}>
             {programStatusLabels[program.status]}
           </span>
-          <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+          <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
             {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
           </span>
         </div>
-        <h1 className="mt-2 font-display text-2xl font-bold text-[#0c0910]">{program.title}</h1>
-        <p className="mt-1 text-sm text-[#0c0910]/60">Formateur : {program.trainer.name}</p>
+        <h1 className="mt-2 font-display text-2xl font-bold text-[var(--color-text-dark)]">{program.title}</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-dark)]/60">Formateur : {program.trainer.name}</p>
         {program.description ? (
-          <p className="mt-4 text-sm leading-7 text-[#0c0910]/72">{program.description}</p>
+          <p className="mt-4 text-sm leading-7 text-[var(--color-text-dark)]/72">{program.description}</p>
         ) : null}
       </div>
 
-      <div className="space-y-3 rounded-2xl bg-[#f7f9ff] p-5">
-        <p className="text-sm font-semibold text-[#0c0910]">Cours inclus</p>
+      <div className="space-y-3 rounded-2xl bg-[var(--color-surface-high)] p-5">
+        <p className="text-sm font-semibold text-[var(--color-text-dark)]">Cours inclus</p>
         {program.courses.length ? (
           program.courses.map((programCourse) => (
             <div key={programCourse.id} className="rounded-xl bg-white p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-medium text-[#0c0910]">
+                <p className="font-medium text-[var(--color-text-dark)]">
                   {programCourse.order}. {programCourse.course.title}
                 </p>
                 <span className="rounded-full bg-[#655670]/10 px-2 py-1 text-xs font-semibold text-[#655670]">
@@ -69,30 +69,30 @@ export function ProgramDetailPanel({ program, backHref, sessionDetailHref }: Pro
                 </span>
               </div>
               {programCourse.course.estimatedHours ? (
-                <p className="text-xs text-[#0c0910]/60">{programCourse.course.estimatedHours} h estimées</p>
+                <p className="text-xs text-[var(--color-text-dark)]/60">{programCourse.course.estimatedHours} h estimées</p>
               ) : null}
-              <Link href={`/courses/${programCourse.course.slug}`} className="mt-2 inline-flex text-xs font-semibold text-[#0F63FF]">
+              <Link href={`/courses/${programCourse.course.slug}`} className="mt-2 inline-flex text-xs font-semibold text-[var(--color-primary-bright)]">
                 Voir le cours
               </Link>
             </div>
           ))
         ) : (
-          <p className="text-sm text-[#0c0910]/55">Aucun cours dans ce parcours.</p>
+          <p className="text-sm text-[var(--color-text-dark)]/55">Aucun cours dans ce parcours.</p>
         )}
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-[#0c0910]">Sessions liées</p>
+        <p className="text-sm font-semibold text-[var(--color-text-dark)]">Sessions liées</p>
         {program.sessions.length ? (
           <ul className="space-y-2">
             {program.sessions.map((s) => (
               <li key={s.id}>
                 <Link
                   href={sessionDetailHref(s.id)}
-                  className="block rounded-xl border border-[#0c0910]/8 bg-white p-4 transition hover:border-[#0F63FF]/30"
+                  className="block rounded-xl border border-[var(--color-text-dark)]/8 bg-white p-4 transition hover:border-[#0F63FF]/30"
                 >
-                  <p className="font-medium text-[#0c0910]">{s.title}</p>
-                  <p className="text-xs text-[#0c0910]/60">
+                  <p className="font-medium text-[var(--color-text-dark)]">{s.title}</p>
+                  <p className="text-xs text-[var(--color-text-dark)]/60">
                     {formatDateTime(s.startsAt)} → {formatDateTime(s.endsAt)}
                   </p>
                 </Link>
@@ -100,7 +100,7 @@ export function ProgramDetailPanel({ program, backHref, sessionDetailHref }: Pro
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-[#0c0910]/55">Aucune session planifiée pour ce parcours.</p>
+          <p className="text-sm text-[var(--color-text-dark)]/55">Aucune session planifiée pour ce parcours.</p>
         )}
       </div>
 

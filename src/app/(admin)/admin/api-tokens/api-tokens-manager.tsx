@@ -46,7 +46,7 @@ const roleLabels: Record<UserRole, string> = {
 };
 
 const roleBadgeStyle: Record<UserRole, string> = {
-  LEARNER: "bg-[#0F63FF]/10 text-[#0F63FF]",
+  LEARNER: "bg-[var(--color-primary-bright)]/10 text-[var(--color-primary-bright)]",
   TRAINER: "bg-[#453750]/10 text-[#453750]",
   ADMIN: "bg-[#119da4]/10 text-[#119da4]",
 };
@@ -129,10 +129,10 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
       </div>
 
       {/* Tableau */}
-      <div className="overflow-hidden rounded-2xl border border-[#0c0910]/10 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-[var(--color-text-dark)]/10 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-[#f7f9ff] text-[#0c0910]/70">
+            <thead className="bg-[var(--color-surface-high)] text-[var(--color-text-dark)]/70">
               <tr>
                 <th className="px-4 py-3 font-medium">Utilisateur</th>
                 <th className="px-4 py-3 font-medium">Rôle</th>
@@ -145,7 +145,7 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
                 <tr>
                   <td
                     colSpan={4}
-                    className="px-4 py-10 text-center text-sm text-[#0c0910]/60"
+                    className="px-4 py-10 text-center text-sm text-[var(--color-text-dark)]/60"
                   >
                     Aucun formateur ou administrateur pour le moment.
                   </td>
@@ -158,13 +158,13 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
                   return (
                     <tr
                       key={user.id}
-                      className="border-t border-[#0c0910]/8 align-top"
+                      className="border-t border-[var(--color-text-dark)]/8 align-top"
                     >
                       <td className="px-4 py-4">
-                        <p className="font-medium text-[#0c0910]">
+                        <p className="font-medium text-[var(--color-text-dark)]">
                           {user.name ?? "Sans nom"}
                         </p>
-                        <p className="text-xs text-[#0c0910]/60">{user.email}</p>
+                        <p className="text-xs text-[var(--color-text-dark)]/60">{user.email}</p>
                         {!user.isActive ? (
                           <p className="mt-1 text-xs font-medium text-[#c2410c]">
                             Compte désactivé
@@ -184,17 +184,17 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
                             <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#119da4]/10 px-2.5 py-1 text-xs font-semibold text-[#119da4]">
                               <ShieldCheck className="h-3.5 w-3.5" /> Jeton actif
                             </span>
-                            <span className="text-xs text-[#0c0910]/60">
+                            <span className="text-xs text-[var(--color-text-dark)]/60">
                               Suffixe : <code>…{user.tokenSuffix}</code>
                             </span>
                             {user.tokenCreatedAt ? (
-                              <span className="text-xs text-[#0c0910]/50">
+                              <span className="text-xs text-[var(--color-text-dark)]/50">
                                 Créé le {formatDate(new Date(user.tokenCreatedAt))}
                               </span>
                             ) : null}
                           </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0c0910]/5 px-2.5 py-1 text-xs font-semibold text-[#0c0910]/60">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-(--color-text-dark)/5 px-2.5 py-1 text-xs font-semibold text-[var(--color-text-dark)]/60">
                             Aucun jeton
                           </span>
                         )}
@@ -211,7 +211,7 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
                               type="submit"
                               disabled={!user.isActive || isRowPending}
                               onClick={() => handleStartAction(user.id)}
-                              className="inline-flex items-center gap-2 rounded-lg bg-[#0F63FF] px-3 py-2 text-xs font-semibold !text-white transition hover:bg-[#0F63FF]/90 disabled:cursor-not-allowed disabled:bg-[#0c0910]/20"
+                              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary-bright)] px-3 py-2 text-xs font-semibold !text-white transition hover:bg-[var(--color-primary-bright)]/90 disabled:cursor-not-allowed disabled:bg-(--color-text-dark)/20"
                             >
                               {isRowPending && generatePending ? (
                                 <>
@@ -264,7 +264,7 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
           >
             <button
               type="button"
-              className="absolute inset-0 bg-[#0c0910]/35 backdrop-blur-[2px]"
+              className="absolute inset-0 bg-(--color-text-dark)/35 backdrop-blur-[2px]"
               onClick={closeConfirmModal}
               aria-label="Fermer la confirmation"
             />
@@ -280,12 +280,12 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
                   <AlertTriangle className="h-5 w-5" />
                 </span>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-[#0c0910]">
+                  <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">
                     Révoquer le jeton API ?
                   </h3>
-                  <p className="text-sm leading-6 text-[#0c0910]/70">
+                  <p className="text-sm leading-6 text-[var(--color-text-dark)]/70">
                     Le compte{" "}
-                    <strong className="text-[#0c0910]">
+                    <strong className="text-[var(--color-text-dark)]">
                       {confirmUser.email}
                     </strong>{" "}
                     ne pourra plus appeler l&apos;API <code>/api/v1</code>. Les
@@ -299,7 +299,7 @@ export function ApiTokensManager({ users }: ApiTokensManagerProps) {
                 <button
                   type="button"
                   onClick={closeConfirmModal}
-                  className="rounded-lg border border-[#0c0910]/10 bg-white px-4 py-2 text-sm font-semibold text-[#0c0910] transition hover:bg-[#0c0910]/5"
+                  className="rounded-lg border border-[var(--color-text-dark)]/10 bg-white px-4 py-2 text-sm font-semibold text-[var(--color-text-dark)] transition hover:bg-(--color-text-dark)/5"
                 >
                   Annuler
                 </button>
@@ -344,12 +344,12 @@ function StatCard({
   accent: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
-      <p className="text-sm text-[#0c0910]/60">{label}</p>
+    <div className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-5 shadow-sm">
+      <p className="text-sm text-[var(--color-text-dark)]/60">{label}</p>
       <p className="mt-2 text-3xl font-bold" style={{ color: accent }}>
         {value}
       </p>
-      <p className="mt-2 text-xs text-[#0c0910]/50">{hint}</p>
+      <p className="mt-2 text-xs text-[var(--color-text-dark)]/50">{hint}</p>
     </div>
   );
 }
@@ -367,7 +367,7 @@ function InlineBanner({
       className={`rounded-xl border px-4 py-3 text-sm ${
         isError
           ? "border-red-200 bg-red-50 text-red-700"
-          : "border-[#119da4]/20 bg-[#119da4]/10 text-[#0c0910]"
+          : "border-[#119da4]/20 bg-[#119da4]/10 text-[var(--color-text-dark)]"
       }`}
     >
       {message}
@@ -406,16 +406,16 @@ function NewTokenBanner({
       className="rounded-2xl border-2 border-[#ffc857] bg-[#fffaf0] p-5 shadow-[0_12px_32px_-12px_rgba(255,200,87,0.5)]"
     >
       <div className="flex items-start gap-3">
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffc857]/30 text-[#0c0910]">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffc857]/30 text-[var(--color-text-dark)]">
           <KeyRound className="h-5 w-5" />
         </span>
         <div className="flex-1 space-y-3">
           <div>
-            <h3 className="text-base font-semibold text-[#0c0910]">
+            <h3 className="text-base font-semibold text-[var(--color-text-dark)]">
               Nouveau jeton API généré pour{" "}
               <span className="font-bold">{userName ?? userEmail}</span>
             </h3>
-            <p className="mt-1 text-xs text-[#0c0910]/70">
+            <p className="mt-1 text-xs text-[var(--color-text-dark)]/70">
               Copiez-le dès maintenant et transmettez-le à l&apos;agent IA
               concerné. <strong>Ce jeton ne sera plus jamais affiché.</strong>{" "}
               Généré le {formatDate(new Date(generatedAt))}.
@@ -429,7 +429,7 @@ function NewTokenBanner({
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0F63FF] px-4 py-3 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary-bright)] px-4 py-3 text-sm font-semibold !text-white transition hover:bg-[var(--color-primary-bright)]/90"
             >
               {copied ? (
                 <>
@@ -445,7 +445,7 @@ function NewTokenBanner({
             </button>
           </div>
 
-          <p className="text-xs text-[#0c0910]/60">
+          <p className="text-xs text-[var(--color-text-dark)]/60">
             Destinataire : <strong>{userEmail}</strong> — ce compte peut
             désormais appeler <code>/api/v1/*</code> avec le header{" "}
             <code>Authorization: Bearer {token.slice(0, 9)}…</code>

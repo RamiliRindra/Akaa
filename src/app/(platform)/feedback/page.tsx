@@ -67,8 +67,8 @@ export default async function FeedbackPage({ searchParams }: FeedbackPageProps) 
 
       <div className="space-y-2">
         <p className="editorial-eyebrow">Vos retours</p>
-        <h1 className="font-display text-3xl font-black tracking-tight text-[#2c2f31] sm:text-5xl">Avis</h1>
-        <p className="max-w-3xl text-sm leading-7 text-[#2c2f31]/72 sm:text-base">
+        <h1 className="font-display text-3xl font-black tracking-tight text-[var(--color-text)] sm:text-5xl">Avis</h1>
+        <p className="max-w-3xl text-sm leading-7 text-[var(--color-text)]/72 sm:text-base">
           Vos notes aident à améliorer les cours et la plateforme. Les retours sont traités en interne pour faire
           évoluer le produit.
         </p>

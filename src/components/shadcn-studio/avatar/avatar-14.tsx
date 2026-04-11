@@ -52,7 +52,7 @@ const AvatarGroupMaxDemo = ({
       ))}
       {extraText ? (
         <Avatar className="ring-2 ring-white">
-          <AvatarFallback className="bg-[#eef1f3] text-xs text-[#2c2f31]">{extraText}</AvatarFallback>
+          <AvatarFallback className="bg-[var(--color-surface-low)] text-xs text-[var(--color-text)]">{extraText}</AvatarFallback>
         </Avatar>
       ) : null}
     </div>
