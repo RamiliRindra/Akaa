@@ -129,6 +129,7 @@ export async function ProtectedShell({
           </div>
         </div>
         <main
+          id="main-content"
           className={
             showLearnerBottomNav
               ? "flex-1 px-4 pb-24 pt-4 sm:px-6 sm:pt-5 md:pb-8"
