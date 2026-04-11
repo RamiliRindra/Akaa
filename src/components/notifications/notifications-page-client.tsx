@@ -88,8 +88,8 @@ export function NotificationsPageClient({
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold text-[#0c0910]">Notifications</h1>
-          <p className="mt-1 text-sm text-[#0c0910]/62">
+          <h1 className="font-display text-2xl font-bold text-[var(--color-text-dark)]">Notifications</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-dark)]/62">
             {totalCount === 0
               ? "Aucune notification pour le moment."
               : `${totalCount} notification${totalCount > 1 ? "s" : ""} au total`}
@@ -98,7 +98,7 @@ export function NotificationsPageClient({
         <div className="flex flex-wrap gap-2">
           <Link
             href={calendarHref}
-            className="inline-flex items-center justify-center rounded-full border border-[#dbe2ea] bg-white px-4 py-2 text-sm font-semibold text-[#0c0910]/80 shadow-sm transition hover:bg-[#f8fafc]"
+            className="inline-flex items-center justify-center rounded-full border border-[#dbe2ea] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-text-dark)]/80 shadow-sm transition hover:bg-[#f8fafc]"
           >
             Calendrier
           </Link>
@@ -106,7 +106,7 @@ export function NotificationsPageClient({
             type="button"
             onClick={markAllRead}
             disabled={isPending || totalCount === 0}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0F63FF] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0B52D6] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--color-primary-bright)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0B52D6] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <CheckCheck className="h-4 w-4" />
             Tout marquer comme lu
@@ -116,10 +116,10 @@ export function NotificationsPageClient({
 
       <div className="space-y-3">
         {items.length === 0 ? (
-          <div className="rounded-[1.25rem] border border-[#e5ebf3] bg-[#f7f9ff] px-6 py-12 text-center">
-            <CircleDot className="mx-auto h-6 w-6 text-[#0F63FF]/55" />
-            <p className="mt-4 font-medium text-[#0c0910]">Aucune notification sur cette page.</p>
-            <p className="mt-2 text-sm text-[#0c0910]/58">
+          <div className="rounded-[1.25rem] border border-[#e5ebf3] bg-[var(--color-surface-high)] px-6 py-12 text-center">
+            <CircleDot className="mx-auto h-6 w-6 text-[var(--color-primary-bright)]/55" />
+            <p className="mt-4 font-medium text-[var(--color-text-dark)]">Aucune notification sur cette page.</p>
+            <p className="mt-2 text-sm text-[var(--color-text-dark)]/58">
               Les validations de sessions, rappels et alertes apparaîtront ici.
             </p>
           </div>
@@ -145,19 +145,19 @@ export function NotificationsPageClient({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-display text-sm font-bold text-[#0c0910]">{notification.title}</p>
-                      <span className="rounded-full bg-[#eef3fb] px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0c0910]/56">
+                      <p className="font-display text-sm font-bold text-[var(--color-text-dark)]">{notification.title}</p>
+                      <span className="rounded-full bg-[#eef3fb] px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-dark)]/56">
                         {meta.label}
                       </span>
                       {!notification.isRead ? (
-                        <span className="rounded-full bg-[#0F63FF]/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0050d6]">
+                        <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0050d6]">
                           Nouveau
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-[#0c0910]/76">{notification.message}</p>
+                    <p className="mt-2 text-sm leading-6 text-[var(--color-text-dark)]/76">{notification.message}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <span className="text-xs text-[#0c0910]/52">{formatNotificationTimestamp(notification.createdAt)}</span>
+                      <span className="text-xs text-[var(--color-text-dark)]/52">{formatNotificationTimestamp(notification.createdAt)}</span>
 
                       {notification.relatedUrl ? (
                         <Link
@@ -167,7 +167,7 @@ export function NotificationsPageClient({
                               markAsRead(notification.id);
                             }
                           }}
-                          className="text-xs font-semibold text-[#0050d6] hover:text-[#0F63FF]"
+                          className="text-xs font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]"
                         >
                           Ouvrir
                         </Link>
@@ -178,13 +178,13 @@ export function NotificationsPageClient({
                           type="button"
                           onClick={() => markAsRead(notification.id)}
                           disabled={isPending}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#0c0910]/68 hover:text-[#0c0910] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-text-dark)]/68 hover:text-[var(--color-text-dark)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <CheckCheck className="h-3.5 w-3.5" />
                           Marquer comme lu
                         </button>
                       ) : (
-                        <span className="text-xs font-medium text-[#0c0910]/48">Lue</span>
+                        <span className="text-xs font-medium text-[var(--color-text-dark)]/48">Lue</span>
                       )}
                     </div>
                   </div>
@@ -197,20 +197,20 @@ export function NotificationsPageClient({
 
       {totalPages > 1 ? (
         <div className="flex items-center justify-between border-t border-[#e5ebf3] pt-4">
-          <p className="text-sm text-[#0c0910]/58">
+          <p className="text-sm text-[var(--color-text-dark)]/58">
             Page {page} sur {totalPages}
           </p>
           <div className="flex items-center gap-2">
             {page > 1 ? (
               <Link
                 href={pageHref(page - 1)}
-                className="inline-flex items-center gap-1 rounded-full border border-[#dbe2ea] bg-white px-3 py-1.5 text-sm font-semibold text-[#0c0910] hover:bg-[#f8fafc]"
+                className="inline-flex items-center gap-1 rounded-full border border-[#dbe2ea] bg-white px-3 py-1.5 text-sm font-semibold text-[var(--color-text-dark)] hover:bg-[#f8fafc]"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Précédent
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-[#0c0910]/38">
+              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-[var(--color-text-dark)]/38">
                 <ChevronLeft className="h-4 w-4" />
                 Précédent
               </span>
@@ -218,13 +218,13 @@ export function NotificationsPageClient({
             {page < totalPages ? (
               <Link
                 href={pageHref(page + 1)}
-                className="inline-flex items-center gap-1 rounded-full border border-[#dbe2ea] bg-white px-3 py-1.5 text-sm font-semibold text-[#0c0910] hover:bg-[#f8fafc]"
+                className="inline-flex items-center gap-1 rounded-full border border-[#dbe2ea] bg-white px-3 py-1.5 text-sm font-semibold text-[var(--color-text-dark)] hover:bg-[#f8fafc]"
               >
                 Suivant
                 <ChevronRight className="h-4 w-4" />
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-[#0c0910]/38">
+              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-[var(--color-text-dark)]/38">
                 Suivant
                 <ChevronRight className="h-4 w-4" />
               </span>

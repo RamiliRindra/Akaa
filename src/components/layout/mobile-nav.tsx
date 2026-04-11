@@ -31,7 +31,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
         type="button"
         onClick={() => setOpen((value) => !value)}
         data-interactive="true"
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/92 text-[#0c0910] shadow-[0_16px_30px_-18px_rgba(44,47,49,0.45)] backdrop-blur"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/92 text-[var(--color-text-dark)] shadow-[0_16px_30px_-18px_rgba(44,47,49,0.45)] backdrop-blur"
       >
         {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
       </button>
@@ -45,7 +45,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className="fixed inset-0 z-30 bg-[#0c0910]/28 backdrop-blur-[2px]"
+              className="fixed inset-0 z-30 bg-(--color-text-dark)/28 backdrop-blur-[2px]"
             />
             <motion.div
               initial={{ opacity: 0, x: -18 }}
@@ -59,14 +59,14 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
                   type="button"
                   onClick={() => setOpen(false)}
                   data-interactive="true"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/82 text-[#0c0910]"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/82 text-[var(--color-text-dark)]"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               <div className="mt-5 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,80,214,0.08),rgba(101,86,112,0.06))] px-4 py-4">
-                <p className="font-display text-lg font-bold text-[#0c0910]">{title}</p>
+                <p className="font-display text-lg font-bold text-[var(--color-text-dark)]">{title}</p>
               </div>
 
               <nav className="mt-5 flex-1 space-y-2 overflow-y-auto pr-1">
@@ -82,10 +82,10 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
                       className={`flex items-center gap-3 rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
                         isActive
                           ? "bg-[linear-gradient(135deg,rgba(0,80,214,0.14),rgba(15,99,255,0.08))] text-[#0050d6]"
-                          : "text-[#0c0910]/80 hover:bg-white/80 hover:text-[#0050d6]"
+                          : "text-[var(--color-text-dark)]/80 hover:bg-white/80 hover:text-[#0050d6]"
                       }`}
                     >
-                      <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${isActive ? "bg-white/80" : "bg-[#eef1f3]"}`}>
+                      <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${isActive ? "bg-white/80" : "bg-[var(--color-surface-low)]"}`}>
                         <Icon className="h-4 w-4" />
                       </span>
                       {item.label}
@@ -94,7 +94,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
                 })}
               </nav>
 
-              <div className="mt-5 shrink-0 border-t border-[#0c0910]/8 pt-5">
+              <div className="mt-5 shrink-0 border-t border-[var(--color-text-dark)]/8 pt-5">
                 <UserMenu
                   name={userName}
                   email={userEmail}

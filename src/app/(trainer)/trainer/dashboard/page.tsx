@@ -113,10 +113,10 @@ export default async function TrainerDashboardPage() {
                 </span>
                 <span className="chip chip-success">{publishedCourses} cours publiés</span>
               </div>
-              <h1 className="font-display text-3xl font-black tracking-tight text-[#2c2f31] sm:text-5xl">
+              <h1 className="font-display text-3xl font-black tracking-tight text-[var(--color-text)] sm:text-5xl">
                 Pilotez vos formations et suivez vos apprenants en un coup d’œil.
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-[#2c2f31]/72 sm:text-base">
+              <p className="max-w-2xl text-sm leading-7 text-[var(--color-text)]/72 sm:text-base">
                 Cet espace réunit vos volumes de cours, vos inscriptions récentes et les formations
                 qui demandent le plus d’attention.
               </p>
@@ -124,27 +124,27 @@ export default async function TrainerDashboardPage() {
 
             <div className="grid gap-4 sm:grid-cols-3">
               <article className="panel-card p-5">
-                <p className="text-sm font-medium text-[#2c2f31]/65">Cours total</p>
+                <p className="text-sm font-medium text-[var(--color-text)]/65">Cours total</p>
                 <p className="mt-3 font-display text-3xl font-black text-[#0050d6]">{totalCourses}</p>
-                <p className="mt-2 text-sm text-[#2c2f31]/65">Brouillons et publiés confondus.</p>
+                <p className="mt-2 text-sm text-[var(--color-text)]/65">Brouillons et publiés confondus.</p>
               </article>
               <article className="panel-card p-5">
-                <p className="text-sm font-medium text-[#2c2f31]/65">Cours publiés</p>
+                <p className="text-sm font-medium text-[var(--color-text)]/65">Cours publiés</p>
                 <p className="mt-3 font-display text-3xl font-black text-[#119da4]">{publishedCourses}</p>
-                <p className="mt-2 text-sm text-[#2c2f31]/65">Visibles côté apprenant.</p>
+                <p className="mt-2 text-sm text-[var(--color-text)]/65">Visibles côté apprenant.</p>
               </article>
               <article className="panel-card p-5">
-                <p className="text-sm font-medium text-[#2c2f31]/65">Apprenants inscrits</p>
+                <p className="text-sm font-medium text-[var(--color-text)]/65">Apprenants inscrits</p>
                 <p className="mt-3 font-display text-3xl font-black text-[#655670]">{totalEnrollments}</p>
-                <p className="mt-2 text-sm text-[#2c2f31]/65">Inscriptions cumulées sur vos formations.</p>
+                <p className="mt-2 text-sm text-[var(--color-text)]/65">Inscriptions cumulées sur vos formations.</p>
               </article>
             </div>
           </div>
 
           <aside className="glass-panel ambient-ring space-y-5 p-6">
             <div className="space-y-2">
-              <h2 className="font-display text-2xl font-black text-[#2c2f31]">Raccourcis utiles</h2>
-              <p className="text-sm text-[#2c2f31]/65">
+              <h2 className="font-display text-2xl font-black text-[var(--color-text)]">Raccourcis utiles</h2>
+              <p className="text-sm text-[var(--color-text)]/65">
                 Accédez rapidement aux actions de gestion les plus fréquentes.
               </p>
             </div>
@@ -180,12 +180,12 @@ export default async function TrainerDashboardPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-[#0c0910]">Formations récentes</h2>
-              <p className="text-sm text-[#0c0910]/70">
+              <h2 className="text-xl font-bold text-[var(--color-text-dark)]">Formations récentes</h2>
+              <p className="text-sm text-[var(--color-text-dark)]/70">
                 Accès direct aux formations avec aperçu des apprenants déjà inscrits.
               </p>
             </div>
-            <Link href="/trainer/courses" className="text-sm font-medium text-[#0F63FF] hover:underline">
+            <Link href="/trainer/courses" className="text-sm font-medium text-[var(--color-primary-bright)] hover:underline">
               Voir tout
             </Link>
           </div>
@@ -207,7 +207,7 @@ export default async function TrainerDashboardPage() {
                           {course._count.enrollments} apprenant{course._count.enrollments > 1 ? "s" : ""}
                         </span>
                       </div>
-                      <h3 className="text-lg font-semibold text-[#0c0910]">{course.title}</h3>
+                      <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">{course.title}</h3>
                     </div>
 
                     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
@@ -226,7 +226,7 @@ export default async function TrainerDashboardPage() {
                           }
                         />
                       ) : (
-                        <span className="text-sm text-[#0c0910]/55">Aucune inscription</span>
+                        <span className="text-sm text-[var(--color-text-dark)]/55">Aucune inscription</span>
                       )}
 
                       <Link
@@ -240,9 +240,9 @@ export default async function TrainerDashboardPage() {
                 </article>
               ))
             ) : (
-              <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-                <h3 className="text-lg font-semibold text-[#0c0910]">Aucune formation pour le moment</h3>
-                <p className="mt-2 text-sm text-[#0c0910]/70">
+              <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucune formation pour le moment</h3>
+                <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
                   Créez votre première formation pour voir apparaître vos apprenants ici.
                 </p>
               </div>
@@ -252,8 +252,8 @@ export default async function TrainerDashboardPage() {
 
         <div className="space-y-4">
           <div>
-            <h2 className="text-xl font-bold text-[#0c0910]">Dernières inscriptions</h2>
-            <p className="text-sm text-[#0c0910]/70">
+            <h2 className="text-xl font-bold text-[var(--color-text-dark)]">Dernières inscriptions</h2>
+            <p className="text-sm text-[var(--color-text-dark)]/70">
               Les apprenants qui ont rejoint vos formations récemment.
             </p>
           </div>
@@ -275,8 +275,8 @@ export default async function TrainerDashboardPage() {
                       extraLabel={undefined}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-[#0c0910]">{enrollment.user.name}</p>
-                      <p className="truncate text-xs text-[#0c0910]/60">
+                      <p className="truncate font-semibold text-[var(--color-text-dark)]">{enrollment.user.name}</p>
+                      <p className="truncate text-xs text-[var(--color-text-dark)]/60">
                         {enrollment.course.title} · {formatDate(enrollment.enrolledAt)}
                       </p>
                     </div>
@@ -284,9 +284,9 @@ export default async function TrainerDashboardPage() {
                 </article>
               ))
             ) : (
-              <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-                <h3 className="text-lg font-semibold text-[#0c0910]">Aucune inscription récente</h3>
-                <p className="mt-2 text-sm text-[#0c0910]/70">
+              <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucune inscription récente</h3>
+                <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
                   Les nouvelles inscriptions apparaîtront ici dès qu’un apprenant rejoindra une formation.
                 </p>
               </div>

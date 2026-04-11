@@ -42,8 +42,8 @@ export function PlatformTrainerFeedbackForms({
       <div className="surface-section space-y-5 p-6 sm:p-8">
         <div>
           <p className="editorial-eyebrow">Outil formateur</p>
-          <h2 className="font-display text-2xl font-black text-[#2c2f31]">Votre avis sur l’interface formateur</h2>
-          <p className="mt-1 text-sm text-[#2c2f31]/70">
+          <h2 className="font-display text-2xl font-black text-[var(--color-text)]">Votre avis sur l’interface formateur</h2>
+          <p className="mt-1 text-sm text-[var(--color-text)]/70">
             Création de cours, calendrier, parcours : une note globale et un commentaire libre.
           </p>
         </div>
@@ -52,7 +52,7 @@ export function PlatformTrainerFeedbackForms({
           <input type="hidden" name="rating" value={platformRating > 0 ? String(platformRating) : ""} />
 
           <div className="space-y-2">
-            <span className="text-sm font-medium text-[#2c2f31]">Votre note</span>
+            <span className="text-sm font-medium text-[var(--color-text)]">Votre note</span>
             <Rating
               rating={platformRating > 0 ? platformRating : 0}
               maxRating={5}
@@ -67,7 +67,7 @@ export function PlatformTrainerFeedbackForms({
             ) : null}
           </div>
 
-          <label className="block space-y-2 text-sm font-medium text-[#2c2f31]">
+          <label className="block space-y-2 text-sm font-medium text-[var(--color-text)]">
             Commentaire (optionnel)
             <textarea
               name="comment"
@@ -93,8 +93,8 @@ export function PlatformTrainerFeedbackForms({
         <div className="surface-section space-y-5 p-6 sm:p-8">
           <div>
             <p className="editorial-eyebrow">Création de contenu</p>
-            <h2 className="font-display text-2xl font-black text-[#2c2f31]">Avis sur un cours que vous pilotez</h2>
-            <p className="mt-1 text-sm text-[#2c2f31]/70">
+            <h2 className="font-display text-2xl font-black text-[var(--color-text)]">Avis sur un cours que vous pilotez</h2>
+            <p className="mt-1 text-sm text-[var(--color-text)]/70">
               Une note et un commentaire par cours (éditeur, structure, médias). Vous pouvez les modifier plus tard.
             </p>
           </div>
@@ -103,7 +103,7 @@ export function PlatformTrainerFeedbackForms({
             <input type="hidden" name="courseId" value={authoringCourseId} />
             <input type="hidden" name="rating" value={authoringRating > 0 ? String(authoringRating) : ""} />
 
-            <label className="block space-y-2 text-sm font-medium text-[#2c2f31]">
+            <label className="block space-y-2 text-sm font-medium text-[var(--color-text)]">
               Cours
               <select
                 value={authoringCourseId}
@@ -119,7 +119,7 @@ export function PlatformTrainerFeedbackForms({
             </label>
 
             <div className="space-y-2">
-              <span className="text-sm font-medium text-[#2c2f31]">Votre note pour ce cours</span>
+              <span className="text-sm font-medium text-[var(--color-text)]">Votre note pour ce cours</span>
               <Rating
                 key={authoringCourseId}
                 rating={authoringRating > 0 ? authoringRating : 0}
@@ -135,7 +135,7 @@ export function PlatformTrainerFeedbackForms({
               ) : null}
             </div>
 
-            <label className="block space-y-2 text-sm font-medium text-[#2c2f31]" key={authoringCourseId}>
+            <label className="block space-y-2 text-sm font-medium text-[var(--color-text)]" key={authoringCourseId}>
               Commentaire (optionnel)
               <textarea
                 name="comment"

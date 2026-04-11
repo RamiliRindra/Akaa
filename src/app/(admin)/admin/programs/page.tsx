@@ -63,42 +63,42 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
   return (
     <section className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Administration des parcours</h2>
-        <p className="text-sm text-[#0c0910]/70">Vue globale des parcours et de leur rattachement aux sessions.</p>
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Administration des parcours</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">Vue globale des parcours et de leur rattachement aux sessions.</p>
       </div>
 
       <FormFeedback type={feedback.type} message={feedback.message} />
 
       <div className="panel-card p-6">
         <div className="mb-5 space-y-1">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Créer un parcours</h3>
-          <p className="text-sm text-[#0c0910]/60">L’admin gère l’ensemble du catalogue de parcours, chacun composé de plusieurs cours.</p>
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Créer un parcours</h3>
+          <p className="text-sm text-[var(--color-text-dark)]/60">L’admin gère l’ensemble du catalogue de parcours, chacun composé de plusieurs cours.</p>
         </div>
         <form action={createTrainingProgramAction} className="grid gap-4 md:grid-cols-2">
           <input type="hidden" name="returnTo" value="/admin/programs" />
-          <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
             Titre
             <input name="title" required className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
             Description
             <textarea name="description" rows={3} className="form-textarea text-sm" />
           </label>
           <fieldset className="space-y-3 md:col-span-2">
-            <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
-            <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-[#f7f9ff] p-4 sm:grid-cols-2">
+            <legend className="text-sm font-medium text-[var(--color-text-dark)]">Cours inclus</legend>
+            <div className="grid gap-2 rounded-2xl border border-[var(--color-text-dark)]/10 bg-[var(--color-surface-high)] p-4 sm:grid-cols-2">
               {availableCourses.map((course) => (
-                <label key={course.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm text-[#0c0910]">
+                <label key={course.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm text-[var(--color-text-dark)]">
                   <input type="checkbox" name="courseIds" value={course.id} className="mt-1 size-4 accent-[#0F63FF]" />
                   <span>
                     <span className="block font-medium">{course.title}</span>
-                    <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                    <span className="text-xs text-[var(--color-text-dark)]/55">{course.level}</span>
                   </span>
                 </label>
               ))}
             </div>
           </fieldset>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Responsable
             <select name="trainerId" className="form-select text-sm" defaultValue={session.user.id}>
               {responsibleUsers.map((responsibleUser) => (
@@ -108,7 +108,7 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
               ))}
             </select>
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Statut
             <select name="status" className="form-select text-sm">
               {Object.values(ProgramStatus).map((status) => (
@@ -138,16 +138,16 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
                   <span className="rounded-full bg-[#655670]/12 px-2.5 py-1 text-xs font-semibold text-[#655670]">
                     {program.trainer.name}
                   </span>
-                  <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+                  <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                     {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-[#0c0910]">
-                  <Link href={`/admin/programs/${program.id}`} className="hover:text-[#0F63FF]">
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">
+                  <Link href={`/admin/programs/${program.id}`} className="hover:text-[var(--color-primary-bright)]">
                     {program.title}
                   </Link>
                 </h3>
-                {program.description ? <p className="text-sm text-[#0c0910]/70">{program.description}</p> : null}
+                {program.description ? <p className="text-sm text-[var(--color-text-dark)]/70">{program.description}</p> : null}
                 <div className="flex flex-wrap gap-2">
                   {program.courses.map((programCourse) => (
                     <span
@@ -176,25 +176,25 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
               </form>
             </div>
 
-            <form action={updateTrainingProgramAction} className="mt-5 grid gap-4 rounded-2xl bg-[#f7f9ff] p-4 md:grid-cols-2">
+            <form action={updateTrainingProgramAction} className="mt-5 grid gap-4 rounded-2xl bg-[var(--color-surface-high)] p-4 md:grid-cols-2">
               <input type="hidden" name="returnTo" value="/admin/programs" />
               <input type="hidden" name="programId" value={program.id} />
-              <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                 Titre
                 <input name="title" defaultValue={program.title} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                 Description
                 <textarea name="description" rows={3} defaultValue={program.description ?? ""} className="form-textarea text-sm" />
               </label>
               <fieldset className="space-y-3 md:col-span-2">
-                <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
-                <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-white p-4 sm:grid-cols-2">
+                <legend className="text-sm font-medium text-[var(--color-text-dark)]">Cours inclus</legend>
+                <div className="grid gap-2 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-4 sm:grid-cols-2">
                   {availableCourses.map((course) => {
                     const isSelected = program.courses.some((programCourse) => programCourse.course.id === course.id);
 
                     return (
-                      <label key={course.id} className="flex items-start gap-3 rounded-xl bg-[#f7f9ff] px-3 py-3 text-sm text-[#0c0910]">
+                      <label key={course.id} className="flex items-start gap-3 rounded-xl bg-[var(--color-surface-high)] px-3 py-3 text-sm text-[var(--color-text-dark)]">
                         <input
                           type="checkbox"
                           name="courseIds"
@@ -204,14 +204,14 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
                         />
                         <span>
                           <span className="block font-medium">{course.title}</span>
-                          <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                          <span className="text-xs text-[var(--color-text-dark)]/55">{course.level}</span>
                         </span>
                       </label>
                     );
                   })}
                 </div>
               </fieldset>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Responsable
                 <select name="trainerId" defaultValue={program.trainerId} className="form-select text-sm">
                   {responsibleUsers.map((responsibleUser) => (
@@ -221,7 +221,7 @@ export default async function AdminProgramsPage({ searchParams }: AdminProgramsP
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Statut
                 <select name="status" defaultValue={program.status} className="form-select text-sm">
                   {Object.values(ProgramStatus).map((status) => (

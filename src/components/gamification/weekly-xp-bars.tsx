@@ -25,13 +25,13 @@ export function WeeklyXpBars({ points }: WeeklyXpBarsProps) {
           <div key={point.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
             <div
               className={`w-full rounded-t-sm transition-colors ${
-                isPeak ? "bg-[#0050d6]" : "cursor-default bg-[#0050d6]/10 hover:bg-[#0050d6]/16"
+                isPeak ? "bg-[var(--color-primary)]" : "cursor-default bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/16"
               }`}
               style={{ height: `${barHeightPx}px` }}
               title={`${point.value} XP`}
             />
             <span
-              className={`text-[10px] font-bold uppercase ${isPeak ? "text-[#2c2f31]" : "text-[#2c2f31]/45"}`}
+              className={`text-[10px] font-bold uppercase ${isPeak ? "text-[var(--color-text)]" : "text-[var(--color-text)]/45"}`}
             >
               {point.label}
             </span>

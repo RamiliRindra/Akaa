@@ -57,10 +57,10 @@ export function SessionDetailPanel({
   return (
     <section className="mx-auto max-w-3xl space-y-6">
       <div>
-        <Link href={backHref} className="text-sm font-semibold text-[#0050d6] hover:text-[#0F63FF]">
+        <Link href={backHref} className="text-sm font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]">
           ← Retour
         </Link>
-        <h1 className="mt-3 font-display text-2xl font-bold text-[#0c0910]">{session.title}</h1>
+        <h1 className="mt-3 font-display text-2xl font-bold text-[var(--color-text-dark)]">{session.title}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getSessionStatusClassName(session.status)}`}>
             {sessionStatusLabels[session.status]}
@@ -69,7 +69,7 @@ export function SessionDetailPanel({
             {sessionAccessPolicyLabels[session.accessPolicy]}
           </span>
           {session.recurrenceSeriesId ? (
-            <span className="rounded-full bg-[#eef3fb] px-2.5 py-1 text-xs font-semibold text-[#0c0910]/70">
+            <span className="rounded-full bg-[#eef3fb] px-2.5 py-1 text-xs font-semibold text-[var(--color-text-dark)]/70">
               Série récurrente
             </span>
           ) : null}
@@ -77,54 +77,54 @@ export function SessionDetailPanel({
       </div>
 
       <article className="panel-card space-y-4 p-6">
-        <p className="text-sm text-[#0c0910]/70">
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           {formatDateTime(session.startsAt)} → {formatDateTime(session.endsAt)}
           {session.isAllDay ? " · Journée entière" : null}
         </p>
-        <p className="text-sm text-[#0c0910]/70">
-          Formateur : <span className="font-medium text-[#0c0910]">{session.trainer.name}</span>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
+          Formateur : <span className="font-medium text-[var(--color-text-dark)]">{session.trainer.name}</span>
         </p>
         {session.location ? (
-          <p className="text-sm text-[#0c0910]/70">
-            Lieu : <span className="font-medium text-[#0c0910]">{session.location}</span>
+          <p className="text-sm text-[var(--color-text-dark)]/70">
+            Lieu : <span className="font-medium text-[var(--color-text-dark)]">{session.location}</span>
           </p>
         ) : null}
         {session.meetingUrl ? (
           <p className="text-sm">
-            <a href={session.meetingUrl} className="font-semibold text-[#0050d6] hover:text-[#0F63FF]" target="_blank" rel="noreferrer">
+            <a href={session.meetingUrl} className="font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]" target="_blank" rel="noreferrer">
               Lien de visioconférence
             </a>
           </p>
         ) : null}
-        <p className="text-sm text-[#0c0910]/70">
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           XP prévus (présence) : <span className="font-mono font-semibold text-[#655670]">{session.xpReward}</span>
         </p>
-        <p className="text-sm text-[#0c0910]/60">
+        <p className="text-sm text-[var(--color-text-dark)]/60">
           Inscriptions : {session._count.enrollments} · Présences enregistrées : {session._count.attendances}
         </p>
         {session.course ? (
           <p className="text-sm">
-            <span className="text-[#0c0910]/60">Cours lié : </span>
-            <Link href={`/courses/${session.course.slug}`} className="font-semibold text-[#0050d6] hover:text-[#0F63FF]">
+            <span className="text-[var(--color-text-dark)]/60">Cours lié : </span>
+            <Link href={`/courses/${session.course.slug}`} className="font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]">
               {session.course.title}
             </Link>
           </p>
         ) : null}
         {session.program ? (
           <p className="text-sm">
-            <span className="text-[#0c0910]/60">Parcours lié : </span>
-            <Link href={`/programs/${session.program.id}`} className="font-semibold text-[#0050d6] hover:text-[#0F63FF]">
+            <span className="text-[var(--color-text-dark)]/60">Parcours lié : </span>
+            <Link href={`/programs/${session.program.id}`} className="font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]">
               {session.program.title}
             </Link>
           </p>
         ) : null}
-        {session.description ? <p className="text-sm leading-7 text-[#0c0910]/78">{session.description}</p> : null}
+        {session.description ? <p className="text-sm leading-7 text-[var(--color-text-dark)]/78">{session.description}</p> : null}
       </article>
 
       {enrollment ? (
         <div className="panel-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-[#0c0910]">Votre inscription</span>
+            <span className="text-sm font-medium text-[var(--color-text-dark)]">Votre inscription</span>
             <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getEnrollmentStatusClassName(enrollment.status)}`}>
               {sessionEnrollmentStatusLabels[enrollment.status]}
             </span>
@@ -150,7 +150,7 @@ export function SessionDetailPanel({
         <form action={requestSessionEnrollmentAction} className="panel-card p-5">
           <input type="hidden" name="returnTo" value={returnTo} />
           <input type="hidden" name="sessionId" value={session.id} />
-          <p className="mb-3 text-sm text-[#0c0910]/70">Demander une inscription à cette session.</p>
+          <p className="mb-3 text-sm text-[var(--color-text-dark)]/70">Demander une inscription à cette session.</p>
           <SubmitButton className="primary-button px-4 py-2 text-sm font-semibold" pendingLabel="Envoi...">
             S&apos;inscrire
           </SubmitButton>

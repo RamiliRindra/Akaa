@@ -492,3 +492,100 @@ Branche `claude/infallible-babbage` — 9 commits livrés.
 
 Inchangées par rapport à § 9 Hors-scope : rate-limiting, multi-jetons, webhooks, audit log, upload médias, `SESSION_ONLY` par défaut.
 
+---
+
+## Phase 10 — Audit UI & Améliorations design system
+Date: 2026-04-11
+Linear: projet « Akaa », issues AIN-82 à AIN-89
+
+### Objectif
+
+Après un audit complet de l'interface Akaa via `/frontend-design`, corriger les lacunes du design system identifiées et améliorer significativement la qualité perçue de la plateforme.
+
+### Contexte de l'audit
+
+L'audit a révélé que la base design est **solide mais fonctionnelle** : tokens CSS bien définis, palette cohérente, layout responsive, Framer Motion sobre. Les lacunes portent sur la standardisation des composants et la cohérence d'implémentation.
+
+### Issues planifiées (AIN-82 à AIN-89)
+
+| ID | Titre | Priorité |
+|----|-------|----------|
+| AIN-82 | Composant `<Button>` centralisé avec variants (CVA) | High |
+| AIN-83 | Skeleton loaders — cours, dashboard, catalogue | High |
+| AIN-84 | Remplacer couleurs hardcodées par variables CSS | Medium |
+| AIN-85 | Composant Dialog/Modal Radix centralisé | Medium |
+| AIN-86 | Composants Input, Select, Textarea standardisés | Medium |
+| AIN-87 | Typographie display — police plus audacieuse | Medium |
+| AIN-88 | Focus ring et accessibilité a11y systématique | Low |
+| AIN-89 | Composant Table admin avec tri et pagination | Low |
+
+### Problèmes clés identifiés
+
+1. **Boutons éparpillés** : `.cta-button`, `.primary-button`, etc. dans `globals.css` + Tailwind inline sans composant React centralisé
+2. **Pas de skeleton loaders** : seul un `<Spinner>` basique — les pages "sautent" au chargement
+3. **Couleurs hardcodées** : `bg-[#0050d6]`, `text-[#2c2f31]` au lieu des variables CSS
+4. **Formulaires non standardisés** : classes CSS dans `globals.css` sans composants React dédiés
+5. **Modals inline** : logique de fermeture/accessibilité dupliquée par composant
+6. **Typographie générique** : Inter (le font le plus utilisé au monde) sans caractère distinctif
+
+
+### Livraisons Phase 10 complètes
+
+#### AIN-82 — Composant `<Button>` centralisé ✅
+- `src/components/ui/button.tsx` : variants `cta | primary | secondary | ghost | danger`, sizes `sm | md | lg`, prop `loading`
+- `src/components/ui/submit-button.tsx` : refactorisé pour déléguer à `<Button>`
+
+#### AIN-83 — Skeleton loaders ✅
+- `src/components/ui/skeleton.tsx` : `<Skeleton>` générique animé
+- `src/components/course/course-card-skeleton.tsx` : `<CourseCardSkeleton>`, `<CourseGridSkeleton>`
+- `src/components/dashboard/stats-skeleton.tsx` : `<StatCardSkeleton>`, `<DashboardStatsSkeleton>`, `<DashboardSkeleton>`
+- `src/components/ui/table-skeleton.tsx` : `<TableSkeleton>` configurable
+- `loading.tsx` ajouté pour : `/courses`, `/dashboard`, `/trainer/courses`, `/admin/users`
+
+#### AIN-84 — Couleurs hardcodées → variables CSS ✅
+- 1 180 remplacements dans 75 fichiers `.tsx`
+- Patterns : `text-[#0c0910]` → `text-[var(--color-text-dark)]`, `text-[#2c2f31]` → etc.
+- Nouvelles entrées `@theme inline` dans `globals.css` : `--color-text-dark`, `--color-primary-bright`, `--color-primary-container`, `--color-surface-low`, `--color-surface-high`
+
+#### AIN-85 — Dialog/Modal Radix centralisé ✅
+- `src/components/ui/dialog.tsx` : full Radix Dialog wrapper (focus trap, Escape, aria-labelledby)
+- `src/components/ui/alert-dialog.tsx` : `<AlertDialog>` pour confirmations destructives
+
+#### AIN-86 — Composants Input, Select, Textarea ✅
+- `src/components/ui/input.tsx` : `<Input>` avec `leftIcon`, `rightIcon`, état `error`
+- `src/components/ui/textarea.tsx` : `<Textarea>` avec `resize` et état `error`
+- `src/components/ui/select.tsx` : `<Select>` avec état `error`
+- `src/components/ui/form-field.tsx` : `<FormField>` wrapper standardisé (label + error + helperText)
+- Formulaires migrés : création cours, édition cours, création session
+
+#### AIN-87 — Typographie display Syne ✅
+- Remplacement de **Manrope** par **Syne** (géométrique, bold, gamification-friendly)
+- `src/app/layout.tsx` : `Syne` importé via `next/font/google`
+- `globals.css` : fallback stack mis à jour (`"Syne", "Segoe UI", sans-serif`)
+
+#### AIN-88 — Focus ring + a11y ✅
+- Système `focus-visible` global dans `globals.css` (suppression `outline: none` générique)
+- Ring bleu `2px solid var(--color-primary-bright)` sur tous les éléments interactifs au clavier
+- `.skip-link` ajouté : visible uniquement au focus, saute au `#main-content`
+- `id="main-content"` ajouté sur `<main>` dans `protected-shell.tsx` et auth layout
+- Formulaires : `:focus` → `:focus-visible` pour ne pas afficher le ring sur clic souris
+
+#### AIN-89 — DataTable admin avec tri ✅
+- Admin users : tri par colonne (Nom, Rôle, XP, Inscrit le) via URL params `sort` + `sortDir`
+- Composant `<SortableHeader>` (Lucide icons : `ChevronUp / ChevronDown / ChevronsUpDown`)
+- `Prisma.UserOrderByWithRelationInput` dynamique selon les params
+- Pagination et filtres préservent l'état de tri
+- Filter form migré vers `<FormField>` + `<Input>` + `<Select>`
+
+### Chiffres clés Phase 10
+
+- **8 issues Linear** créées et complétées (AIN-82 à AIN-89)
+- **15+ fichiers créés** (composants UI, skeletons, loading.tsx)
+- **75 fichiers modifiés** pour la migration des couleurs (1 180 remplacements)
+- **Zéro nouvelle dépendance** installée
+- Tailwind v4 syntax respectée dans tous les fichiers
+
+### Validation
+
+- `npm run lint` — à exécuter
+- `npx tsc --noEmit` — à exécuter

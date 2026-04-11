@@ -70,14 +70,14 @@ export function SessionManagementPanel({
       {/* ------------------------------------------------------------------ */}
       <section>
         <div className="mb-4 flex items-center gap-3">
-          <h4 className="font-semibold text-[#0c0910]">Demandes en attente</h4>
+          <h4 className="font-semibold text-[var(--color-text-dark)]">Demandes en attente</h4>
           <span className="rounded-full bg-[#ffc857]/25 px-2.5 py-0.5 text-xs font-bold text-[#b88c00]">
             {pending.length}
           </span>
         </div>
 
         {pending.length === 0 ? (
-          <p className="text-sm text-[#0c0910]/55">Aucune demande en attente.</p>
+          <p className="text-sm text-[var(--color-text-dark)]/55">Aucune demande en attente.</p>
         ) : (
           <>
             {/* Hidden forms for individual approve / reject — NOT nested inside the bulk form */}
@@ -115,7 +115,7 @@ export function SessionManagementPanel({
 
               <div className="overflow-x-auto rounded-xl border border-[#e5e7eb]">
                 <table className="w-full text-sm">
-                  <thead className="bg-[#f7f9ff]">
+                  <thead className="bg-[var(--color-surface-high)]">
                     <tr>
                       <th className="w-10 p-3 text-center">
                         <input
@@ -126,13 +126,13 @@ export function SessionManagementPanel({
                           aria-label="Tout sélectionner"
                         />
                       </th>
-                      <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[#0c0910]/60">
+                      <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/60">
                         Participant
                       </th>
-                      <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[#0c0910]/60">
+                      <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/60">
                         Email
                       </th>
-                      <th className="p-3 text-right text-xs font-semibold uppercase tracking-wide text-[#0c0910]/60">
+                      <th className="p-3 text-right text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/60">
                         Actions
                       </th>
                     </tr>
@@ -141,7 +141,7 @@ export function SessionManagementPanel({
                     {pending.map((enrollment) => (
                       <tr
                         key={enrollment.id}
-                        className={selected.has(enrollment.id) ? "bg-[#0F63FF]/5" : ""}
+                        className={selected.has(enrollment.id) ? "bg-[var(--color-primary-bright)]/5" : ""}
                       >
                         <td className="p-3 text-center">
                           <input
@@ -151,10 +151,10 @@ export function SessionManagementPanel({
                             className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-[#0F63FF]"
                           />
                         </td>
-                        <td className="p-3 font-medium text-[#0c0910]">
+                        <td className="p-3 font-medium text-[var(--color-text-dark)]">
                           {enrollment.user.name ?? "—"}
                         </td>
-                        <td className="p-3 text-[#0c0910]/70">{enrollment.user.email}</td>
+                        <td className="p-3 text-[var(--color-text-dark)]/70">{enrollment.user.email}</td>
                         <td className="p-3">
                           <div className="flex items-center justify-end gap-2">
                             {/* These buttons submit the hidden forms above via the `form` attr */}
@@ -181,7 +181,7 @@ export function SessionManagementPanel({
               </div>
 
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs text-[#0c0910]/55">
+                <p className="text-xs text-[var(--color-text-dark)]/55">
                   {selected.size > 0
                     ? `${selected.size} sélectionné${selected.size > 1 ? "s" : ""}`
                     : "Cochez des lignes pour approuver en lot."}
@@ -204,26 +204,26 @@ export function SessionManagementPanel({
       {/* ------------------------------------------------------------------ */}
       <section>
         <div className="mb-4 flex items-center gap-3">
-          <h4 className="font-semibold text-[#0c0910]">Liste de présence</h4>
-          <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-0.5 text-xs font-bold text-[#0F63FF]">
+          <h4 className="font-semibold text-[var(--color-text-dark)]">Liste de présence</h4>
+          <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-0.5 text-xs font-bold text-[var(--color-primary-bright)]">
             {approved.length}
           </span>
         </div>
 
         {approved.length === 0 ? (
-          <p className="text-sm text-[#0c0910]/55">Aucun apprenant approuvé sur cette session.</p>
+          <p className="text-sm text-[var(--color-text-dark)]/55">Aucun apprenant approuvé sur cette session.</p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-[#e5e7eb]">
             <table className="w-full text-sm">
-              <thead className="bg-[#f7f9ff]">
+              <thead className="bg-[var(--color-surface-high)]">
                 <tr>
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[#0c0910]/60">
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/60">
                     Participant
                   </th>
-                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[#0c0910]/60">
+                  <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/60">
                     Présence actuelle
                   </th>
-                  <th className="p-3 text-right text-xs font-semibold uppercase tracking-wide text-[#0c0910]/60">
+                  <th className="p-3 text-right text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/60">
                     Pointer
                   </th>
                 </tr>
@@ -234,10 +234,10 @@ export function SessionManagementPanel({
                   return (
                     <tr key={enrollment.id}>
                       <td className="p-3">
-                        <p className="font-medium text-[#0c0910]">
+                        <p className="font-medium text-[var(--color-text-dark)]">
                           {enrollment.user.name ?? "—"}
                         </p>
-                        <p className="text-xs text-[#0c0910]/60">{enrollment.user.email}</p>
+                        <p className="text-xs text-[var(--color-text-dark)]/60">{enrollment.user.email}</p>
                       </td>
                       <td className="p-3">
                         {att ? (
@@ -247,7 +247,7 @@ export function SessionManagementPanel({
                             {attendanceStatusLabels[att.status]}
                           </span>
                         ) : (
-                          <span className="text-xs text-[#0c0910]/40">Non pointé</span>
+                          <span className="text-xs text-[var(--color-text-dark)]/40">Non pointé</span>
                         )}
                       </td>
                       <td className="p-3">
@@ -270,7 +270,7 @@ export function SessionManagementPanel({
                             ))}
                           </select>
                           <SubmitButton
-                            className="rounded-lg bg-[#0F63FF] px-3 py-1.5 text-xs font-semibold !text-white transition hover:bg-[#0050d0]"
+                            className="rounded-lg bg-[var(--color-primary-bright)] px-3 py-1.5 text-xs font-semibold !text-white transition hover:bg-[#0050d0]"
                             pendingLabel="..."
                           >
                             Pointer

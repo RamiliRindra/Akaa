@@ -53,14 +53,14 @@ export function MarkdownEditorClient({ initialMarkdown, inputName }: MarkdownEdi
 
   return (
     <div className="space-y-4">
-      <div className="inline-flex rounded-full border border-[#0c0910]/10 bg-white p-1 shadow-[0_12px_24px_-20px_rgba(12,9,16,0.35)]">
+      <div className="inline-flex rounded-full border border-[var(--color-text-dark)]/10 bg-white p-1 shadow-[0_12px_24px_-20px_rgba(12,9,16,0.35)]">
         <button
           type="button"
           onClick={() => setActiveView("edit")}
           className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
             activeView === "edit"
-              ? "bg-[#0F63FF] text-white"
-              : "text-[#0c0910]/70 hover:bg-[#0F63FF]/6"
+              ? "bg-[var(--color-primary-bright)] text-white"
+              : "text-[var(--color-text-dark)]/70 hover:bg-[var(--color-primary-bright)]/6"
           }`}
         >
           <SquarePen className="h-4 w-4" />
@@ -71,8 +71,8 @@ export function MarkdownEditorClient({ initialMarkdown, inputName }: MarkdownEdi
           onClick={() => setActiveView("preview")}
           className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
             activeView === "preview"
-              ? "bg-[#0F63FF] text-white"
-              : "text-[#0c0910]/70 hover:bg-[#0F63FF]/6"
+              ? "bg-[var(--color-primary-bright)] text-white"
+              : "text-[var(--color-text-dark)]/70 hover:bg-[var(--color-primary-bright)]/6"
           }`}
         >
           <Eye className="h-4 w-4" />
@@ -81,7 +81,7 @@ export function MarkdownEditorClient({ initialMarkdown, inputName }: MarkdownEdi
       </div>
 
       <div className={activeView === "edit" ? "block" : "hidden"}>
-        <div className="rounded-2xl border border-[#0c0910]/10 bg-white">
+        <div className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white">
           <input type="hidden" name={inputName} value={markdown} readOnly />
           <MDXEditor
             markdown={initialMarkdown}
@@ -138,7 +138,7 @@ export function MarkdownEditorClient({ initialMarkdown, inputName }: MarkdownEdi
 
       <div className={activeView === "preview" ? "block" : "hidden"}>
         <div className="space-y-2">
-          <p className="text-sm font-medium text-[#0c0910]">Aperçu du rendu apprenant</p>
+          <p className="text-sm font-medium text-[var(--color-text-dark)]">Aperçu du rendu apprenant</p>
           <RichContentRenderer content={markdown} />
         </div>
       </div>

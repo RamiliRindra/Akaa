@@ -34,8 +34,8 @@ export function CategoryFormFields({
 
       <div className="space-y-3">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-[#0c0910]">Icône</p>
-          <p className="text-xs text-[#0c0910]/60">Choisissez une icône visible dans tout le catalogue.</p>
+          <p className="text-sm font-medium text-[var(--color-text-dark)]">Icône</p>
+          <p className="text-xs text-[var(--color-text-dark)]/60">Choisissez une icône visible dans tout le catalogue.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -47,8 +47,8 @@ export function CategoryFormFields({
                 key={option.value}
                 className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-3 transition ${
                   isSelected
-                    ? "border-[#0F63FF] bg-[#0F63FF]/5 text-[#0F63FF]"
-                    : "border-[#0c0910]/10 bg-white text-[#0c0910]"
+                    ? "border-[#0F63FF] bg-[var(--color-primary-bright)]/5 text-[var(--color-primary-bright)]"
+                    : "border-[var(--color-text-dark)]/10 bg-white text-[var(--color-text-dark)]"
                 }`}
               >
                 <input
@@ -69,10 +69,10 @@ export function CategoryFormFields({
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <div className="space-y-3">
           <div className="space-y-1">
-            <label htmlFor={`${radioName}-color`} className="text-sm font-medium text-[#0c0910]">
+            <label htmlFor={`${radioName}-color`} className="text-sm font-medium text-[var(--color-text-dark)]">
               Couleur hexadécimale
             </label>
-            <p className="text-xs text-[#0c0910]/60">
+            <p className="text-xs text-[var(--color-text-dark)]/60">
               Vous pouvez saisir un code précis ou repartir d’une suggestion.
             </p>
           </div>
@@ -84,13 +84,13 @@ export function CategoryFormFields({
               required
               value={color}
               onChange={(event) => setColor(event.target.value)}
-              className="h-11 min-w-[160px] rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+              className="h-11 min-w-[160px] rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 text-sm text-[var(--color-text-dark)]"
             />
             <input
               type="color"
               value={color}
               onChange={(event) => setColor(event.target.value.toUpperCase())}
-              className="h-11 w-16 cursor-pointer rounded-xl border border-[#0c0910]/15 bg-white p-1"
+              className="h-11 w-16 cursor-pointer rounded-xl border border-[var(--color-text-dark)]/15 bg-white p-1"
               aria-label="Choisir une couleur"
             />
           </div>
@@ -103,8 +103,8 @@ export function CategoryFormFields({
                 onClick={() => setColor(suggestion)}
                 className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                   color.toLowerCase() === suggestion.toLowerCase()
-                    ? "border-[#0F63FF] bg-[#0F63FF]/5 text-[#0F63FF]"
-                    : "border-[#0c0910]/10 bg-white text-[#0c0910]/70"
+                    ? "border-[#0F63FF] bg-[var(--color-primary-bright)]/5 text-[var(--color-primary-bright)]"
+                    : "border-[var(--color-text-dark)]/10 bg-white text-[var(--color-text-dark)]/70"
                 }`}
               >
                 <span
@@ -118,8 +118,8 @@ export function CategoryFormFields({
           </div>
         </div>
 
-        <div className="space-y-2 rounded-2xl border border-[#0c0910]/10 bg-[#f7f9ff] p-4">
-          <p className="text-sm font-medium text-[#0c0910]">Aperçu</p>
+        <div className="space-y-2 rounded-2xl border border-[var(--color-text-dark)]/10 bg-[var(--color-surface-high)] p-4">
+          <p className="text-sm font-medium text-[var(--color-text-dark)]">Aperçu</p>
           <div className="flex items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-[#0c0910]/8">
             <span
               className="inline-flex h-11 w-11 items-center justify-center rounded-xl"
@@ -128,8 +128,8 @@ export function CategoryFormFields({
               <CategoryIcon iconName={icon} className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-[#0c0910]">Catégorie Akaa</p>
-              <p className="text-xs text-[#0c0910]/60">{icon} • {color.toUpperCase()}</p>
+              <p className="text-sm font-semibold text-[var(--color-text-dark)]">Catégorie Akaa</p>
+              <p className="text-xs text-[var(--color-text-dark)]/60">{icon} • {color.toUpperCase()}</p>
             </div>
           </div>
         </div>

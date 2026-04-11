@@ -12,7 +12,7 @@ const MarkdownEditorClient = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="rounded-2xl border border-[#0c0910]/10 bg-white p-4 text-sm text-[#0c0910]/60">
+      <div className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-4 text-sm text-[var(--color-text-dark)]/60">
         Chargement de l’éditeur Markdown…
       </div>
     ),

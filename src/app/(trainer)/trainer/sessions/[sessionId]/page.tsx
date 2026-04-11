@@ -55,8 +55,8 @@ export default async function TrainerSessionDetailPage({ params }: TrainerSessio
 
       <div className="panel-card p-6">
         <div className="mb-6 space-y-1">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Gestion des participants</h3>
-          <p className="text-sm text-[#0c0910]/60">
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Gestion des participants</h3>
+          <p className="text-sm text-[var(--color-text-dark)]/60">
             Approuvez les demandes d&apos;inscription et pointez la présence des apprenants.
           </p>
         </div>

@@ -53,8 +53,8 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
   return (
     <section className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Parcours de formation</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Parcours de formation</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Regroupez vos sessions dans des programmes lisibles côté apprenant.
         </p>
       </div>
@@ -63,35 +63,35 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
 
       <div className="panel-card p-6">
         <div className="mb-5 space-y-1">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Créer un parcours</h3>
-          <p className="text-sm text-[#0c0910]/60">Un parcours est un ensemble ordonné de cours.</p>
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Créer un parcours</h3>
+          <p className="text-sm text-[var(--color-text-dark)]/60">Un parcours est un ensemble ordonné de cours.</p>
         </div>
 
         <form action={createTrainingProgramAction} className="grid gap-4 md:grid-cols-2">
           <input type="hidden" name="returnTo" value="/trainer/programs" />
-          <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
             Titre
             <input name="title" required className="form-input text-sm" placeholder="Parcours IA bureautique" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
             Description
             <textarea name="description" rows={3} className="form-textarea text-sm" placeholder="Décrivez le programme..." />
           </label>
           <fieldset className="space-y-3 md:col-span-2">
-            <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
-            <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-[#f7f9ff] p-4 sm:grid-cols-2">
+            <legend className="text-sm font-medium text-[var(--color-text-dark)]">Cours inclus</legend>
+            <div className="grid gap-2 rounded-2xl border border-[var(--color-text-dark)]/10 bg-[var(--color-surface-high)] p-4 sm:grid-cols-2">
               {availableCourses.map((course) => (
-                <label key={course.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm text-[#0c0910]">
+                <label key={course.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm text-[var(--color-text-dark)]">
                   <input type="checkbox" name="courseIds" value={course.id} className="mt-1 size-4 accent-[#0F63FF]" />
                   <span>
                     <span className="block font-medium">{course.title}</span>
-                    <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                    <span className="text-xs text-[var(--color-text-dark)]/55">{course.level}</span>
                   </span>
                 </label>
               ))}
             </div>
           </fieldset>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Statut
             <select name="status" defaultValue={ProgramStatus.DRAFT} className="form-select text-sm">
               {Object.values(ProgramStatus).map((status) => (
@@ -119,17 +119,17 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getProgramStatusClassName(program.status)}`}>
                       {programStatusLabels[program.status]}
                     </span>
-                    <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+                    <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                       {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
                     </span>
                   </div>
-                  <h3 className="text-lg font-semibold text-[#0c0910]">
-                    <Link href={`/trainer/programs/${program.id}`} className="hover:text-[#0F63FF]">
+                  <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">
+                    <Link href={`/trainer/programs/${program.id}`} className="hover:text-[var(--color-primary-bright)]">
                       {program.title}
                     </Link>
                   </h3>
                   {program.description ? (
-                    <p className="text-sm text-[#0c0910]/70">{program.description}</p>
+                    <p className="text-sm text-[var(--color-text-dark)]/70">{program.description}</p>
                   ) : null}
                   <div className="flex flex-wrap gap-2">
                     {program.courses.map((programCourse) => (
@@ -159,25 +159,25 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
                 </form>
               </div>
 
-              <form action={updateTrainingProgramAction} className="mt-5 grid gap-4 rounded-2xl bg-[#f7f9ff] p-4 md:grid-cols-2">
+              <form action={updateTrainingProgramAction} className="mt-5 grid gap-4 rounded-2xl bg-[var(--color-surface-high)] p-4 md:grid-cols-2">
                 <input type="hidden" name="returnTo" value="/trainer/programs" />
                 <input type="hidden" name="programId" value={program.id} />
-                <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                   Titre
                   <input name="title" defaultValue={program.title} className="form-input text-sm" />
                 </label>
-                <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                   Description
                   <textarea name="description" rows={3} defaultValue={program.description ?? ""} className="form-textarea text-sm" />
                 </label>
                 <fieldset className="space-y-3 md:col-span-2">
-                  <legend className="text-sm font-medium text-[#0c0910]">Cours inclus</legend>
-                  <div className="grid gap-2 rounded-2xl border border-[#0c0910]/10 bg-white p-4 sm:grid-cols-2">
+                  <legend className="text-sm font-medium text-[var(--color-text-dark)]">Cours inclus</legend>
+                  <div className="grid gap-2 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-4 sm:grid-cols-2">
                     {availableCourses.map((course) => {
                       const isSelected = program.courses.some((programCourse) => programCourse.course.id === course.id);
 
                       return (
-                        <label key={course.id} className="flex items-start gap-3 rounded-xl bg-[#f7f9ff] px-3 py-3 text-sm text-[#0c0910]">
+                        <label key={course.id} className="flex items-start gap-3 rounded-xl bg-[var(--color-surface-high)] px-3 py-3 text-sm text-[var(--color-text-dark)]">
                           <input
                             type="checkbox"
                             name="courseIds"
@@ -187,14 +187,14 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
                           />
                           <span>
                             <span className="block font-medium">{course.title}</span>
-                            <span className="text-xs text-[#0c0910]/55">{course.level}</span>
+                            <span className="text-xs text-[var(--color-text-dark)]/55">{course.level}</span>
                           </span>
                         </label>
                       );
                     })}
                   </div>
                 </fieldset>
-                <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                   Statut
                   <select name="status" defaultValue={program.status} className="form-select text-sm">
                     {Object.values(ProgramStatus).map((status) => (
@@ -213,9 +213,9 @@ export default async function TrainerProgramsPage({ searchParams }: TrainerProgr
             </article>
           ))
         ) : (
-          <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-            <h3 className="text-lg font-semibold text-[#0c0910]">Aucun parcours pour le moment</h3>
-            <p className="mt-2 text-sm text-[#0c0910]/70">
+          <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+            <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucun parcours pour le moment</h3>
+            <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
               Créez un premier parcours pour regrouper vos cours en itinéraire pédagogique.
             </p>
           </div>

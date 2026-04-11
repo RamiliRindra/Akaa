@@ -3,7 +3,7 @@ import { CourseStatus } from "@prisma/client";
 const statusStyles: Record<CourseStatus, string> = {
   DRAFT: "chip chip-secondary",
   PUBLISHED: "chip chip-success",
-  ARCHIVED: "chip bg-[#2c2f31]/8 text-[#2c2f31]/65",
+  ARCHIVED: "chip bg-[#2c2f31]/8 text-[var(--color-text)]/65",
 };
 
 const statusLabels: Record<CourseStatus, string> = {

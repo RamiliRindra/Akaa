@@ -177,15 +177,15 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
 
             <div className="space-y-3">
               <p className="editorial-eyebrow">Course Overview</p>
-              <h1 className="font-display text-3xl font-black tracking-tight text-[#2c2f31] sm:text-5xl">
+              <h1 className="font-display text-3xl font-black tracking-tight text-[var(--color-text)] sm:text-5xl">
                 {course.title}
               </h1>
-              <p className="max-w-3xl text-sm leading-7 text-[#2c2f31]/72 sm:text-base">
+              <p className="max-w-3xl text-sm leading-7 text-[var(--color-text)]/72 sm:text-base">
                 {course.description?.trim() || "Aucune description n’a encore été rédigée pour ce cours."}
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4 text-sm text-[#2c2f31]/70">
+            <div className="flex flex-wrap gap-4 text-sm text-[var(--color-text)]/70">
               <span>Formateur : {course.trainer.name}</span>
               {course.estimatedHours ? (
                 <span className="inline-flex items-center gap-1.5">
@@ -203,7 +203,7 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
           <aside className="glass-panel ambient-ring space-y-4 p-6">
             <div>
               <p className="editorial-eyebrow">Course Snapshot</p>
-              <h2 className="font-display mt-2 text-2xl font-black text-[#2c2f31]">Prêt à reprendre ?</h2>
+              <h2 className="font-display mt-2 text-2xl font-black text-[var(--color-text)]">Prêt à reprendre ?</h2>
             </div>
 
             <div className="grid gap-3">
@@ -212,10 +212,10 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
                   <BookOpenCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#2c2f31]">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     {completedChapters}/{flatChapters.length} chapitres
                   </p>
-                  <p className="text-xs text-[#2c2f31]/62">Validés sur ce parcours.</p>
+                  <p className="text-xs text-[var(--color-text)]/62">Validés sur ce parcours.</p>
                 </div>
               </div>
 
@@ -224,10 +224,10 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
                   <Layers3 className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#2c2f31]">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     {moduleCount} module{moduleCount > 1 ? "s" : ""}
                   </p>
-                  <p className="text-xs text-[#2c2f31]/62">Structure complète du cours.</p>
+                  <p className="text-xs text-[var(--color-text)]/62">Structure complète du cours.</p>
                 </div>
               </div>
 
@@ -236,10 +236,10 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
                   <Trophy className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#2c2f31]">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     {nextChapter ? "Chapitre suivant prêt" : "Cours complété"}
                   </p>
-                  <p className="text-xs text-[#2c2f31]/62">
+                  <p className="text-xs text-[var(--color-text)]/62">
                     {nextChapter ? "Votre prochain effort est déjà identifié." : "Tous les chapitres sont validés."}
                   </p>
                 </div>
@@ -263,16 +263,16 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
       <div className="space-y-4">
         <div>
           <p className="editorial-eyebrow">Learning Path</p>
-          <h2 className="font-display text-2xl font-black text-[#2c2f31]">Parcours détaillé</h2>
+          <h2 className="font-display text-2xl font-black text-[var(--color-text)]">Parcours détaillé</h2>
         </div>
 
         {course.modules.map((module) => (
           <article key={module.id} className="panel-card p-5 sm:p-6">
             <div className="space-y-2">
               <p className="editorial-eyebrow">Module {module.order}</p>
-              <h2 className="font-display text-2xl font-black text-[#2c2f31]">{module.title}</h2>
+              <h2 className="font-display text-2xl font-black text-[var(--color-text)]">{module.title}</h2>
               {module.description ? (
-                <p className="text-sm leading-7 text-[#2c2f31]/70">{module.description}</p>
+                <p className="text-sm leading-7 text-[var(--color-text)]/70">{module.description}</p>
               ) : null}
             </div>
 
@@ -287,10 +287,10 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
                     className="flex flex-col gap-3 rounded-[1.6rem] bg-[var(--color-surface-high)] px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <p className="font-semibold text-[#2c2f31]">
+                      <p className="font-semibold text-[var(--color-text)]">
                         {index + 1}. {chapter.title}
                       </p>
-                      <p className="text-xs text-[#2c2f31]/60">
+                      <p className="text-xs text-[var(--color-text)]/60">
                         {chapter.estimatedMinutes ? `${chapter.estimatedMinutes} min` : "Durée non renseignée"}
                       </p>
                     </div>

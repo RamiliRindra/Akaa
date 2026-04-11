@@ -1,20 +1,15 @@
 import type { Metadata } from "next";
 import "@mdxeditor/editor/style.css";
-import { Inter, Manrope } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "500", "600", "700"],
   variable: "--font-body",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -36,8 +31,11 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="fr" className={`${inter.variable} ${manrope.variable} h-full antialiased`}>
+    <html lang="fr" className={`${dmSans.variable} h-full antialiased`}>
       <body className="min-h-full bg-[var(--color-background)] text-[var(--color-text)]">
+        <a href="#main-content" className="skip-link">
+          Aller au contenu principal
+        </a>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

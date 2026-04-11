@@ -85,11 +85,11 @@ export function NotificationBell({
         data-interactive="true"
         aria-label="Ouvrir les notifications"
         onClick={() => setOpen((value) => !value)}
-        className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/82 text-[#0c0910] shadow-[0_16px_28px_-22px_rgba(44,47,49,0.38)] ring-1 ring-[#dbe2ea] backdrop-blur transition hover:bg-white"
+        className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/82 text-[var(--color-text-dark)] shadow-[0_16px_28px_-22px_rgba(44,47,49,0.38)] ring-1 ring-[#dbe2ea] backdrop-blur transition hover:bg-white"
       >
         <Bell className="h-4.5 w-4.5" />
         {badgeCount > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[#0F63FF] px-1.5 py-0.5 text-[0.65rem] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[var(--color-primary-bright)] px-1.5 py-0.5 text-[0.65rem] font-bold text-white">
             {badgeCount > 9 ? "9+" : badgeCount}
           </span>
         ) : null}
@@ -106,15 +106,15 @@ export function NotificationBell({
           >
             <div className="flex items-center justify-between border-b border-[#e5ebf3] px-4 py-3">
               <div>
-                <p className="font-display text-base font-bold text-[#0c0910]">Notifications</p>
-                <p className="text-xs text-[#0c0910]/58">
+                <p className="font-display text-base font-bold text-[var(--color-text-dark)]">Notifications</p>
+                <p className="text-xs text-[var(--color-text-dark)]/58">
                   {badgeCount > 0 ? `${badgeCount} non lue${badgeCount > 1 ? "s" : ""}` : "Aucune alerte en attente"}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full px-2 py-1 text-xs font-semibold text-[#0c0910]/56 hover:bg-[#f3f6fb] hover:text-[#0c0910]"
+                className="rounded-full px-2 py-1 text-xs font-semibold text-[var(--color-text-dark)]/56 hover:bg-[#f3f6fb] hover:text-[var(--color-text-dark)]"
               >
                 Fermer
               </button>
@@ -122,10 +122,10 @@ export function NotificationBell({
 
             <div className="max-h-[26rem] overflow-y-auto p-3">
               {notifications.length === 0 ? (
-                <div className="rounded-[1.1rem] bg-[#f7f9ff] px-4 py-8 text-center">
-                  <CircleDot className="mx-auto h-5 w-5 text-[#0F63FF]/55" />
-                  <p className="mt-3 font-medium text-[#0c0910]">Aucune notification pour le moment.</p>
-                  <p className="mt-1 text-sm text-[#0c0910]/58">Les validations de sessions et prochains rappels apparaîtront ici.</p>
+                <div className="rounded-[1.1rem] bg-[var(--color-surface-high)] px-4 py-8 text-center">
+                  <CircleDot className="mx-auto h-5 w-5 text-[var(--color-primary-bright)]/55" />
+                  <p className="mt-3 font-medium text-[var(--color-text-dark)]">Aucune notification pour le moment.</p>
+                  <p className="mt-1 text-sm text-[var(--color-text-dark)]/58">Les validations de sessions et prochains rappels apparaîtront ici.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -150,19 +150,19 @@ export function NotificationBell({
 
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="font-display text-sm font-bold text-[#0c0910]">{notification.title}</p>
-                              <span className="rounded-full bg-[#eef3fb] px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0c0910]/56">
+                              <p className="font-display text-sm font-bold text-[var(--color-text-dark)]">{notification.title}</p>
+                              <span className="rounded-full bg-[#eef3fb] px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-dark)]/56">
                                 {meta.label}
                               </span>
                               {!notification.isRead ? (
-                                <span className="rounded-full bg-[#0F63FF]/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0050d6]">
+                                <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#0050d6]">
                                   Nouveau
                                 </span>
                               ) : null}
                             </div>
-                            <p className="mt-1 text-sm leading-6 text-[#0c0910]/76">{notification.message}</p>
+                            <p className="mt-1 text-sm leading-6 text-[var(--color-text-dark)]/76">{notification.message}</p>
                             <div className="mt-3 flex flex-wrap items-center gap-3">
-                              <span className="text-xs text-[#0c0910]/52">{formatNotificationTimestamp(notification.createdAt)}</span>
+                              <span className="text-xs text-[var(--color-text-dark)]/52">{formatNotificationTimestamp(notification.createdAt)}</span>
 
                               {notification.relatedUrl ? (
                                 <Link
@@ -173,7 +173,7 @@ export function NotificationBell({
                                     }
                                     setOpen(false);
                                   }}
-                                  className="text-xs font-semibold text-[#0050d6] hover:text-[#0F63FF]"
+                                  className="text-xs font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]"
                                 >
                                   Ouvrir
                                 </Link>
@@ -184,13 +184,13 @@ export function NotificationBell({
                                   type="button"
                                   onClick={() => markAsRead(notification.id)}
                                   disabled={isPending}
-                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#0c0910]/68 hover:text-[#0c0910] disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-text-dark)]/68 hover:text-[var(--color-text-dark)] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   <CheckCheck className="h-3.5 w-3.5" />
                                   Marquer comme lu
                                 </button>
                               ) : (
-                                <span className="text-xs font-medium text-[#0c0910]/48">Déjà lue</span>
+                                <span className="text-xs font-medium text-[var(--color-text-dark)]/48">Déjà lue</span>
                               )}
                             </div>
                           </div>
@@ -206,7 +206,7 @@ export function NotificationBell({
               <Link
                 href={notificationsListHref}
                 onClick={() => setOpen(false)}
-                className="block text-sm font-semibold text-[#0050d6] hover:text-[#0F63FF]"
+                className="block text-sm font-semibold text-[#0050d6] hover:text-[var(--color-primary-bright)]"
               >
                 Voir toutes les notifications
               </Link>
@@ -214,7 +214,7 @@ export function NotificationBell({
                 <Link
                   href={calendarHref}
                   onClick={() => setOpen(false)}
-                  className="block text-sm font-semibold text-[#0c0910]/72 hover:text-[#0c0910]"
+                  className="block text-sm font-semibold text-[var(--color-text-dark)]/72 hover:text-[var(--color-text-dark)]"
                 >
                   Aller au calendrier
                 </Link>

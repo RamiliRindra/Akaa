@@ -15,8 +15,8 @@ export function BadgeCard({ name, description, iconUrl, earnedAt }: BadgeCardPro
           <Image src={iconUrl} alt={name} width={48} height={48} className="h-12 w-12" />
         </div>
         <div className="space-y-1">
-          <h3 className="font-display text-lg font-bold text-[#2c2f31]">{name}</h3>
-          {description ? <p className="text-sm leading-6 text-[#2c2f31]/66">{description}</p> : null}
+          <h3 className="font-display text-lg font-bold text-[var(--color-text)]">{name}</h3>
+          {description ? <p className="text-sm leading-6 text-[var(--color-text)]/66">{description}</p> : null}
           {earnedAt ? <p className="text-xs font-medium text-[#775600]/80">Obtenu le {earnedAt}</p> : null}
         </div>
       </div>

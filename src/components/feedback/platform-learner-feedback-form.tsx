@@ -22,8 +22,8 @@ export function PlatformLearnerFeedbackForm({
     <div className="surface-section space-y-5 p-6 sm:p-8">
       <div>
         <p className="editorial-eyebrow">Plateforme</p>
-        <h2 className="font-display text-2xl font-black text-[#2c2f31]">Votre avis sur Akaa</h2>
-        <p className="mt-1 text-sm text-[#2c2f31]/70">
+        <h2 className="font-display text-2xl font-black text-[var(--color-text)]">Votre avis sur Akaa</h2>
+        <p className="mt-1 text-sm text-[var(--color-text)]/70">
           Note globale de 1 à 5 étoiles, commentaire facultatif. Vous pouvez mettre à jour votre avis quand vous voulez.
         </p>
       </div>
@@ -32,7 +32,7 @@ export function PlatformLearnerFeedbackForm({
         <input type="hidden" name="rating" value={rating > 0 ? String(rating) : ""} />
 
         <div className="space-y-2">
-          <span className="text-sm font-medium text-[#2c2f31]">Votre note</span>
+          <span className="text-sm font-medium text-[var(--color-text)]">Votre note</span>
           <Rating
             rating={rating > 0 ? rating : 0}
             maxRating={5}
@@ -45,7 +45,7 @@ export function PlatformLearnerFeedbackForm({
           {rating === 0 ? <p className="text-xs text-[#ef4444]">Sélectionnez au moins une étoile.</p> : null}
         </div>
 
-        <label className="block space-y-2 text-sm font-medium text-[#2c2f31]">
+        <label className="block space-y-2 text-sm font-medium text-[var(--color-text)]">
           Commentaire (optionnel)
           <textarea
             name="comment"

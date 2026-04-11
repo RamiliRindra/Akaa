@@ -42,7 +42,7 @@ export function ChapterEditorForm({
       <input type="hidden" name="chapterId" value={chapterId} />
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+        <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
           Titre du chapitre
           <input
             name="title"
@@ -52,7 +52,7 @@ export function ChapterEditorForm({
           />
         </label>
 
-        <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+        <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
           Durée estimée (minutes)
           <input
             name="estimatedMinutes"
@@ -64,7 +64,7 @@ export function ChapterEditorForm({
         </label>
       </div>
 
-      <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+      <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
         URL vidéo (YouTube ou Google Drive)
         <input
           name="videoUrl"
@@ -76,9 +76,9 @@ export function ChapterEditorForm({
       </label>
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-[#0c0910]">Contenu du chapitre</p>
+        <p className="text-sm font-medium text-[var(--color-text-dark)]">Contenu du chapitre</p>
         <MarkdownEditor initialMarkdown={initialMarkdown} inputName="content" />
-        <p className="text-xs text-[#0c0910]/55">
+        <p className="text-xs text-[var(--color-text-dark)]/55">
           Syntaxe supportée v1 : titres, paragraphes, listes, citations, liens, images par URL, séparateurs,
           code inline et blocs de code.
         </p>

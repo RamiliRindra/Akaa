@@ -115,8 +115,8 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
   return (
     <section className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Administration des sessions</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Administration des sessions</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Vue globale de toutes les sessions planifiées sur la plateforme.
         </p>
       </div>
@@ -125,25 +125,25 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div className="panel-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Sessions</p>
-          <p className="mt-2 font-display text-2xl font-bold text-[#0c0910]">{sessions.length}</p>
-          <p className="mt-1 text-xs text-[#0c0910]/60">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/55">Sessions</p>
+          <p className="mt-2 font-display text-2xl font-bold text-[var(--color-text-dark)]">{sessions.length}</p>
+          <p className="mt-1 text-xs text-[var(--color-text-dark)]/60">
             Planifiées {sessionStatusCounts.SCHEDULED} · Terminées {sessionStatusCounts.COMPLETED} · Annulées{" "}
             {sessionStatusCounts.CANCELLED}
           </p>
         </div>
         <div className="panel-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Inscriptions</p>
-          <p className="mt-2 font-display text-2xl font-bold text-[#0c0910]">{totalEnrollments}</p>
-          <p className="mt-1 text-xs text-[#0c0910]/60">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/55">Inscriptions</p>
+          <p className="mt-2 font-display text-2xl font-bold text-[var(--color-text-dark)]">{totalEnrollments}</p>
+          <p className="mt-1 text-xs text-[var(--color-text-dark)]/60">
             En attente {enrollmentTotals.PENDING} · Approuvées {enrollmentTotals.APPROVED} · Refusées{" "}
             {enrollmentTotals.REJECTED}
           </p>
         </div>
         <div className="panel-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Présences</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/55">Présences</p>
           <p className="mt-2 font-display text-2xl font-bold text-[#119da4]">{attendancePresent}</p>
-          <p className="mt-1 text-xs text-[#0c0910]/60">
+          <p className="mt-1 text-xs text-[var(--color-text-dark)]/60">
             Pointages « présent » sur {attendanceTotal} enregistrement{attendanceTotal > 1 ? "s" : ""} total
             {attendanceTotal > 0
               ? ` (${Math.round((attendancePresent / attendanceTotal) * 100)} % présents)`
@@ -151,22 +151,22 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
           </p>
         </div>
         <div className="panel-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#0c0910]/55">Taux participation</p>
-          <p className="mt-2 font-display text-2xl font-bold text-[#0F63FF]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-dark)]/55">Taux participation</p>
+          <p className="mt-2 font-display text-2xl font-bold text-[var(--color-primary-bright)]">
             {totalEnrollments > 0 ? `${Math.round((enrollmentTotals.APPROVED / totalEnrollments) * 100)} %` : "—"}
           </p>
-          <p className="mt-1 text-xs text-[#0c0910]/60">Part des inscriptions approuvées sur le total des demandes</p>
+          <p className="mt-1 text-xs text-[var(--color-text-dark)]/60">Part des inscriptions approuvées sur le total des demandes</p>
         </div>
       </div>
 
       {topTrainers.length ? (
         <div className="panel-card p-5">
-          <h3 className="text-sm font-semibold text-[#0c0910]">Formateurs — sessions créées</h3>
+          <h3 className="text-sm font-semibold text-[var(--color-text-dark)]">Formateurs — sessions créées</h3>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {topTrainers.map((trainer) => (
               <li
                 key={trainer.id}
-                className="flex items-center justify-between rounded-xl bg-[#f7f9ff] px-3 py-2 text-sm text-[#0c0910]"
+                className="flex items-center justify-between rounded-xl bg-[var(--color-surface-high)] px-3 py-2 text-sm text-[var(--color-text-dark)]"
               >
                 <span className="font-medium">{trainer.name}</span>
                 <span className="font-mono text-[#655670]">{trainer._count.trainingSessions}</span>
@@ -178,28 +178,28 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
 
       <div className="panel-card p-6">
         <div className="mb-5 space-y-1">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Créer une session globale</h3>
-          <p className="text-sm text-[#0c0910]/60">En phase 8, l’admin peut aussi créer des sessions directement.</p>
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Créer une session globale</h3>
+          <p className="text-sm text-[var(--color-text-dark)]/60">En phase 8, l’admin peut aussi créer des sessions directement.</p>
         </div>
         <form action={createTrainingSessionAction} className="grid gap-4 md:grid-cols-2">
           <input type="hidden" name="returnTo" value="/admin/calendar" />
-          <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
             Titre
             <input name="title" required className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Début
             <input name="startsAt" type="datetime-local" required className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Fin
             <input name="endsAt" type="datetime-local" required className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
             Description
             <textarea name="description" rows={3} className="form-textarea text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Responsable
             <select name="trainerId" className="form-select text-sm" defaultValue={session.user.id}>
               {responsibleUsers.map((responsibleUser) => (
@@ -209,7 +209,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
               ))}
             </select>
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Statut
             <select name="status" className="form-select text-sm">
               {Object.values(SessionStatus).map((status) => (
@@ -219,7 +219,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
               ))}
             </select>
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Politique d’accès
             <select name="accessPolicy" defaultValue={SessionAccessPolicy.OPEN} className="form-select text-sm">
               {Object.values(SessionAccessPolicy).map((policy) => (
@@ -229,30 +229,30 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
               ))}
             </select>
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             XP
             <input name="xpReward" type="number" min="0" defaultValue={30} className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Lieu
             <input name="location" className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Lien visio
             <input name="meetingUrl" className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Journée entière
             <select name="isAllDay" defaultValue="false" className="form-select text-sm">
               <option value="false">Non</option>
               <option value="true">Oui</option>
             </select>
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Rappel
             <input name="reminderMinutes" type="number" min="0" defaultValue={1440} className="form-input text-sm" />
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Cours
             <select name="courseId" className="form-select text-sm">
               <option value="">Aucun cours lié</option>
@@ -262,9 +262,9 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                 </option>
               ))}
             </select>
-            <p className="text-xs font-normal text-[#0c0910]/55">Renseignez un seul rattachement : cours ou parcours.</p>
+            <p className="text-xs font-normal text-[var(--color-text-dark)]/55">Renseignez un seul rattachement : cours ou parcours.</p>
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Parcours
             <select name="programId" className="form-select text-sm">
               <option value="">Aucun parcours lié</option>
@@ -274,12 +274,12 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                 </option>
               ))}
             </select>
-            <p className="text-xs font-normal text-[#0c0910]/55">Laissez vide si cette session cible un cours.</p>
+            <p className="text-xs font-normal text-[var(--color-text-dark)]/55">Laissez vide si cette session cible un cours.</p>
           </label>
-          <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
             Récurrence (RRULE)
             <input name="recurrenceRule" className="form-input text-sm" placeholder="FREQ=WEEKLY;COUNT=8" />
-            <span className="block text-xs font-normal text-[#0c0910]/55">
+            <span className="block text-xs font-normal text-[var(--color-text-dark)]/55">
               Si renseigné, une ligne de session est créée par occurrence (plafonné à 52). Ex. FREQ=DAILY;COUNT=5 ou
               FREQ=WEEKLY;BYDAY=MO;COUNT=10 — format RFC 5545.
             </span>
@@ -307,16 +307,16 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                   <span className="rounded-full bg-[#655670]/12 px-2.5 py-1 text-xs font-semibold text-[#655670]">
                     {trainingSession.trainer.name}
                   </span>
-                  <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+                  <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                     {trainingSession._count.enrollments} inscription{trainingSession._count.enrollments > 1 ? "s" : ""}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-[#0c0910]">
-                  <Link href={`/admin/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">
+                  <Link href={`/admin/sessions/${trainingSession.id}`} className="hover:text-[var(--color-primary-bright)]">
                     {trainingSession.title}
                   </Link>
                 </h3>
-                <p className="text-sm text-[#0c0910]/70">
+                <p className="text-sm text-[var(--color-text-dark)]/70">
                   {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                 </p>
               </div>
@@ -336,22 +336,22 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
               </form>
             </div>
 
-            <form action={updateTrainingSessionAction} className="mt-5 grid gap-4 rounded-2xl bg-[#f7f9ff] p-4 md:grid-cols-2">
+            <form action={updateTrainingSessionAction} className="mt-5 grid gap-4 rounded-2xl bg-[var(--color-surface-high)] p-4 md:grid-cols-2">
               <input type="hidden" name="returnTo" value="/admin/calendar" />
               <input type="hidden" name="sessionId" value={trainingSession.id} />
-              <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                 Titre
                 <input name="title" defaultValue={trainingSession.title} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Début
                 <input name="startsAt" type="datetime-local" defaultValue={toDateTimeLocalValue(trainingSession.startsAt)} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Fin
                 <input name="endsAt" type="datetime-local" defaultValue={toDateTimeLocalValue(trainingSession.endsAt)} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Responsable
                 <select name="trainerId" defaultValue={trainingSession.trainerId} className="form-select text-sm">
                   {responsibleUsers.map((responsibleUser) => (
@@ -361,7 +361,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Statut
                 <select name="status" defaultValue={trainingSession.status} className="form-select text-sm">
                   {Object.values(SessionStatus).map((status) => (
@@ -371,7 +371,7 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Politique d’accès
                 <select name="accessPolicy" defaultValue={trainingSession.accessPolicy} className="form-select text-sm">
                   {Object.values(SessionAccessPolicy).map((policy) => (
@@ -381,30 +381,30 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                   ))}
                 </select>
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 XP
                 <input name="xpReward" type="number" min="0" defaultValue={trainingSession.xpReward} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Journée entière
                 <select name="isAllDay" defaultValue={String(trainingSession.isAllDay)} className="form-select text-sm">
                   <option value="false">Non</option>
                   <option value="true">Oui</option>
                 </select>
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Rappel
                 <input name="reminderMinutes" type="number" min="0" defaultValue={trainingSession.reminderMinutes} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Lieu
                 <input name="location" defaultValue={trainingSession.location ?? ""} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Lien visio
                 <input name="meetingUrl" defaultValue={trainingSession.meetingUrl ?? ""} className="form-input text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Cours lié
                 <select name="courseId" defaultValue={trainingSession.courseId ?? ""} className="form-select text-sm">
                   <option value="">Aucun cours lié</option>
@@ -414,9 +414,9 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                     </option>
                   ))}
                 </select>
-                <p className="text-xs font-normal text-[#0c0910]/55">Renseignez un seul rattachement : cours ou parcours.</p>
+                <p className="text-xs font-normal text-[var(--color-text-dark)]/55">Renseignez un seul rattachement : cours ou parcours.</p>
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Parcours
                 <select name="programId" defaultValue={trainingSession.programId ?? ""} className="form-select text-sm">
                   <option value="">Aucun parcours lié</option>
@@ -426,13 +426,13 @@ export default async function AdminCalendarPage({ searchParams }: AdminCalendarP
                     </option>
                   ))}
                 </select>
-                <p className="text-xs font-normal text-[#0c0910]/55">Laissez vide si cette session cible un cours.</p>
+                <p className="text-xs font-normal text-[var(--color-text-dark)]/55">Laissez vide si cette session cible un cours.</p>
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                 Description
                 <textarea name="description" rows={3} defaultValue={trainingSession.description ?? ""} className="form-textarea text-sm" />
               </label>
-              <label className="space-y-2 text-sm font-medium text-[#0c0910] md:col-span-2">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] md:col-span-2">
                 Récurrence
                 <input name="recurrenceRule" defaultValue={trainingSession.recurrenceRule ?? ""} className="form-input text-sm" />
               </label>

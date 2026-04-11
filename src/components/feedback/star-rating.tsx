@@ -96,7 +96,7 @@ export function Rating({
         })}
       </div>
       {showValue ? (
-        <span className={cn("font-mono tabular-nums text-[#0c0910]/80", size === "lg" ? "text-base" : "text-sm")}>
+        <span className={cn("font-mono tabular-nums text-[var(--color-text-dark)]/80", size === "lg" ? "text-base" : "text-sm")}>
           {display.toFixed(1).replace(".0", "")}
         </span>
       ) : null}

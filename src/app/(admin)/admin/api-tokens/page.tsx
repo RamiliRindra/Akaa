@@ -62,10 +62,10 @@ export default async function AdminApiTokensPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">
           Jetons API IA programmatique
         </h2>
-        <p className="text-sm leading-6 text-[#0c0910]/70">
+        <p className="text-sm leading-6 text-[var(--color-text-dark)]/70">
           Ces jetons permettent aux agents IA (Claude, ChatGPT, serveur MCP
           Akaa) de piloter la plateforme au nom d&apos;un formateur ou d&apos;un
           administrateur via l&apos;API <code>/api/v1/*</code>. Un seul jeton

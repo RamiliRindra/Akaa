@@ -74,7 +74,7 @@ export function ConfirmSubmitButton({
           >
             <button
               type="button"
-              className="absolute inset-0 bg-[#0c0910]/35 backdrop-blur-[2px]"
+              className="absolute inset-0 bg-(--color-text-dark)/35 backdrop-blur-[2px]"
               onClick={closeModal}
               aria-label="Fermer la confirmation"
             />
@@ -91,13 +91,13 @@ export function ConfirmSubmitButton({
                   <AlertTriangle className="h-5 w-5" />
                 </span>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-[#0c0910]">{title}</h3>
-                  <p className="text-sm leading-6 text-[#0c0910]/68">{description}</p>
+                  <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">{title}</h3>
+                  <p className="text-sm leading-6 text-[var(--color-text-dark)]/68">{description}</p>
                 </div>
               </div>
 
               {needsTextConfirmation ? (
-                <label className="mt-5 block space-y-2 text-sm font-medium text-[#0c0910]">
+                <label className="mt-5 block space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                   {requireTextLabel ?? `Tapez "${requireText}" pour confirmer`}
                   <input
                     type="text"

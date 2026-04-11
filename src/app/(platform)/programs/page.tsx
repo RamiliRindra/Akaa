@@ -46,8 +46,8 @@ export default async function PlatformProgramsPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Parcours de formation</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Parcours de formation</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Consultez les parcours publiés, leurs cours inclus et les sessions qui leur sont rattachées.
         </p>
       </div>
@@ -61,30 +61,30 @@ export default async function PlatformProgramsPage() {
                   <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getProgramStatusClassName(program.status)}`}>
                     {programStatusLabels[program.status]}
                   </span>
-                  <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+                  <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                     {program.courses.length} cours{program.courses.length > 1 ? "s" : ""}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-[#0c0910]">
-                    <Link href={`/programs/${program.id}`} className="hover:text-[#0F63FF]">
+                  <h3 className="text-xl font-semibold text-[var(--color-text-dark)]">
+                    <Link href={`/programs/${program.id}`} className="hover:text-[var(--color-primary-bright)]">
                       {program.title}
                     </Link>
                   </h3>
-                  <p className="mt-1 text-sm text-[#0c0910]/60">Formateur : {program.trainer.name}</p>
+                  <p className="mt-1 text-sm text-[var(--color-text-dark)]/60">Formateur : {program.trainer.name}</p>
                 </div>
                 {program.description ? (
-                  <p className="text-sm leading-7 text-[#0c0910]/72">{program.description}</p>
+                  <p className="text-sm leading-7 text-[var(--color-text-dark)]/72">{program.description}</p>
                 ) : null}
               </div>
 
-              <div className="mt-5 space-y-3 rounded-2xl bg-[#f7f9ff] p-4">
-                <p className="text-sm font-semibold text-[#0c0910]">Cours inclus</p>
+              <div className="mt-5 space-y-3 rounded-2xl bg-[var(--color-surface-high)] p-4">
+                <p className="text-sm font-semibold text-[var(--color-text-dark)]">Cours inclus</p>
                 {program.courses.length ? (
                   program.courses.map((programCourse) => (
                     <div key={programCourse.id} className="rounded-xl bg-white p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="font-medium text-[#0c0910]">
+                        <p className="font-medium text-[var(--color-text-dark)]">
                           {programCourse.order}. {programCourse.course.title}
                         </p>
                         <span className="rounded-full bg-[#655670]/10 px-2 py-1 text-xs font-semibold text-[#655670]">
@@ -92,37 +92,37 @@ export default async function PlatformProgramsPage() {
                         </span>
                       </div>
                       {programCourse.course.estimatedHours ? (
-                        <p className="text-xs text-[#0c0910]/60">
+                        <p className="text-xs text-[var(--color-text-dark)]/60">
                           {programCourse.course.estimatedHours} h estimées
                         </p>
                       ) : null}
-                      <Link href={`/courses/${programCourse.course.slug}`} className="mt-2 inline-flex text-xs font-semibold text-[#0F63FF]">
+                      <Link href={`/courses/${programCourse.course.slug}`} className="mt-2 inline-flex text-xs font-semibold text-[var(--color-primary-bright)]">
                         Voir le cours
                       </Link>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-[#0c0910]/55">Ce parcours n’a pas encore de cours associés.</p>
+                  <p className="text-sm text-[var(--color-text-dark)]/55">Ce parcours n’a pas encore de cours associés.</p>
                 )}
               </div>
 
               <div className="mt-4 space-y-3 rounded-2xl bg-white/80 p-4">
-                <p className="text-sm font-semibold text-[#0c0910]">Sessions liées au parcours</p>
+                <p className="text-sm font-semibold text-[var(--color-text-dark)]">Sessions liées au parcours</p>
                 {program.sessions.length ? (
                   program.sessions.map((trainingSession) => (
-                    <div key={trainingSession.id} className="rounded-xl border border-[#0c0910]/8 bg-white p-3">
-                      <p className="font-medium text-[#0c0910]">
-                        <Link href={`/calendar/sessions/${trainingSession.id}`} className="hover:text-[#0F63FF]">
+                    <div key={trainingSession.id} className="rounded-xl border border-[var(--color-text-dark)]/8 bg-white p-3">
+                      <p className="font-medium text-[var(--color-text-dark)]">
+                        <Link href={`/calendar/sessions/${trainingSession.id}`} className="hover:text-[var(--color-primary-bright)]">
                           {trainingSession.title}
                         </Link>
                       </p>
-                      <p className="text-xs text-[#0c0910]/60">
+                      <p className="text-xs text-[var(--color-text-dark)]/60">
                         {formatDateTime(trainingSession.startsAt)} → {formatDateTime(trainingSession.endsAt)}
                       </p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-[#0c0910]/55">Aucune session planifiée pour ce parcours pour le moment.</p>
+                  <p className="text-sm text-[var(--color-text-dark)]/55">Aucune session planifiée pour ce parcours pour le moment.</p>
                 )}
               </div>
 
@@ -135,9 +135,9 @@ export default async function PlatformProgramsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-[#0c0910]/20 bg-white px-6 py-10 text-center">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Aucun parcours publié</h3>
-          <p className="mt-2 text-sm text-[#0c0910]/70">
+        <div className="rounded-2xl border border-dashed border-[var(--color-text-dark)]/20 bg-white px-6 py-10 text-center">
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Aucun parcours publié</h3>
+          <p className="mt-2 text-sm text-[var(--color-text-dark)]/70">
             Les parcours publiés apparaîtront ici lorsqu’ils seront ouverts aux apprenants.
           </p>
         </div>

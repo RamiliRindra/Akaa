@@ -190,13 +190,13 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
       <ChapterProgressTracker chapterId={chapter.id} enabled={chapterStatus !== ChapterProgressStatus.COMPLETED} />
 
       <aside className="surface-section space-y-4 p-4 sm:p-5">
-        <Link href={`/courses/${course.slug}`} className="text-sm font-medium text-[#0F63FF] hover:underline">
+        <Link href={`/courses/${course.slug}`} className="text-sm font-medium text-[var(--color-primary-bright)] hover:underline">
           ← Retour à la fiche du cours
         </Link>
         <div>
           <p className="editorial-eyebrow">Course Flow</p>
-          <h2 className="font-display mt-2 text-2xl font-black text-[#2c2f31]">{course.title}</h2>
-          <p className="text-sm text-[#2c2f31]/60">{chapterList.length} chapitres</p>
+          <h2 className="font-display mt-2 text-2xl font-black text-[var(--color-text)]">{course.title}</h2>
+          <p className="text-sm text-[var(--color-text)]/60">{chapterList.length} chapitres</p>
         </div>
 
         <ProgressBar value={progressPercent} label="Progression du cours" />
@@ -213,7 +213,7 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
                 className={`block rounded-[1.35rem] px-4 py-4 text-sm transition ${
                   isActive
                     ? "bg-[linear-gradient(135deg,rgba(0,80,214,0.13),rgba(15,99,255,0.08))] text-[#0050d6] ring-1 ring-[#0050d6]/14"
-                    : "text-[#2c2f31]/75 ring-1 ring-[#2c2f31]/8 hover:bg-white hover:text-[#0050d6]"
+                    : "text-[var(--color-text)]/75 ring-1 ring-[#2c2f31]/8 hover:bg-white hover:text-[#0050d6]"
                 }`}
               >
                 <p className="font-medium">{index + 1}. {item.title}</p>
@@ -251,12 +251,12 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
 
           <div className="space-y-2">
             <p className="editorial-eyebrow">Chapter Focus</p>
-            <h1 className="font-display text-3xl font-black tracking-tight text-[#2c2f31] sm:text-5xl">
+            <h1 className="font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-[var(--foreground)] sm:text-[2rem] sm:leading-[1.15]">
               {chapter.title}
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[#2c2f31]/60">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text)]/60">
             <p>
               {chapter.estimatedMinutes ? `${chapter.estimatedMinutes} min estimées` : "Durée non renseignée"}
             </p>
@@ -278,8 +278,8 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
           <section className="surface-section space-y-4 p-5 sm:p-6">
             <div className="space-y-2">
               <p className="editorial-eyebrow">Knowledge Check</p>
-              <h2 className="font-display text-2xl font-black text-[#2c2f31]">Quiz du chapitre</h2>
-              <p className="text-sm text-[#2c2f31]/65">
+              <h2 className="font-display text-2xl font-bold text-[var(--foreground)]">Quiz du chapitre</h2>
+              <p className="text-sm text-[var(--color-text)]/65">
                 La réussite du quiz est nécessaire pour marquer ce chapitre comme terminé.
               </p>
             </div>
@@ -288,7 +288,7 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
               <div
                 className={`rounded-[1.4rem] px-4 py-4 text-sm ${
                   quizAttempt.passed
-                    ? "bg-[#119da4]/10 text-[#2c2f31] ring-1 ring-[#119da4]/20"
+                    ? "bg-[#119da4]/10 text-[var(--color-text)] ring-1 ring-[#119da4]/20"
                     : "bg-red-50 text-red-700 ring-1 ring-red-200"
                 }`}
               >
@@ -304,7 +304,7 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
                 hasAttempt={Boolean(quizAttempt)}
               />
             ) : (
-              <div className="rounded-[1.4rem] bg-[#f7f9ff] px-4 py-4 text-sm text-[#2c2f31]/65 ring-1 ring-dashed ring-[#2c2f31]/16">
+              <div className="rounded-[1.4rem] bg-[var(--color-surface-high)] px-4 py-4 text-sm text-[var(--color-text)]/65 ring-1 ring-dashed ring-[#2c2f31]/16">
                 Ce quiz n’est pas encore entièrement configuré par le formateur.
               </div>
             )}
@@ -313,14 +313,14 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
           <section className="surface-section space-y-4 p-5 sm:p-6">
             <div className="space-y-1">
               <p className="editorial-eyebrow">Completion</p>
-              <h2 className="font-display text-2xl font-black text-[#2c2f31]">Compléter ce chapitre</h2>
-              <p className="text-sm text-[#2c2f31]/65">
+              <h2 className="font-display text-2xl font-bold text-[var(--foreground)]">Compléter ce chapitre</h2>
+              <p className="text-sm text-[var(--color-text)]/65">
                 Ce chapitre ne contient pas de quiz. Vous pouvez le marquer comme terminé une fois la lecture terminée.
               </p>
             </div>
 
             {chapterStatus === ChapterProgressStatus.COMPLETED ? (
-              <div className="rounded-[1.4rem] bg-[#119da4]/10 px-4 py-4 text-sm text-[#2c2f31] ring-1 ring-[#119da4]/20">
+              <div className="rounded-[1.4rem] bg-[#119da4]/10 px-4 py-4 text-sm text-[var(--color-text)] ring-1 ring-[#119da4]/20">
                 Ce chapitre est déjà terminé.
               </div>
             ) : (
@@ -339,7 +339,7 @@ export default async function LearnChapterPage({ params, searchParams }: LearnCh
           </section>
         )}
 
-        <div className="flex flex-col gap-3 border-t border-[#0c0910]/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-[var(--color-text-dark)]/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
           {previousChapter ? (
             <Link
               href={`/courses/${course.slug}/learn/${previousChapter.id}`}

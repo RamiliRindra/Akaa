@@ -29,7 +29,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
           <AppLogo />
           <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Vision guidée</p>
           <div className="mt-4 rounded-2xl bg-[linear-gradient(135deg,rgba(0,80,214,0.06),rgba(101,86,112,0.05))] px-3 py-3">
-            <p className="font-display text-base font-bold leading-tight text-[#0c0910]">{title}</p>
+            <p className="font-display text-base font-bold leading-tight text-[var(--color-text-dark)]">{title}</p>
           </div>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto px-2 pr-1">
@@ -43,8 +43,8 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
                 data-interactive="true"
                 className={`relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition ${
                   isActive
-                    ? "border-r-4 border-[#0050d6] bg-[#0050d6]/8 text-[#0050d6]"
-                    : "text-slate-500 hover:bg-[#0050d6]/5 hover:text-[#0050d6]"
+                    ? "border-r-4 border-[#0050d6] bg-[var(--color-primary)]/8 text-[#0050d6]"
+                    : "text-slate-500 hover:bg-[var(--color-primary)]/5 hover:text-[#0050d6]"
                 }`}
               >
                 {isActive ? (
@@ -55,7 +55,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
                 ) : null}
                 <span
                   className={`relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-full ${
-                    isActive ? "bg-white shadow-sm" : "bg-[#eef1f3]"
+                    isActive ? "bg-white shadow-sm" : "bg-[var(--color-surface-low)]"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
             </Link>
           </div>
         ) : null}
-        <div className="shrink-0 border-t border-[#0c0910]/8 px-2 pb-4 pt-4">
+        <div className="shrink-0 border-t border-[var(--color-text-dark)]/8 px-2 pb-4 pt-4">
           <UserMenu
             name={userName}
             email={userEmail}

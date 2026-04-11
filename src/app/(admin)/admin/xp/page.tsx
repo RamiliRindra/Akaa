@@ -73,8 +73,8 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
   return (
     <section className="mx-auto max-w-4xl space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Configuration XP</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Configuration XP</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Ajustez les coefficients XP appliqués aux cours selon leur niveau. Les gains apprenants
           sur chapitres et quiz utilisent ensuite ces ratios.
         </p>
@@ -86,18 +86,18 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
         <div className="space-y-6">
           <form
             action={updateXpLevelSettingsAction}
-            className="space-y-5 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm"
+            className="space-y-5 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm"
           >
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-[#0c0910]">Ratios par niveau</h3>
-              <p className="text-sm text-[#0c0910]/60">
+              <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Ratios par niveau</h3>
+              <p className="text-sm text-[var(--color-text-dark)]/60">
                 Base actuelle : chapitre terminé = 10 XP, quiz réussi = XP du quiz, quiz parfait =
                 bonus 25 XP. Le coefficient du niveau multiplie ces bases.
               </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 {courseLevelLabels.BEGINNER}
                 <input
                   name="beginnerMultiplier"
@@ -109,12 +109,12 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   defaultValue={beginner?.multiplier ?? 1}
                   className="form-input text-sm"
                 />
-                <span className="block text-xs font-normal text-[#0c0910]/60">
+                <span className="block text-xs font-normal text-[var(--color-text-dark)]/60">
                   {courseLevelDescriptions.BEGINNER}
                 </span>
               </label>
 
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 {courseLevelLabels.INTERMEDIATE}
                 <input
                   name="intermediateMultiplier"
@@ -126,12 +126,12 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   defaultValue={intermediate?.multiplier ?? 1.5}
                   className="form-input text-sm"
                 />
-                <span className="block text-xs font-normal text-[#0c0910]/60">
+                <span className="block text-xs font-normal text-[var(--color-text-dark)]/60">
                   {courseLevelDescriptions.INTERMEDIATE}
                 </span>
               </label>
 
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 {courseLevelLabels.ADVANCED}
                 <input
                   name="advancedMultiplier"
@@ -143,7 +143,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   defaultValue={advanced?.multiplier ?? 2}
                   className="form-input text-sm"
                 />
-                <span className="block text-xs font-normal text-[#0c0910]/60">
+                <span className="block text-xs font-normal text-[var(--color-text-dark)]/60">
                   {courseLevelDescriptions.ADVANCED}
                 </span>
               </label>
@@ -159,16 +159,16 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
 
           <form
             action={adjustUserXpAction}
-            className="space-y-5 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm"
+            className="space-y-5 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm"
           >
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-[#0c0910]">Ajustement XP manuel</h3>
-              <p className="text-sm text-[#0c0910]/60">
+              <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Ajustement XP manuel</h3>
+              <p className="text-sm text-[var(--color-text-dark)]/60">
                 Réservé aux apprenants. Chaque ajustement crée une transaction de source admin.
               </p>
             </div>
 
-            <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+            <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
               Apprenant
               <select
                 name="userId"
@@ -185,7 +185,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
             </label>
 
             <div className="grid gap-4 md:grid-cols-[180px_1fr]">
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Montant XP
                 <input
                   name="amount"
@@ -197,7 +197,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                 />
               </label>
 
-              <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+              <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                 Raison
                 <input
                   name="reason"
@@ -218,30 +218,30 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
         </div>
 
         <aside className="space-y-4">
-          <div className="space-y-3 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Périmètre actuel</h3>
-          <div className="space-y-2 text-sm text-[#0c0910]/70">
+          <div className="space-y-3 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Périmètre actuel</h3>
+          <div className="space-y-2 text-sm text-[var(--color-text-dark)]/70">
             <p>Les XP apprenant ne s’appliquent qu’aux utilisateurs de rôle apprenant.</p>
             <p>Les formateurs choisissent le niveau du cours, mais ne règlent pas les ratios.</p>
             <p>L’ajustement XP manuel agit via une transaction admin, puis recalcule niveau et total XP.</p>
           </div>
           </div>
 
-          <div className="space-y-3 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-[#0c0910]">Derniers ajustements</h3>
+          <div className="space-y-3 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Derniers ajustements</h3>
             <div className="space-y-3">
               {recentAdjustments.length ? (
                 recentAdjustments.map((adjustment) => (
-                  <div key={adjustment.id} className="rounded-xl bg-[#f7f9ff] p-3 text-sm">
-                    <p className="font-medium text-[#0c0910]">
-                      {adjustment.user.name} <span className="font-normal text-[#0c0910]/60">({adjustment.user.email})</span>
+                  <div key={adjustment.id} className="rounded-xl bg-[var(--color-surface-high)] p-3 text-sm">
+                    <p className="font-medium text-[var(--color-text-dark)]">
+                      {adjustment.user.name} <span className="font-normal text-[var(--color-text-dark)]/60">({adjustment.user.email})</span>
                     </p>
                     <p className={`mt-1 font-semibold ${adjustment.amount >= 0 ? "text-[#119da4]" : "text-[#c2410c]"}`}>
                       {adjustment.amount >= 0 ? "+" : ""}
                       {adjustment.amount} XP
                     </p>
-                    <p className="mt-1 text-xs text-[#0c0910]/60">{adjustment.description ?? "Sans raison"}</p>
-                    <p className="mt-1 text-xs text-[#0c0910]/50">
+                    <p className="mt-1 text-xs text-[var(--color-text-dark)]/60">{adjustment.description ?? "Sans raison"}</p>
+                    <p className="mt-1 text-xs text-[var(--color-text-dark)]/50">
                       {new Intl.DateTimeFormat("fr-FR", {
                         dateStyle: "medium",
                         timeStyle: "short",
@@ -250,7 +250,7 @@ export default async function AdminXpPage({ searchParams }: AdminXpPageProps) {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-[#0c0910]/60">Aucun ajustement manuel pour le moment.</p>
+                <p className="text-sm text-[var(--color-text-dark)]/60">Aucun ajustement manuel pour le moment.</p>
               )}
             </div>
           </div>

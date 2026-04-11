@@ -57,8 +57,8 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
   return (
     <section className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#0c0910]">Gestion des badges</h2>
-        <p className="text-sm text-[#0c0910]/70">
+        <h2 className="text-2xl font-bold text-[var(--color-text-dark)]">Gestion des badges</h2>
+        <p className="text-sm text-[var(--color-text-dark)]/70">
           Paramétrez les badges automatiques ou manuels. Utilisez de préférence des icônes SVG dans <code>/public/badges</code>.
         </p>
       </div>
@@ -67,16 +67,16 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
 
       <form
         action={createBadgeAction}
-        className="grid gap-4 rounded-2xl border border-[#0c0910]/10 bg-white p-6 shadow-sm lg:grid-cols-2"
+        className="grid gap-4 rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-6 shadow-sm lg:grid-cols-2"
       >
         <div className="space-y-2 lg:col-span-2">
-          <h3 className="text-lg font-semibold text-[#0c0910]">Créer un badge</h3>
-          <p className="text-sm text-[#0c0910]/60">
+          <h3 className="text-lg font-semibold text-[var(--color-text-dark)]">Créer un badge</h3>
+          <p className="text-sm text-[var(--color-text-dark)]/60">
             Les badges manuels sont attribués plus tard par l’admin. Les autres types servent aux règles automatiques.
           </p>
         </div>
 
-        <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+        <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
           Nom
           <input
             name="name"
@@ -86,7 +86,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
           />
         </label>
 
-        <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+        <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
           Icône (URL ou chemin)
           <input
             name="iconUrl"
@@ -96,7 +96,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
           />
         </label>
 
-        <label className="space-y-2 text-sm font-medium text-[#0c0910] lg:col-span-2">
+        <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] lg:col-span-2">
           Description
           <textarea
             name="description"
@@ -107,7 +107,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
         </label>
 
         <div className="grid gap-4 sm:grid-cols-4 lg:col-span-2">
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Condition
             <select
               name="conditionType"
@@ -122,7 +122,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
             </select>
           </label>
 
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Valeur de condition
             <input
               name="conditionValue"
@@ -133,7 +133,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
             />
           </label>
 
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             Bonus XP
             <input
               name="xpBonus"
@@ -145,7 +145,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
             />
           </label>
 
-          <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+          <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
             État
             <select
               name="isActive"
@@ -168,9 +168,9 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
 
       <div className="space-y-4">
         {badges.map((badge) => (
-          <article key={badge.id} className="rounded-2xl border border-[#0c0910]/10 bg-white p-5 shadow-sm">
+          <article key={badge.id} className="rounded-2xl border border-[var(--color-text-dark)]/10 bg-white p-5 shadow-sm">
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              <span className="text-lg font-semibold text-[#0c0910]">{badge.name}</span>
+              <span className="text-lg font-semibold text-[var(--color-text-dark)]">{badge.name}</span>
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                   badge.isActive ? "bg-[#119da4]/10 text-[#119da4]" : "bg-[#c2410c]/10 text-[#c2410c]"
@@ -184,50 +184,50 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
               <span className="rounded-full bg-[#ffc857]/15 px-2.5 py-1 text-xs font-semibold text-[#8a6110]">
                 +{badge.xpBonus} XP
               </span>
-              <span className="rounded-full bg-[#0F63FF]/10 px-2.5 py-1 text-xs font-semibold text-[#0F63FF]">
+              <span className="rounded-full bg-[var(--color-primary-bright)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-primary-bright)]">
                 {badge.userBadges.length} attribution{badge.userBadges.length > 1 ? "s" : ""}
               </span>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[1fr_auto]">
               <form action={updateBadgeAction.bind(null, badge.id)} className="grid gap-4 lg:grid-cols-2">
-                <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                   Nom
                   <input
                     name="name"
                     required
                     defaultValue={badge.name}
-                    className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                    className="h-11 w-full rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 text-sm text-[var(--color-text-dark)]"
                   />
                 </label>
 
-                <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                   Icône (URL ou chemin)
                   <input
                     name="iconUrl"
                     required
                     defaultValue={badge.iconUrl}
-                    className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                    className="h-11 w-full rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 text-sm text-[var(--color-text-dark)]"
                   />
                 </label>
 
-                <label className="space-y-2 text-sm font-medium text-[#0c0910] lg:col-span-2">
+                <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)] lg:col-span-2">
                   Description
                   <textarea
                     name="description"
                     rows={3}
                     defaultValue={badge.description ?? ""}
-                    className="w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 py-3 text-sm text-[#0c0910]"
+                    className="w-full rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 py-3 text-sm text-[var(--color-text-dark)]"
                   />
                 </label>
 
                 <div className="grid gap-4 sm:grid-cols-4 lg:col-span-2">
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Condition
                     <select
                       name="conditionType"
                       defaultValue={badge.conditionType}
-                      className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                      className="h-11 w-full rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 text-sm text-[var(--color-text-dark)]"
                     >
                       {Object.values(BadgeConditionType).map((type) => (
                         <option key={type} value={type}>
@@ -237,18 +237,18 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
                     </select>
                   </label>
 
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Valeur de condition
                     <input
                       name="conditionValue"
                       type="number"
                       min="0"
                       defaultValue={badge.conditionValue ?? ""}
-                      className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                      className="h-11 w-full rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 text-sm text-[var(--color-text-dark)]"
                     />
                   </label>
 
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     Bonus XP
                     <input
                       name="xpBonus"
@@ -256,16 +256,16 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
                       min="0"
                       required
                       defaultValue={badge.xpBonus}
-                      className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                      className="h-11 w-full rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 text-sm text-[var(--color-text-dark)]"
                     />
                   </label>
 
-                  <label className="space-y-2 text-sm font-medium text-[#0c0910]">
+                  <label className="space-y-2 text-sm font-medium text-[var(--color-text-dark)]">
                     État
                     <select
                       name="isActive"
                       defaultValue={String(badge.isActive)}
-                      className="h-11 w-full rounded-xl border border-[#0c0910]/15 bg-white px-3 text-sm text-[#0c0910]"
+                      className="h-11 w-full rounded-xl border border-[var(--color-text-dark)]/15 bg-white px-3 text-sm text-[var(--color-text-dark)]"
                     >
                       <option value="true">Actif</option>
                       <option value="false">Inactif</option>
@@ -274,7 +274,7 @@ export default async function AdminBadgesPage({ searchParams }: AdminBadgesPageP
                 </div>
 
                 <SubmitButton
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F63FF] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#0F63FF]/90 lg:col-span-2 lg:w-fit"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary-bright)] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[var(--color-primary-bright)]/90 lg:col-span-2 lg:w-fit"
                   pendingLabel="Enregistrement..."
                 >
                   Enregistrer

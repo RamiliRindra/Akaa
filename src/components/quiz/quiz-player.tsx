@@ -74,8 +74,8 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
             <span className="chip chip-accent">{quiz.xpReward} XP</span>
           </div>
           <div>
-            <h3 className="font-display text-2xl font-black text-[#2c2f31]">{quiz.title}</h3>
-            <p className="mt-2 text-sm text-[#2c2f31]/65">
+            <h3 className="font-display text-2xl font-black text-[var(--color-text)]">{quiz.title}</h3>
+            <p className="mt-2 text-sm text-[var(--color-text)]/65">
               Score minimum : {quiz.passingScore}% • Récompense prévue : {quiz.xpReward} XP
             </p>
           </div>
@@ -92,7 +92,7 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
                 <p className="editorial-eyebrow">
                   Question {question.order} • {question.type === QuizQuestionType.SINGLE ? "Choix unique" : "Choix multiple"}
                 </p>
-                <p className="text-base font-semibold text-[#2c2f31] sm:text-lg">{question.questionText}</p>
+                <p className="text-base font-semibold text-[var(--color-text)] sm:text-lg">{question.questionText}</p>
               </div>
 
               <div className="space-y-2">
@@ -105,7 +105,7 @@ export function QuizPlayer({ quiz, chapterId, courseSlug, hasAttempt }: QuizPlay
                       className={`flex cursor-pointer items-start gap-3 rounded-[1.2rem] px-4 py-4 text-sm transition ${
                         checked
                           ? "bg-[linear-gradient(135deg,rgba(0,80,214,0.12),rgba(15,99,255,0.06))] text-[#0050d6] ring-1 ring-[#0050d6]/14"
-                          : "bg-[var(--color-surface-high)] text-[#2c2f31]/80 ring-1 ring-[#2c2f31]/8 hover:bg-white hover:ring-[#0F63FF]/14"
+                          : "bg-[var(--color-surface-high)] text-[var(--color-text)]/80 ring-1 ring-[#2c2f31]/8 hover:bg-white hover:ring-[#0F63FF]/14"
                       }`}
                     >
                       <input

@@ -9,9 +9,9 @@ export function ProgressBar({ value, label }: ProgressBarProps) {
   return (
     <div className="space-y-2.5">
       {label ? (
-        <div className="flex items-center justify-between text-sm text-[#2c2f31]/70">
+        <div className="flex items-center justify-between text-sm text-[var(--color-text)]/70">
           <span>{label}</span>
-          <span className="font-semibold text-[#2c2f31]">{safeValue}%</span>
+          <span className="font-semibold text-[var(--color-text)]">{safeValue}%</span>
         </div>
       ) : null}
       <div className="h-3 overflow-hidden rounded-full bg-[#dfe5ea]">
