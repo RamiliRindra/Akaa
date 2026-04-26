@@ -24,11 +24,11 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
 
   return (
     <aside className="sticky top-0 z-10 hidden h-screen w-64 shrink-0 px-3 py-6 lg:block">
-      <div className="flex h-[calc(100vh-3rem)] flex-col overflow-hidden border border-white/50 bg-slate-50/80 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.08)] backdrop-blur-xl">
+      <div className="flex h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-featured border border-border-soft bg-slate-50/80 shadow-ambient backdrop-blur-xl">
         <div className="shrink-0 px-4 pb-8 pt-2">
           <AppLogo />
           <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Vision guidée</p>
-          <div className="mt-4 rounded-2xl bg-[linear-gradient(135deg,rgba(0,80,214,0.06),rgba(101,86,112,0.05))] px-3 py-3">
+          <div className="mt-4 rounded-comfortable border border-border-soft bg-[linear-gradient(135deg,rgba(0,80,214,0.06),rgba(101,86,112,0.05))] px-3 py-3">
             <p className="font-display text-base font-bold leading-tight text-[var(--color-text-dark)]">{title}</p>
           </div>
         </div>
@@ -41,7 +41,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
                 key={item.href}
                 href={item.href}
                 data-interactive="true"
-                className={`relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition ${
+                className={`relative flex items-center gap-3 rounded-comfortable px-3 py-3 text-sm font-bold transition-[color,background-color,border-color] duration-150 ${
                   isActive
                     ? "border-r-4 border-[#0050d6] bg-[var(--color-primary)]/8 text-[#0050d6]"
                     : "text-slate-500 hover:bg-[var(--color-primary)]/5 hover:text-[#0050d6]"
@@ -50,7 +50,7 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
                 {isActive ? (
                   <motion.span
                     layoutId="active-nav-pill"
-                    className="absolute inset-0 rounded-xl ring-1 ring-[#0050d6]/10"
+                    className="absolute inset-0 rounded-comfortable ring-1 ring-[#0050d6]/10"
                   />
                 ) : null}
                 <span
@@ -69,13 +69,13 @@ export function Sidebar({ title, items, workspace, userName, userEmail, userImag
           <div className="shrink-0 px-4 pb-4">
             <Link
               href="/courses"
-              className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-[#0050d6] to-indigo-500 py-3.5 text-sm font-bold !text-white shadow-lg shadow-[#0050d6]/20 transition-opacity hover:opacity-90 hover:!text-white"
+              className="flex w-full items-center justify-center rounded-pill bg-gradient-to-r from-[#0050d6] to-indigo-500 py-3.5 text-sm font-bold !text-white shadow-focus-soft transition hover:shadow-card-elevated hover:!text-white"
             >
               Explorer les formations
             </Link>
           </div>
         ) : null}
-        <div className="shrink-0 border-t border-[var(--color-text-dark)]/8 px-2 pb-4 pt-4">
+        <div className="shrink-0 border-t border-border-soft px-2 pb-4 pt-4">
           <UserMenu
             name={userName}
             email={userEmail}

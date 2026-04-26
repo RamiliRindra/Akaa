@@ -31,7 +31,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
         type="button"
         onClick={() => setOpen((value) => !value)}
         data-interactive="true"
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/92 text-[var(--color-text-dark)] shadow-[0_16px_30px_-18px_rgba(44,47,49,0.45)] backdrop-blur"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border-soft bg-white text-[var(--color-text-dark)] shadow-ambient transition hover:shadow-focus-soft"
       >
         {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
       </button>
@@ -65,7 +65,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
                 </button>
               </div>
 
-              <div className="mt-5 rounded-[1.5rem] bg-[linear-gradient(135deg,rgba(0,80,214,0.08),rgba(101,86,112,0.06))] px-4 py-4">
+              <div className="mt-5 rounded-comfortable border border-border-soft bg-[linear-gradient(135deg,rgba(0,80,214,0.08),rgba(101,86,112,0.06))] px-4 py-4">
                 <p className="font-display text-lg font-bold text-[var(--color-text-dark)]">{title}</p>
               </div>
 
@@ -79,7 +79,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
                       href={item.href}
                       data-interactive="true"
                       onClick={() => setOpen(false)}
-                      className={`flex items-center gap-3 rounded-[1.2rem] px-4 py-3 text-sm font-semibold transition ${
+                      className={`flex items-center gap-3 rounded-comfortable px-4 py-3 text-sm font-semibold transition ${
                         isActive
                           ? "bg-[linear-gradient(135deg,rgba(0,80,214,0.14),rgba(15,99,255,0.08))] text-[#0050d6]"
                           : "text-[var(--color-text-dark)]/80 hover:bg-white/80 hover:text-[#0050d6]"
@@ -94,7 +94,7 @@ export function MobileNav({ title, items, workspace, userName, userEmail, userIm
                 })}
               </nav>
 
-              <div className="mt-5 shrink-0 border-t border-[var(--color-text-dark)]/8 pt-5">
+              <div className="mt-5 shrink-0 border-t border-border-soft pt-5">
                 <UserMenu
                   name={userName}
                   email={userEmail}

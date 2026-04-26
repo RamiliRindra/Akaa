@@ -67,7 +67,7 @@ export function Header({
               placeholder="Rechercher dans vos formations…"
               title="Fonctionnalité à venir"
               aria-label="Recherche (bientôt disponible)"
-              className="w-full max-w-md rounded-full border-0 bg-[var(--color-surface-low)] py-2 pl-12 pr-4 text-sm text-[var(--color-text)] outline-none ring-[#0050d6]/20 transition placeholder:text-[#64748b] focus:ring-2"
+              className="w-full max-w-md rounded-pill border border-border-soft bg-[var(--color-surface-low)] py-2 pl-12 pr-4 text-sm text-[var(--color-text)] outline-none transition placeholder:text-[#64748b] hover:border-border-medium focus:border-border-medium focus:shadow-focus-soft"
             />
           </div>
         ) : null}
@@ -128,7 +128,7 @@ export function Header({
 
           <Link
             href="/profile"
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm"
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border-soft bg-slate-100 shadow-ambient transition hover:shadow-focus-soft"
           >
             {userImage && !avatarFailed ? (
               <Image
