@@ -11,7 +11,7 @@ export function BadgeCard({ name, description, iconUrl, earnedAt }: BadgeCardPro
   return (
     <article className="panel-card p-4">
       <div className="flex items-start gap-3">
-        <div className="rounded-[1.4rem] bg-[linear-gradient(135deg,rgba(255,200,87,0.18),rgba(101,86,112,0.08))] p-2.5">
+        <div className="rounded-comfortable bg-[linear-gradient(135deg,rgba(255,200,87,0.18),rgba(101,86,112,0.08))] p-2.5">
           <Image src={iconUrl} alt={name} width={48} height={48} className="h-12 w-12" />
         </div>
         <div className="space-y-1">

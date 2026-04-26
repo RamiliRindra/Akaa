@@ -85,7 +85,7 @@ export function NotificationBell({
         data-interactive="true"
         aria-label="Ouvrir les notifications"
         onClick={() => setOpen((value) => !value)}
-        className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/82 text-[var(--color-text-dark)] shadow-[0_16px_28px_-22px_rgba(44,47,49,0.38)] ring-1 ring-[#dbe2ea] backdrop-blur transition hover:bg-white"
+        className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[var(--color-text-dark)] border border-border-soft shadow-ambient transition hover:shadow-focus-soft hover:border-border-medium"
       >
         <Bell className="h-4.5 w-4.5" />
         {badgeCount > 0 ? (
@@ -102,9 +102,9 @@ export function NotificationBell({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.16 }}
-            className="ambient-ring absolute right-0 top-[calc(100%+0.75rem)] z-30 w-[min(92vw,26rem)] overflow-hidden rounded-[1.45rem] bg-white/96 shadow-[0_24px_50px_-28px_rgba(44,47,49,0.42)] backdrop-blur"
+            className="absolute right-0 top-[calc(100%+0.75rem)] z-30 w-[min(92vw,26rem)] overflow-hidden rounded-featured border border-border-soft bg-white shadow-card-elevated"
           >
-            <div className="flex items-center justify-between border-b border-[#e5ebf3] px-4 py-3">
+            <div className="flex items-center justify-between border-b border-border-soft px-4 py-3">
               <div>
                 <p className="font-display text-base font-bold text-[var(--color-text-dark)]">Notifications</p>
                 <p className="text-xs text-[var(--color-text-dark)]/58">
@@ -122,7 +122,7 @@ export function NotificationBell({
 
             <div className="max-h-[26rem] overflow-y-auto p-3">
               {notifications.length === 0 ? (
-                <div className="rounded-[1.1rem] bg-[var(--color-surface-high)] px-4 py-8 text-center">
+                <div className="rounded-comfortable bg-[var(--color-surface-high)] px-4 py-8 text-center">
                   <CircleDot className="mx-auto h-5 w-5 text-[var(--color-primary-bright)]/55" />
                   <p className="mt-3 font-medium text-[var(--color-text-dark)]">Aucune notification pour le moment.</p>
                   <p className="mt-1 text-sm text-[var(--color-text-dark)]/58">Les validations de sessions et prochains rappels apparaîtront ici.</p>
@@ -137,10 +137,10 @@ export function NotificationBell({
                       <article
                         key={notification.id}
                         className={cn(
-                          "rounded-[1.15rem] border px-3 py-3 transition",
+                          "rounded-comfortable border px-3 py-3 transition",
                           notification.isRead
-                            ? "border-[#e7edf5] bg-white"
-                            : "border-[#cfe0ff] bg-[linear-gradient(180deg,rgba(15,99,255,0.06),rgba(255,255,255,0.96))]",
+                            ? "border-border-soft bg-white"
+                            : "border-border-medium bg-[linear-gradient(180deg,rgba(15,99,255,0.06),rgba(255,255,255,0.96))]",
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -202,7 +202,7 @@ export function NotificationBell({
               )}
             </div>
 
-            <div className="space-y-2 border-t border-[#e5ebf3] px-4 py-3">
+            <div className="space-y-2 border-t border-border-soft px-4 py-3">
               <Link
                 href={notificationsListHref}
                 onClick={() => setOpen(false)}

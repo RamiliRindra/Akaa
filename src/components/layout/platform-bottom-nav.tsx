@@ -19,7 +19,7 @@ export function PlatformBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 z-50 flex w-full justify-around border-t border-[#e2e8f0] bg-white/90 px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-lg md:hidden"
+      className="fixed bottom-0 left-0 z-50 flex w-full justify-around border-t border-border-soft bg-white/95 px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-lg md:hidden"
       aria-label="Navigation principale"
     >
       {ITEMS.map((item) => {

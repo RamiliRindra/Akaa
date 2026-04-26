@@ -90,6 +90,40 @@
   --ambient-shadow-soft: var(--shadow-xs);
   --radius-card: var(--radius);
   --radius-pill: 999px;
+
+  /* ── Cursor-inspired structural layer (additive, color-agnostic) ────────── */
+  /* Sub-8px micro spacing for icon/text alignment */
+  --space-0_5: 1.5px;
+  --space-1: 2px;
+  --space-1_5: 2.5px;
+  --space-2: 3px;
+  --space-3: 4px;
+  --space-4: 5px;
+  --space-5: 6px;
+
+  /* Full radius scale — micro to pill */
+  --radius-micro: 1.5px;
+  --radius-2xs: 2px;
+  --radius-xs: 3px;
+  --radius-compact: 4px;
+  --radius-comfortable: 8px;
+  --radius-featured: 10px;
+
+  /* Alpha-based borders derived from foreground (works on any palette) */
+  --border-soft: rgba(0, 0, 0, 0.10);
+  --border-medium: rgba(0, 0, 0, 0.20);
+  --border-strong: rgba(0, 0, 0, 0.55);
+  --border-solid: var(--foreground);
+
+  /* Atmospheric shadows — diffused, large blur, low opacity */
+  --shadow-ambient: 0 0 16px rgba(0, 0, 0, 0.02), 0 0 8px rgba(0, 0, 0, 0.008);
+  --shadow-ring: 0 0 0 1px var(--border-soft);
+  --shadow-card-elevated: 0 28px 70px rgba(0, 0, 0, 0.14), 0 14px 32px rgba(0, 0, 0, 0.10), 0 0 0 1px var(--border-soft);
+  --shadow-focus-soft: 0 4px 12px rgba(0, 0, 0, 0.10);
+
+  /* Motion */
+  --motion-color: 150ms ease;
+  --motion-shadow: 200ms ease;
 }
 
 .dark {
@@ -193,6 +227,24 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+  /* Cursor-inspired structural tokens exposed to Tailwind */
+  --radius-micro: var(--radius-micro);
+  --radius-2xs: var(--radius-2xs);
+  --radius-xs: var(--radius-xs);
+  --radius-compact: var(--radius-compact);
+  --radius-comfortable: var(--radius-comfortable);
+  --radius-featured: var(--radius-featured);
+
+  --color-border-soft: var(--border-soft);
+  --color-border-medium: var(--border-medium);
+  --color-border-strong: var(--border-strong);
+  --color-border-solid: var(--border-solid);
+
+  --shadow-ambient: var(--shadow-ambient);
+  --shadow-ring: var(--shadow-ring);
+  --shadow-card-elevated: var(--shadow-card-elevated);
+  --shadow-focus-soft: var(--shadow-focus-soft);
 }
 
 @layer base {
@@ -345,27 +397,72 @@ a:focus-visible {
 }
 
 .panel-card {
-  border-radius: var(--radius);
+  border-radius: var(--radius-comfortable);
   background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-ambient);
+  transition: box-shadow var(--motion-shadow), border-color var(--motion-color);
+}
+
+.panel-card:hover {
+  border-color: var(--border-medium);
 }
 
 .glass-panel {
-  border-radius: var(--radius);
+  border-radius: var(--radius-featured);
   background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-ambient);
 }
 
 .surface-section {
-  border-radius: var(--radius);
+  border-radius: var(--radius-comfortable);
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-soft);
 }
 
 .ambient-ring {
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-soft);
+}
+
+/* ── Cursor-inspired card variants ──────────────────────────────────────── */
+
+.elevated-card {
+  border-radius: var(--radius-featured);
+  background: var(--card);
+  box-shadow: var(--shadow-card-elevated);
+  transition: box-shadow var(--motion-shadow);
+}
+
+.ambient-card {
+  border-radius: var(--radius-comfortable);
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-ambient);
+  transition: box-shadow var(--motion-shadow), border-color var(--motion-color);
+}
+
+.ambient-card:hover {
+  box-shadow: var(--shadow-card-elevated);
+}
+
+.pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: var(--radius-pill);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: background-color var(--motion-color), color var(--motion-color);
+}
+
+.pill-tag-active {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .hero-gradient-text {
@@ -381,20 +478,27 @@ a:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-comfortable);
   background: var(--primary);
   color: var(--primary-foreground);
   font-weight: 500;
   font-size: 0.875rem;
   letter-spacing: -0.01em;
   transition:
-    background-color 150ms ease,
-    opacity 150ms ease;
+    background-color var(--motion-color),
+    box-shadow var(--motion-shadow),
+    opacity var(--motion-color);
 }
 
 .cta-button:hover,
 .primary-button:hover {
   background: #0050d6;
+}
+
+.cta-button:focus-visible,
+.primary-button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-soft), 0 0 0 2px var(--ring);
 }
 
 a.cta-button,
@@ -412,19 +516,25 @@ a.primary-button:hover {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-comfortable);
   background: transparent;
   color: var(--foreground);
   font-weight: 500;
   font-size: 0.875rem;
   letter-spacing: -0.01em;
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
+    background-color var(--motion-color),
+    border-color var(--motion-color),
+    box-shadow var(--motion-shadow);
 }
 
 .ghost-button:hover {
   background: var(--muted);
+}
+
+.ghost-button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-soft);
 }
 
 .secondary-button {
@@ -432,21 +542,28 @@ a.primary-button:hover {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-comfortable);
+  border: 1px solid var(--border-soft);
   background: var(--background);
   color: var(--foreground);
   font-weight: 500;
   font-size: 0.875rem;
   letter-spacing: -0.01em;
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
+    background-color var(--motion-color),
+    border-color var(--motion-color),
+    box-shadow var(--motion-shadow);
 }
 
 .secondary-button:hover {
   background: var(--muted);
-  border-color: #d4d4d4;
+  border-color: var(--border-medium);
+}
+
+.secondary-button:focus-visible {
+  outline: none;
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-focus-soft);
 }
 
 .danger-button {
@@ -454,19 +571,25 @@ a.primary-button:hover {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-comfortable);
   background: var(--destructive);
   color: var(--destructive-foreground);
   font-weight: 500;
   font-size: 0.875rem;
   letter-spacing: -0.01em;
   transition:
-    background-color 150ms ease,
-    opacity 150ms ease;
+    background-color var(--motion-color),
+    box-shadow var(--motion-shadow),
+    opacity var(--motion-color);
 }
 
 .danger-button:hover {
   background: #cc0000;
+}
+
+.danger-button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-soft), 0 0 0 2px var(--destructive);
 }
 
 /* ── Form inputs — flat rectangles ──────────────────────────────────────── */
@@ -475,16 +598,16 @@ a.primary-button:hover {
 .form-select,
 .form-textarea {
   width: 100%;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-comfortable);
+  border: 1px solid var(--border-soft);
   background: var(--background);
   color: var(--foreground);
   font-size: 0.875rem;
   letter-spacing: -0.01em;
   outline: none;
   transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease;
+    border-color var(--motion-color),
+    box-shadow var(--motion-shadow);
 }
 
 .form-input,
@@ -507,7 +630,7 @@ a.primary-button:hover {
 .form-input:hover,
 .form-select:hover,
 .form-textarea:hover {
-  border-color: #d4d4d4;
+  border-color: var(--border-medium);
 }
 
 .form-input:focus-visible,
@@ -524,15 +647,16 @@ a.primary-button:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.25rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: -0.005em;
   line-height: 1.2;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-soft);
   background: var(--background);
   color: var(--foreground);
+  transition: background-color var(--motion-color), border-color var(--motion-color);
 }
 
 .chip-primary {
