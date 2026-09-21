@@ -300,7 +300,6 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                           <input type="hidden" name="direction" value="up" />
                           <SubmitButton
                             className="inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white p-2 text-[var(--color-text-dark)] hover:bg-[var(--color-primary-bright)]/5"
-                            showSpinner={false}
                             pendingChildren={<span className="text-xs font-semibold">...</span>}
                             aria-label="Monter le module"
                           >
@@ -313,7 +312,6 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                           <input type="hidden" name="direction" value="down" />
                           <SubmitButton
                             className="inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white p-2 text-[var(--color-text-dark)] hover:bg-[var(--color-primary-bright)]/5"
-                            showSpinner={false}
                             pendingChildren={<span className="text-xs font-semibold">...</span>}
                             aria-label="Descendre le module"
                           >
@@ -378,7 +376,6 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                                   <input type="hidden" name="direction" value="up" />
                                   <SubmitButton
                                     className="inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white p-2 text-[var(--color-text-dark)] hover:bg-[var(--color-primary-bright)]/5"
-                                    showSpinner={false}
                                     pendingChildren={<span className="text-xs font-semibold">...</span>}
                                     aria-label="Monter le chapitre"
                                   >
@@ -392,7 +389,6 @@ export default async function EditCoursePage({ params, searchParams }: EditCours
                                   <input type="hidden" name="direction" value="down" />
                                   <SubmitButton
                                     className="inline-flex items-center justify-center rounded-xl border border-[var(--color-text-dark)]/10 bg-white p-2 text-[var(--color-text-dark)] hover:bg-[var(--color-primary-bright)]/5"
-                                    showSpinner={false}
                                     pendingChildren={<span className="text-xs font-semibold">...</span>}
                                     aria-label="Descendre le chapitre"
                                   >
