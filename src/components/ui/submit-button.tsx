@@ -7,8 +7,6 @@ import { Button, type ButtonProps } from "@/components/ui/button";
 type SubmitButtonProps = Omit<ButtonProps, "type" | "loading"> & {
   pendingLabel?: string;
   pendingChildren?: ReactNode;
-  /** @deprecated Le spinner est toujours affiché pendant le chargement. */
-  showSpinner?: boolean;
 };
 
 export function SubmitButton({
@@ -18,7 +16,6 @@ export function SubmitButton({
   disabled,
   variant = "primary",
   size = "md",
-  showSpinner: _showSpinner,
   ...props
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();

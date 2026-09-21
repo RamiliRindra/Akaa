@@ -19,7 +19,6 @@ type ConfirmSubmitButtonProps = {
   requireText?: string;
   requireTextLabel?: string;
   requireTextPlaceholder?: string;
-  showSpinner?: boolean;
   ariaLabel?: string;
 };
 
@@ -36,7 +35,6 @@ export function ConfirmSubmitButton({
   requireText,
   requireTextLabel,
   requireTextPlaceholder,
-  showSpinner = true,
   ariaLabel,
 }: ConfirmSubmitButtonProps) {
   const [open, setOpen] = useState(false);
@@ -121,7 +119,6 @@ export function ConfirmSubmitButton({
                 <SubmitButton
                   className={confirmClassName}
                   pendingLabel={pendingLabel}
-                  showSpinner={showSpinner}
                   disabled={!isTextConfirmed}
                 >
                   {confirmLabel}
